@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref, watch } from 'vue'
+import SpeechBubble from '../SpeechBubble.vue'
 import BedSvg from '../svg/BedSvg.vue'
 import CharacterSvg from '../svg/CharacterSvg.vue'
 
@@ -20,13 +21,14 @@ const beds = reactive<Bed[]>([])
 const character = reactive<Character>({
     x: 100,
     y: 100,
-    width: 25,
-    height: 25,
+    width: 30, // 小一点的角色宽度
+    height: 30, // 小一点的角色高度
     speed: 3,
     isSleeping: false,
     currentBedIndex: -1,
     direction: 'down',
     isMoving: false,
+    bubbleMessage: null,
 })
 
 // 移动控制
@@ -35,10 +37,6 @@ const keys = reactive({
     ArrowDown: false,
     ArrowLeft: false,
     ArrowRight: false,
-    w: false,
-    a: false,
-    s: false,
-    d: false,
 })
 
 // 类型定义
@@ -61,7 +59,21 @@ interface Character {
     currentBedIndex: number
     direction: 'up' | 'down' | 'left' | 'right'
     isMoving: boolean
+    bubbleMessage: string | null
 }
+
+// 角色引用，用于获取精确位置
+const characterRef = ref<InstanceType<typeof CharacterSvg> | null>(null)
+
+// 计算角色中心位置（用于气泡定位）
+const characterPosition = computed(() => {
+    return {
+        x: character.x,
+        y: character.y,
+        width: character.width,
+        height: character.height,
+    }
+})
 
 // 初始化游戏
 onMounted(() => {
@@ -88,7 +100,7 @@ onMounted(() => {
                     character.currentBedIndex = index
                     beds[index].isOccupied = true
                     character.x = beds[index].x + (beds[index].width - character.width) / 2
-                    character.y = beds[index].y + 40 // 同样调整为靠下位置
+                    character.y = beds[index].y + 35 // 根据火柴人大小调整位置
 
                     // 触发睡眠开始事件
                     window.dispatchEvent(new CustomEvent('character-sleep-start'))
@@ -144,14 +156,14 @@ function gameLoop(time = 0) {
 
 // 根据键盘输入更新角色位置
 function updateCharacterPosition(deltaTime: number) {
-    console.log('updateCharacterPosition', deltaTime)
+    // console.log('updateCharacterPosition', deltaTime)
     if (character.isSleeping)
         return
 
-    const moveUp = keys.ArrowUp || keys.w
-    const moveDown = keys.ArrowDown || keys.s
-    const moveLeft = keys.ArrowLeft || keys.a
-    const moveRight = keys.ArrowRight || keys.d
+    const moveUp = keys.ArrowUp
+    const moveDown = keys.ArrowDown
+    const moveLeft = keys.ArrowLeft
+    const moveRight = keys.ArrowRight
 
     let dx = 0
     let dy = 0
@@ -282,7 +294,7 @@ function handleBedClicked(bedId: number) {
 
         // 将角色适当地放在床上 - 调整为更靠下的位置
         character.x = bed.x + (bed.width - character.width) / 2
-        character.y = bed.y + 40 // 将y位置从15调整到40，让头部更靠下
+        character.y = bed.y + 35 // 根据火柴人大小调整位置
 
         // 保存当前睡眠的床位索引
         localStorage.setItem('currentBedIndex', bedId.toString())
@@ -333,7 +345,7 @@ function handleBedDragMove(bedId: number, dx: number, dy: number) {
     // 如果角色正在这张床上睡觉，同时移动角色
     if (character.isSleeping && character.currentBedIndex === bedId) {
         character.x = bed.x + (bed.width - character.width) / 2
-        character.y = bed.y + 40 // 更新为相同的靠下位置
+        character.y = bed.y + 35 // 更新为相同的位置
     }
 }
 
@@ -344,6 +356,28 @@ function handleBedDragEnd(bedId: number) {
 
 // 角色可见性的计算属性
 const isCharacterVisible = computed(() => !character.isSleeping)
+
+// 设置角色气泡消息
+let bubbleMessageTimer: number | null = null
+function setBubbleMessage(message: string) {
+    // 设置消息
+    character.bubbleMessage = message
+
+    // 清除之前的计时器（如果有）
+    if (bubbleMessageTimer) {
+        clearTimeout(bubbleMessageTimer)
+    }
+
+    // 设置20秒后消失的计时器
+    bubbleMessageTimer = window.setTimeout(() => {
+        character.bubbleMessage = null
+    }, 20000)
+}
+
+// 暴露方法给父组件使用
+defineExpose({
+    setBubbleMessage,
+})
 </script>
 
 <template>
@@ -376,6 +410,7 @@ const isCharacterVisible = computed(() => !character.isSleeping)
             <!-- 角色（仅在不睡觉时显示） -->
             <CharacterSvg
                 v-if="isCharacterVisible"
+                ref="characterRef"
                 :x="character.x"
                 :y="character.y"
                 :width="character.width"
@@ -384,6 +419,15 @@ const isCharacterVisible = computed(() => !character.isSleeping)
                 :is-moving="character.isMoving"
             />
         </svg>
+
+        <!-- 使用DOM方式的气泡框 -->
+        <SpeechBubble
+            :message="character.bubbleMessage"
+            :character-x="characterPosition.x"
+            :character-y="characterPosition.y"
+            :character-width="characterPosition.width"
+            :character-height="characterPosition.height"
+        />
     </div>
 </template>
 
@@ -402,5 +446,6 @@ const isCharacterVisible = computed(() => !character.isSleeping)
   position: absolute;
   top: 0;
   left: 0;
+  z-index: 10; /* 确保SVG在正确的层级 */
 }
 </style>

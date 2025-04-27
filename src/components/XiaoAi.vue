@@ -264,6 +264,16 @@ onMounted(() => {
 
 <template>
     <div class="xiao-ai-container">
+        <!-- 消息气泡 -->
+        <div v-if="messageVisible" class="xiao-ai-message">
+            <div class="message-bubble">
+                <div class="message-content">
+                    {{ message }}
+                </div>
+            </div>
+            <div class="message-tail" />
+        </div>
+        
         <div
             class="xiao-ai-robot"
             :class="{ active: isActive, listening: isListening }"
@@ -304,16 +314,6 @@ onMounted(() => {
                 <!-- 右侧绿色装饰 -->
                 <div class="side-decoration right" />
             </div>
-        </div>
-
-        <!-- 消息气泡 -->
-        <div v-if="messageVisible" class="xiao-ai-message">
-            <div class="message-bubble">
-                <div class="message-content">
-                    {{ message }}
-                </div>
-            </div>
-            <div class="message-tail" />
         </div>
     </div>
 </template>
@@ -500,10 +500,10 @@ onMounted(() => {
 .xiao-ai-message {
   position: relative;
   max-width: 280px;
-  margin-bottom: 20px;
-  margin-right: 25px;
+  margin-bottom: 15px;
   animation: pop-in 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  transform-origin: bottom right;
+  transform-origin: bottom center;
+  align-self: center;
 }
 
 .message-bubble {
@@ -511,6 +511,7 @@ onMounted(() => {
   color: white;
   border-radius: 20px;
   padding: 15px 18px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
 }
 
 .message-content {
@@ -520,13 +521,14 @@ onMounted(() => {
 
 .message-tail {
   position: absolute;
-  bottom: -10px;
-  right: 20px;
+  bottom: -15px;
+  left: 50%;
   width: 0;
   height: 0;
   border-left: 10px solid transparent;
   border-right: 10px solid transparent;
   border-top: 15px solid #2196F3;
+  transform: translateX(-50%);
 }
 
 @keyframes pop-in {

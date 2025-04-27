@@ -7,6 +7,7 @@ import WeatherControlCard from './components/card/WeatherControlCard.vue'
 import CurtainLayer from './components/layer/CurtainLayer.vue'
 import GameLayerSvg from './components/layer/GameLayer.vue'
 import WeatherLayer from './components/layer/WeatherLayer.vue'
+import MessageInput from './components/MessageInput.vue'
 import Television from './components/Television.vue'
 import XiaoAi from './components/XiaoAi.vue'
 
@@ -21,6 +22,17 @@ const gameHeight = computed(() => Math.round(windowHeight.value * 0.7))
 // 居中游戏的位置
 const gameLeft = computed(() => Math.round((windowWidth.value - gameWidth.value) / 2))
 const gameTop = computed(() => Math.round((windowHeight.value - gameHeight.value) / 2))
+
+// 游戏层引用
+const gameLayerRef = ref<InstanceType<typeof GameLayerSvg> | null>(null)
+
+// 处理消息输入
+function handleMessageInput(text: string) {
+    if (gameLayerRef.value) {
+        // 触发游戏层中的setBubbleMessage方法
+        gameLayerRef.value.setBubbleMessage(text)
+    }
+}
 
 // 处理窗口大小调整
 onMounted(() => {
@@ -70,6 +82,7 @@ onMounted(() => {
 
             <!-- 游戏层（床和角色） -->
             <GameLayerSvg
+                ref="gameLayerRef"
                 :width="gameWidth"
                 :height="gameHeight"
             />
@@ -77,6 +90,9 @@ onMounted(() => {
             <!-- 幕布层（位于其他所有层之上） -->
             <CurtainLayer :width="gameWidth" :height="gameHeight" />
         </div>
+
+        <!-- 消息输入框 -->
+        <MessageInput @message="handleMessageInput" />
     </div>
 </template>
 
@@ -113,10 +129,9 @@ html, body {
 
 .game-container {
   position: absolute;
-  border-radius: 10px;
   overflow: hidden;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-  z-index: 10; /* 确保游戏容器在天气层之上 */
-  background: transparent; /* 背景透明，可以看到天气效果 */
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  z-index: 5;
 }
 </style>

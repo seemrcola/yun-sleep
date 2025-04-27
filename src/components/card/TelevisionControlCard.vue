@@ -7,13 +7,13 @@ const isTvVisible = ref(false)
 // 显示电视机
 function showTelevision() {
     isTvVisible.value = true
-    window.dispatchEvent(new CustomEvent('turn-on-tv'))
+    window.dispatchEvent(new CustomEvent('turn-on-tv-exe'))
 }
 
 // 隐藏电视机
 function hideTelevision() {
-      isTvVisible.value = false
-      window.dispatchEvent(new CustomEvent('turn-off-tv'))
+    isTvVisible.value = false
+    window.dispatchEvent(new CustomEvent('turn-off-tv-exe'))
 }
 
 onMounted(() => {

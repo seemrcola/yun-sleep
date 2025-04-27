@@ -8,6 +8,7 @@ const props = defineProps<{
     height: number
     direction: 'up' | 'down' | 'left' | 'right'
     isMoving: boolean
+    bubbleMessage?: string | null
 }>()
 
 // 计算视图框尺寸
@@ -188,6 +189,14 @@ const getLegsPath = computed(() => {
     // 静止时的腿部
         return 'M40,60 L35,75 M40,60 L45,75'
     }
+})
+
+// 导出角色位置信息供外部使用
+defineExpose({
+    x: props.x,
+    y: props.y,
+    width: props.width,
+    height: props.height
 })
 </script>
 

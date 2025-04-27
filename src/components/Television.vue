@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 
 const props = defineProps<{
     width?: number
@@ -24,12 +24,6 @@ const channels = [
     { id: 4, name: '静态杂波', color: '#000000' },
 ]
 const currentChannel = ref(0)
-
-// 监听全局事件以控制电视机
-onMounted(() => {
-    window.addEventListener('turn-on-tv', handleTvShow)
-    window.addEventListener('turn-off-tv', handleTvHide)
-})
 
 // 显示电视机 - 调整位置更靠下
 function handleTvShow() {
@@ -91,6 +85,17 @@ function changeChannel() {
 function togglePower() {
     isOn.value = !isOn.value
 }
+
+// 监听全局事件以控制电视机
+onMounted(() => {
+    window.addEventListener('turn-on-tv-exe', handleTvShow)
+    window.addEventListener('turn-off-tv-exe', handleTvHide)
+})
+
+onUnmounted(() => {
+    window.removeEventListener('turn-on-tv-exe', handleTvShow)
+    window.removeEventListener('turn-off-tv-exe', handleTvHide)
+})
 </script>
 
 <template>
