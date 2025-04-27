@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted, computed, watch } from 'vue';
-import BedSvg from './svg/BedSvg.vue';
-import CharacterSvg from './svg/CharacterSvg.vue';
+import BedSvg from '../svg/BedSvg.vue';
+import CharacterSvg from '../svg/CharacterSvg.vue';
 
 // 定义属性
 const props = defineProps<{

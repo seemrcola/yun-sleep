@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, nextTick, watch } from 'vue';
+import { ref, computed, onMounted, nextTick, watch, onUnmounted } from 'vue';
 
 // Props
 const props = defineProps({
@@ -35,16 +35,19 @@ function moveCurtains() {
     leftCurtainRef.value.style.transform = `translateX(${leftPos}px)`;
   }
   
-  // 移动右侧窗帘
+  // 移动右侧窗帘 - 修复右侧窗帘位置计算
   if (rightCurtainRef.value) {
-    const rightPos = rightCurtainOpen.value ? props.width - curtainWidth.value : curtainWidth.value - curtainWidth.value;
+    // 右侧窗帘在打开状态下，移动到右边缘外侧
+    // 在关闭状态下，移动到中间位置
+    const rightPos = rightCurtainOpen.value ? curtainWidth.value : 0;
     rightCurtainRef.value.style.transform = `translateX(${rightPos}px)`;
-    console.log('右侧窗帘位置:', rightPos, '打开状态:', rightCurtainOpen.value);
+    console.log('右侧窗帘位置:', rightPos, '打开状态:', rightCurtainOpen.value, '窗帘宽度:', curtainWidth.value);
   }
 }
 
 // 切换左侧窗帘
 async function toggleLeftCurtain() {
+  console.log('切换左侧窗帘');
   leftCurtainOpen.value = !leftCurtainOpen.value;
   await nextTick();
   moveCurtains();
@@ -55,30 +58,6 @@ async function toggleRightCurtain() {
   rightCurtainOpen.value = !rightCurtainOpen.value;
   await nextTick();
   moveCurtains();
-}
-
-// 紧急关闭右侧窗帘
-function forceCloseRightCurtain() {
-  rightCurtainOpen.value = false;
-  nextTick(() => {
-    if (rightCurtainRef.value) {
-      rightCurtainRef.value.style.transition = 'transform 1.5s ease-in-out';
-      rightCurtainRef.value.style.transform = 'translateX(0px)';
-      console.log('强制关闭右侧窗帘');
-    }
-  });
-}
-
-// 紧急打开右侧窗帘
-function forceOpenRightCurtain() {
-  rightCurtainOpen.value = true;
-  nextTick(() => {
-    if (rightCurtainRef.value) {
-      rightCurtainRef.value.style.transition = 'transform 1.5s ease-in-out';
-      rightCurtainRef.value.style.transform = `translateX(${props.width - curtainWidth.value}px)`;
-      console.log('强制打开右侧窗帘');
-    }
-  });
 }
 
 // 组件挂载时初始化
@@ -93,6 +72,84 @@ onMounted(() => {
   nextTick(() => {
     moveCurtains();
   });
+  
+  // 监听窗口大小变化，重新计算窗帘位置
+  window.addEventListener('resize', () => {
+    moveCurtains();
+  });
+  
+  // 定义事件处理函数
+  const handleOpenCurtains = () => {
+    console.log('接收到打开窗帘事件');
+    if (!leftCurtainOpen.value) toggleLeftCurtain();
+    if (!rightCurtainOpen.value) toggleRightCurtain();
+  };
+  
+  const handleCloseCurtains = () => {
+    console.log('接收到关闭窗帘事件');
+    if (leftCurtainOpen.value) toggleLeftCurtain();
+    if (rightCurtainOpen.value) toggleRightCurtain();
+  };
+  
+  const handleOpenLeftCurtain = () => {
+    console.log('接收到打开左侧窗帘事件');
+    if (!leftCurtainOpen.value) toggleLeftCurtain();
+  };
+  
+  const handleCloseLeftCurtain = () => {
+    console.log('接收到关闭左侧窗帘事件');
+    if (leftCurtainOpen.value) toggleLeftCurtain();
+  };
+  
+  const handleOpenRightCurtain = () => {
+    console.log('接收到打开右侧窗帘事件');
+    if (!rightCurtainOpen.value) toggleRightCurtain();
+  };
+  
+  const handleCloseRightCurtain = () => {
+    console.log('接收到关闭右侧窗帘事件');
+    if (rightCurtainOpen.value) toggleRightCurtain();
+  };
+  
+  // 添加事件监听器来响应小爱同学的命令
+  window.addEventListener('open-curtains', handleOpenCurtains);
+  window.addEventListener('close-curtains', handleCloseCurtains);
+  
+  // 单独控制左右窗帘的事件
+  window.addEventListener('open-left-curtain', handleOpenLeftCurtain);
+  window.addEventListener('close-left-curtain', handleCloseLeftCurtain);
+  window.addEventListener('open-right-curtain', handleOpenRightCurtain);
+  window.addEventListener('close-right-curtain', handleCloseRightCurtain);
+  
+  // 将事件处理函数添加到组件实例上，以便在卸载时移除
+  (window as any).curtainHandlers = {
+    handleOpenCurtains,
+    handleCloseCurtains,
+    handleOpenLeftCurtain,
+    handleCloseLeftCurtain,
+    handleOpenRightCurtain,
+    handleCloseRightCurtain
+  };
+});
+
+// 组件卸载时移除事件监听器
+onUnmounted(() => {
+  const handlers = (window as any).curtainHandlers;
+  
+  // 移除窗口大小变化监听
+  window.removeEventListener('resize', moveCurtains);
+  
+  if (handlers) {
+    window.removeEventListener('open-curtains', handlers.handleOpenCurtains);
+    window.removeEventListener('close-curtains', handlers.handleCloseCurtains);
+    window.removeEventListener('open-left-curtain', handlers.handleOpenLeftCurtain);
+    window.removeEventListener('close-left-curtain', handlers.handleCloseLeftCurtain);
+    window.removeEventListener('open-right-curtain', handlers.handleOpenRightCurtain);
+    window.removeEventListener('close-right-curtain', handlers.handleCloseRightCurtain);
+    
+    // 清除引用
+    delete (window as any).curtainHandlers;
+  }
 });
 </script>
 
@@ -373,7 +430,7 @@ onMounted(() => {
 .right-curtain {
   right: 0;
   border-left: 5px solid #4A95D0; /* 深色边框 */
-  transform: translateX(50%); /* 初始位置 */
+  transform: translateX(0%); /* 修正初始位置 */
 }
 
 .curtain-rod {

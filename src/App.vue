@@ -1,14 +1,15 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
-import BackgroundLayer from './components/BackgroundLayer.vue';
-import CurtainLayer from './components/CurtainLayer.vue';
-import GameLayerSvg from './components/GameLayer.vue';
-import SleepTimeCard from './components/SleepTimeCard.vue';
+import BackgroundLayer from './components/layer/BackgroundLayer.vue';
+import CurtainLayer from './components/layer/CurtainLayer.vue';
+import GameLayerSvg from './components/layer/GameLayer.vue';
+import SleepTimeCard from './components/card/SleepTimeCard.vue';
 import AirConditioner from './components/AirConditioner.vue';
 import Television from './components/Television.vue';
-import TelevisionControlCard from './components/TelevisionControlCard.vue';
-import WeatherLayer from './components/WeatherLayer.vue';
-import WeatherControlCard from './components/WeatherControlCard.vue';
+import TelevisionControlCard from './components/card/TelevisionControlCard.vue';
+import WeatherLayer from './components/layer/WeatherLayer.vue';
+import WeatherControlCard from './components/card/WeatherControlCard.vue';
+import XiaoAi from './components/XiaoAi.vue';
 
 // 应用尺寸
 const windowWidth = ref(window.innerWidth);
@@ -52,6 +53,9 @@ onMounted(() => {
     
     <!-- 电视机组件 - 从顶部降下 -->
     <Television :width="gameWidth * 0.8" :height="gameHeight * 0.5" />
+    
+    <!-- 小爱同学 - 固定在右下角 -->
+    <XiaoAi />
     
     <div class="game-container" 
       :style="{ 
