@@ -7,6 +7,8 @@ import SleepTimeCard from './components/SleepTimeCard.vue';
 import AirConditioner from './components/AirConditioner.vue';
 import Television from './components/Television.vue';
 import TelevisionControlCard from './components/TelevisionControlCard.vue';
+import WeatherLayer from './components/WeatherLayer.vue';
+import WeatherControlCard from './components/WeatherControlCard.vue';
 
 // 应用尺寸
 const windowWidth = ref(window.innerWidth);
@@ -31,8 +33,16 @@ onMounted(() => {
 
 <template>
   <div class="game-app" :style="{ width: '100vw', height: '100vh' }">
+    <!-- 天气图层 - 在最底层但需覆盖整个页面 -->
+    <div class="weather-container">
+      <WeatherLayer :width="windowWidth" :height="windowHeight" />
+    </div>
+    
     <!-- 睡眠时间卡片 - 固定在页面左上角 -->
     <SleepTimeCard />
+    
+    <!-- 天气控制卡片 - 固定在左上角下方 -->
+    <WeatherControlCard />
     
     <!-- 空调组件 - 固定在页面顶部中央 -->
     <AirConditioner />
@@ -50,8 +60,8 @@ onMounted(() => {
         left: `${gameLeft}px`,
         top: `${gameTop}px`
       }">
-      <!-- 背景层（天空和云朵） -->
-      <BackgroundLayer :width="gameWidth" :height="gameHeight" />
+      <!-- 不再需要背景层，因为天气图层已经代替它 -->
+      <!-- <BackgroundLayer :width="gameWidth" :height="gameHeight" /> -->
       
       <!-- 游戏层（床和角色） -->
       <GameLayerSvg 
@@ -87,10 +97,21 @@ html, body {
   overflow: hidden;
 }
 
+.weather-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+}
+
 .game-container {
   position: absolute;
   border-radius: 10px;
   overflow: hidden;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  z-index: 10; /* 确保游戏容器在天气层之上 */
+  background: transparent; /* 背景透明，可以看到天气效果 */
 }
 </style>
