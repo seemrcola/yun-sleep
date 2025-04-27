@@ -1,193 +1,196 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue';
+import { computed, onMounted, ref } from 'vue'
 
 const props = defineProps<{
-  width?: number;
-  height?: number;
-}>();
+    width?: number
+    height?: number
+}>()
 
 // 电视机状态
-const isVisible = ref(false);
-const tvPosition = ref(-200); // 初始位置在屏幕外
-const isOn = ref(false); // 电视机开关状态
+const isVisible = ref(false)
+const tvPosition = ref(-200) // 初始位置在屏幕外
+const isOn = ref(false) // 电视机开关状态
 
 // 电视机尺寸 - 调整为16:9比例
-const tvWidth = computed(() => props.width || 400);
+const tvWidth = computed(() => props.width || 400)
 // 高度根据16:9比例计算 (宽度 / 16 * 9)
-const tvHeight = computed(() => props.height || Math.round(tvWidth.value / 16 * 9));
+const tvHeight = computed(() => props.height || Math.round(tvWidth.value / 16 * 9))
 
 // 频道控制
 const channels = [
-  { id: 1, name: "自然风光", color: "#3498db" },
-  { id: 2, name: "动画世界", color: "#e74c3c" },
-  { id: 3, name: "音乐频道", color: "#2ecc71" },
-  { id: 4, name: "静态杂波", color: "#000000" }
-];
-const currentChannel = ref(0);
+    { id: 1, name: '自然风光', color: '#3498db' },
+    { id: 2, name: '动画世界', color: '#e74c3c' },
+    { id: 3, name: '音乐频道', color: '#2ecc71' },
+    { id: 4, name: '静态杂波', color: '#000000' },
+]
+const currentChannel = ref(0)
 
 // 监听全局事件以控制电视机
 onMounted(() => {
-  window.addEventListener('tv-toggle', handleTvToggle);
-  window.addEventListener('tv-show', handleTvShow);
-  window.addEventListener('tv-hide', handleTvHide);
-});
+    window.addEventListener('tv-toggle', handleTvToggle)
+    window.addEventListener('tv-show', handleTvShow)
+    window.addEventListener('tv-hide', handleTvHide)
+})
 
 // 升降电视机
 function handleTvToggle() {
-  if (isVisible.value) {
-    handleTvHide();
-  } else {
-    handleTvShow();
-  }
+    if (isVisible.value) {
+        handleTvHide()
+    }
+    else {
+        handleTvShow()
+    }
 }
 
 // 显示电视机 - 调整位置更靠下
 function handleTvShow() {
-  isVisible.value = true;
-  // 动画过渡到屏幕内更下方的位置
-  const targetPosition = 120; // 增加距离顶部的位置
-  animateTv(tvPosition.value, targetPosition);
-  // 打开电视
-  isOn.value = true;
+    isVisible.value = true
+    // 动画过渡到屏幕内更下方的位置
+    const targetPosition = 120 // 增加距离顶部的位置
+    animateTv(tvPosition.value, targetPosition)
+    // 打开电视
+    isOn.value = true
 }
 
 // 隐藏电视机
 function handleTvHide() {
-  // 动画过渡到屏幕外的位置
-  const targetPosition = -tvHeight.value;
-  animateTv(tvPosition.value, targetPosition, () => {
-    isVisible.value = false;
-    // 关闭电视
-    isOn.value = false;
-  });
+    // 动画过渡到屏幕外的位置
+    const targetPosition = -tvHeight.value
+    animateTv(tvPosition.value, targetPosition, () => {
+        isVisible.value = false
+        // 关闭电视
+        isOn.value = false
+    })
 }
 
 // 电视机动画
 function animateTv(from: number, to: number, callback?: () => void) {
-  const duration = 1000; // 1秒动画
-  const startTime = Date.now();
-  
-  function animate() {
-    const currentTime = Date.now();
-    const elapsed = currentTime - startTime;
-    
-    if (elapsed < duration) {
-      const progress = elapsed / duration;
-      // 使用缓动函数使动画更自然
-      const easeProgress = 1 - Math.pow(1 - progress, 3); // 缓出效果
-      tvPosition.value = from + (to - from) * easeProgress;
-      requestAnimationFrame(animate);
-    } else {
-      tvPosition.value = to;
-      if (callback) callback();
+    const duration = 1000 // 1秒动画
+    const startTime = Date.now()
+
+    function animate() {
+        const currentTime = Date.now()
+        const elapsed = currentTime - startTime
+
+        if (elapsed < duration) {
+            const progress = elapsed / duration
+            // 使用缓动函数使动画更自然
+            const easeProgress = 1 - (1 - progress) ** 3 // 缓出效果
+            tvPosition.value = from + (to - from) * easeProgress
+            requestAnimationFrame(animate)
+        }
+        else {
+            tvPosition.value = to
+            if (callback)
+                callback()
+        }
     }
-  }
-  
-  animate();
+
+    animate()
 }
 
 // 切换频道
 function changeChannel() {
-  currentChannel.value = (currentChannel.value + 1) % channels.length;
+    currentChannel.value = (currentChannel.value + 1) % channels.length
 }
 
 // 开关电视
 function togglePower() {
-  isOn.value = !isOn.value;
+    isOn.value = !isOn.value
 }
 </script>
 
 <template>
-  <div 
-    class="television-container"
-    :style="{
-      width: tvWidth + 'px',
-      height: isVisible ? tvHeight + 'px' : '0px',
-      top: tvPosition + 'px'
-    }"
-  >
-    <!-- 左侧电视挂件 -->
-    <div class="tv-mount tv-mount-left" v-if="isVisible"></div>
-    
-    <!-- 右侧电视挂件 -->
-    <div class="tv-mount tv-mount-right" v-if="isVisible"></div>
-    
-    <!-- 电视信号线 -->
-    <div class="tv-cable-left" v-if="isVisible"></div>
-    <div class="tv-cable-right" v-if="isVisible"></div>
-    
-    <!-- 电视机框架 -->
-    <div class="tv-frame">
-      <!-- 电视机屏幕 -->
-      <div class="tv-screen" :class="{ 'tv-off': !isOn }">
-        <div class="tv-content" v-if="isOn">
-          <!-- 不同频道内容 -->
-          <div v-if="currentChannel === 0" class="tv-program nature">
-            <div class="sun"></div>
-            <div class="cloud cloud1"></div>
-            <div class="cloud cloud2"></div>
-            <div class="mountain"></div>
-            <div class="tree tree1"></div>
-            <div class="tree tree2"></div>
-          </div>
-          
-          <div v-else-if="currentChannel === 1" class="tv-program animation">
-            <div class="bounce-ball"></div>
-            <div class="square"></div>
-          </div>
-          
-          <div v-else-if="currentChannel === 2" class="tv-program music">
-            <div class="bar bar1"></div>
-            <div class="bar bar2"></div>
-            <div class="bar bar3"></div>
-            <div class="bar bar4"></div>
-            <div class="bar bar5"></div>
-          </div>
-          
-          <div v-else class="tv-program static">
-            <div class="tv-static"></div>
-          </div>
-          
-          <!-- 频道信息 -->
-          <div class="tv-channel-info">
-            频道 {{ channels[currentChannel].id }}: {{ channels[currentChannel].name }}
-          </div>
+    <div
+        class="television-container"
+        :style="{
+            width: `${tvWidth}px`,
+            height: isVisible ? `${tvHeight}px` : '0px',
+            top: `${tvPosition}px`,
+        }"
+    >
+        <!-- 左侧电视挂件 -->
+        <div v-if="isVisible" class="tv-mount tv-mount-left" />
+
+        <!-- 右侧电视挂件 -->
+        <div v-if="isVisible" class="tv-mount tv-mount-right" />
+
+        <!-- 电视信号线 -->
+        <div v-if="isVisible" class="tv-cable-left" />
+        <div v-if="isVisible" class="tv-cable-right" />
+
+        <!-- 电视机框架 -->
+        <div class="tv-frame">
+            <!-- 电视机屏幕 -->
+            <div class="tv-screen" :class="{ 'tv-off': !isOn }">
+                <div v-if="isOn" class="tv-content">
+                    <!-- 不同频道内容 -->
+                    <div v-if="currentChannel === 0" class="tv-program nature">
+                        <div class="sun" />
+                        <div class="cloud cloud1" />
+                        <div class="cloud cloud2" />
+                        <div class="mountain" />
+                        <div class="tree tree1" />
+                        <div class="tree tree2" />
+                    </div>
+
+                    <div v-else-if="currentChannel === 1" class="tv-program animation">
+                        <div class="bounce-ball" />
+                        <div class="square" />
+                    </div>
+
+                    <div v-else-if="currentChannel === 2" class="tv-program music">
+                        <div class="bar bar1" />
+                        <div class="bar bar2" />
+                        <div class="bar bar3" />
+                        <div class="bar bar4" />
+                        <div class="bar bar5" />
+                    </div>
+
+                    <div v-else class="tv-program static">
+                        <div class="tv-static" />
+                    </div>
+
+                    <!-- 频道信息 -->
+                    <div class="tv-channel-info">
+                        频道 {{ channels[currentChannel].id }}: {{ channels[currentChannel].name }}
+                    </div>
+                </div>
+                <!-- 关机效果 -->
+                <div v-if="!isOn" class="tv-off-effect">
+                    <div class="tv-off-dot" />
+                </div>
+            </div>
+
+            <!-- 电视机控制区域 -->
+            <div class="tv-controls">
+                <button class="tv-button power-button" @click="togglePower">
+                    <div class="button-icon">
+                        <div class="power-icon" />
+                    </div>
+                    <span class="button-label">电源</span>
+                </button>
+                <button class="tv-button channel-button" @click="changeChannel">
+                    <div class="button-icon">
+                        <div class="channel-icon" />
+                    </div>
+                    <span class="button-label">频道</span>
+                </button>
+                <button class="tv-button volume-button">
+                    <div class="button-icon">
+                        <div class="volume-icon" />
+                    </div>
+                    <span class="button-label">音量</span>
+                </button>
+            </div>
+
+            <!-- 电视机底座 -->
+            <div class="tv-stand">
+                <div class="tv-stand-neck" />
+                <div class="tv-stand-base" />
+            </div>
         </div>
-        <!-- 关机效果 -->
-        <div v-if="!isOn" class="tv-off-effect">
-          <div class="tv-off-dot"></div>
-        </div>
-      </div>
-      
-      <!-- 电视机控制区域 -->
-      <div class="tv-controls">
-        <button class="tv-button power-button" @click="togglePower">
-          <div class="button-icon">
-            <div class="power-icon"></div>
-          </div>
-          <span class="button-label">电源</span>
-        </button>
-        <button class="tv-button channel-button" @click="changeChannel">
-          <div class="button-icon">
-            <div class="channel-icon"></div>
-          </div>
-          <span class="button-label">频道</span>
-        </button>
-        <button class="tv-button volume-button">
-          <div class="button-icon">
-            <div class="volume-icon"></div>
-          </div>
-          <span class="button-label">音量</span>
-        </button>
-      </div>
-      
-      <!-- 电视机底座 -->
-      <div class="tv-stand">
-        <div class="tv-stand-neck"></div>
-        <div class="tv-stand-base"></div>
-      </div>
     </div>
-  </div>
 </template>
 
 <style scoped>
@@ -490,7 +493,7 @@ function togglePower() {
   align-items: center;
   justify-content: center;
   margin-bottom: 4px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3), 
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3),
               inset 0 1px 1px rgba(255, 255, 255, 0.2),
               inset 0 -1px 1px rgba(0, 0, 0, 0.3);
   border: 1px solid #1a1a1a;
@@ -663,4 +666,4 @@ function togglePower() {
   0% { transform: scale(20); opacity: 0.7; }
   100% { transform: scale(0.1); opacity: 0.1; }
 }
-</style> 
+</style>

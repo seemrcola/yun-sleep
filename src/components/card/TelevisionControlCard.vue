@@ -1,53 +1,57 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { onMounted, onUnmounted, ref } from 'vue'
 
 // 电视状态
-const isTvVisible = ref(false);
-
-// 切换电视机状态
-function toggleTelevision() {
-  isTvVisible.value = !isTvVisible.value;
-  
-  // 发送全局事件通知电视机组件
-  window.dispatchEvent(new CustomEvent('tv-toggle'));
-}
+const isTvVisible = ref(false)
 
 // 显示电视机
 function showTelevision() {
-  if (!isTvVisible.value) {
-    isTvVisible.value = true;
-    window.dispatchEvent(new CustomEvent('tv-show'));
-  }
+    if (!isTvVisible.value) {
+        isTvVisible.value = true
+        window.dispatchEvent(new CustomEvent('turn-on-tv'))
+    }
 }
 
 // 隐藏电视机
 function hideTelevision() {
-  if (isTvVisible.value) {
-    isTvVisible.value = false;
-    window.dispatchEvent(new CustomEvent('tv-hide'));
-  }
+    if (isTvVisible.value) {
+        isTvVisible.value = false
+        window.dispatchEvent(new CustomEvent('turn-off-tv'))
+    }
 }
+
+onMounted(() => {
+    window.addEventListener('turn-on-tv', showTelevision)
+    window.addEventListener('turn-off-tv', hideTelevision)
+})
+
+onUnmounted(() => {
+    window.removeEventListener('tv-show', showTelevision)
+    window.removeEventListener('tv-hide', hideTelevision)
+})
 </script>
 
 <template>
-  <div class="tv-control-card">
-    <div class="card-header">
-      <div class="card-title">电视控制</div>
-      <div class="card-status" :class="{ 'status-on': isTvVisible }">
-        {{ isTvVisible ? '已显示' : '已隐藏' }}
-      </div>
+    <div class="tv-control-card">
+        <div class="card-header">
+            <div class="card-title">
+                电视控制
+            </div>
+            <div class="card-status" :class="{ 'status-on': isTvVisible }">
+                {{ isTvVisible ? '已显示' : '已隐藏' }}
+            </div>
+        </div>
+        <div class="card-content">
+            <div class="buttons-row">
+                <button class="control-button" @click="showTelevision">
+                    <span class="arrow-icon">▲</span> 降下
+                </button>
+                <button class="control-button" @click="hideTelevision">
+                    <span class="arrow-icon">▼</span> 升起
+                </button>
+            </div>
+        </div>
     </div>
-    <div class="card-content">
-      <div class="buttons-row">
-        <button class="control-button" @click="showTelevision">
-          <span class="arrow-icon">▲</span> 降下
-        </button>
-        <button class="control-button" @click="hideTelevision">
-          <span class="arrow-icon">▼</span> 升起
-        </button>
-      </div>
-    </div>
-  </div>
 </template>
 
 <style scoped>
@@ -151,4 +155,4 @@ function hideTelevision() {
 .arrow-icon {
   margin-right: 5px;
 }
-</style> 
+</style>

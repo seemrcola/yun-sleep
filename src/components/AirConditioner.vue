@@ -1,451 +1,492 @@
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 
 // 定义属性
-const props = defineProps({
-  width: {
-    type: Number,
-    default: 300
-  },
-  height: {
-    type: Number,
-    default: 100
-  }
-});
+defineProps({
+    width: {
+        type: Number,
+        default: 300,
+    },
+    height: {
+        type: Number,
+        default: 100,
+    },
+})
 
 // 空调状态
-const isPowered = ref(false);
-const isControlPanelOpen = ref(false);
+const isPowered = ref(false)
+const isControlPanelOpen = ref(false)
 
 // 空调设置
-const temperature = ref(25);
-const mode = ref('制冷'); // 制冷, 制热, 抽湿, 自动
-const fanSpeed = ref('中'); // 低, 中, 高, 自动
-const swingMode = ref(false); // 摆风模式
+const temperature = ref(25)
+const mode = ref('制冷') // 制冷, 制热, 抽湿, 自动
+const fanSpeed = ref('中') // 低, 中, 高, 自动
+const swingMode = ref(false) // 摆风模式
 
 // 声音效果
-const beepSound = ref(null);
-const windSound = ref(null);
-const isPlayingWind = ref(false);
+const beepSound = ref<HTMLAudioElement | null>(null)
+const windSound = ref<HTMLAudioElement | null>(null)
+const isPlayingWind = ref(false)
 
 // 吹风效果
-const windParticles = ref([]);
-const maxParticles = 20;
+const windParticles = ref<{
+    id: number
+    x: number
+    y: number
+    size: number
+    speed: number
+    opacity: number
+    active: boolean
+}[]>([])
+const maxParticles = 20
 
 // 模式选项
-const modeOptions = ['制冷', '制热', '抽湿', '自动'];
-const fanSpeedOptions = ['低', '中', '高', '自动'];
+const modeOptions = ['制冷', '制热', '抽湿', '自动']
+const fanSpeedOptions = ['低', '中', '高', '自动']
 
 // 空调显示温度（计算属性）
 const displayTemperature = computed(() => {
-  return temperature.value.toString().padStart(2, '0');
-});
+    return temperature.value.toString().padStart(2, '0')
+})
 
 // 空调状态指示灯颜色
 const statusLightColor = computed(() => {
-  if (!isPowered.value) return '#888';
-  
-  switch(mode.value) {
-    case '制冷': return '#00a0e9';
-    case '制热': return '#ff4500';
-    case '抽湿': return '#24d396';
-    case '自动': return '#ffd700';
-    default: return '#00a0e9';
-  }
-});
+    if (!isPowered.value)
+        return '#888'
+
+    switch (mode.value) {
+        case '制冷': return '#00a0e9'
+        case '制热': return '#ff4500'
+        case '抽湿': return '#24d396'
+        case '自动': return '#ffd700'
+        default: return '#00a0e9'
+    }
+})
 
 // 空调风向指示器动画
-const showAnimation = computed(() => isPowered.value);
+const showAnimation = computed(() => isPowered.value)
 
 // 风速强度
 const fanSpeedIntensity = computed(() => {
-  if (!isPowered.value) return 0;
-  
-  switch(fanSpeed.value) {
-    case '低': return 1;
-    case '中': return 2;
-    case '高': return 3;
-    case '自动': return 2;
-    default: return 0;
-  }
-});
+    if (!isPowered.value)
+        return 0
+
+    switch (fanSpeed.value) {
+        case '低': return 1
+        case '中': return 2
+        case '高': return 3
+        case '自动': return 2
+        default: return 0
+    }
+})
 
 // 风的颜色
 const windColor = computed(() => {
-  if (!isPowered.value) return 'rgba(255, 255, 255, 0.5)';
-  
-  switch(mode.value) {
-    case '制冷': return 'rgba(0, 160, 233, 0.5)';
-    case '制热': return 'rgba(255, 69, 0, 0.3)';
-    case '抽湿': return 'rgba(36, 211, 150, 0.3)';
-    case '自动': return 'rgba(255, 215, 0, 0.3)';
-    default: return 'rgba(255, 255, 255, 0.5)';
-  }
-});
+    if (!isPowered.value)
+        return 'rgba(255, 255, 255, 0.5)'
+
+    switch (mode.value) {
+        case '制冷': return 'rgba(0, 160, 233, 0.5)'
+        case '制热': return 'rgba(255, 69, 0, 0.3)'
+        case '抽湿': return 'rgba(36, 211, 150, 0.3)'
+        case '自动': return 'rgba(255, 215, 0, 0.3)'
+        default: return 'rgba(255, 255, 255, 0.5)'
+    }
+})
 
 // 初始化
 onMounted(() => {
-  // 创建音效元素
-  createSoundEffects();
-  
-  // 初始化风粒子
-  for (let i = 0; i < maxParticles; i++) {
-    windParticles.value.push({
-      id: i,
-      x: Math.random() * 300,
-      y: 80 + Math.random() * 20,
-      size: 2 + Math.random() * 3,
-      speed: 0.5 + Math.random() * 1.5,
-      opacity: 0.1 + Math.random() * 0.4,
-      active: false
-    });
-  }
-  
-  // 开始风粒子动画
-  requestAnimationFrame(animateWind);
-  
-  // 添加事件监听器来响应小爱同学的命令
-  window.addEventListener('turn-on-ac', () => {
-    console.log('接收到打开空调事件');
-    if (!isPowered.value) {
-      togglePower();
+    // 创建音效元素
+    createSoundEffects()
+
+    // 初始化风粒子
+    for (let i = 0; i < maxParticles; i++) {
+        windParticles.value.push({
+            id: i,
+            x: Math.random() * 300,
+            y: 80 + Math.random() * 20,
+            size: 2 + Math.random() * 3,
+            speed: 0.5 + Math.random() * 1.5,
+            opacity: 0.1 + Math.random() * 0.4,
+            active: false,
+        })
     }
-  });
-  
-  window.addEventListener('turn-off-ac', () => {
-    console.log('接收到关闭空调事件');
-    if (isPowered.value) {
-      togglePower();
-    }
-  });
-});
+
+    // 开始风粒子动画
+    requestAnimationFrame(animateWind)
+
+    // 添加事件监听器来响应小爱同学的命令
+    window.addEventListener('turn-on-ac', () => {
+        console.log('接收到打开空调事件')
+        if (!isPowered.value) {
+            togglePower()
+        }
+    })
+
+    window.addEventListener('turn-off-ac', () => {
+        console.log('接收到关闭空调事件')
+        if (isPowered.value) {
+            togglePower()
+        }
+    })
+})
 
 // 创建音效
 function createSoundEffects() {
-  // 蜂鸣声
-  const beep = new Audio();
-  beep.src = "data:audio/wav;base64,UklGRnwkAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YVgkAAB/f39/f39/f39/f39/f39/f4B/f39/f39/f39/gH9/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f3+Af39/f39/f39/gICAgICAf4CAgICAgICAgICAgICAgICAgICAgICAgICAgYGBgYGBgYGCgYKBgoKCgoKCgoKCgoKCgoKCgoKCgoKDg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODgoKCgoKCgYGBgYGBgYGBgYGBgYGBgYGAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIB/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f3+Af39/f39/f39/gH9/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f3+Af39/f39/f39/gICAgICAf4CAgICAgICAgICAgICAgICAgICAgICAgICAgYGBgYGBgYGCgYKBgoKCgoKCgoKCgoKCgoKCgoKDg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODgoKCgoKCgYGBgYGBgYGBgYGBgYGBgYGAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIB/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f3+Af39/f39/f39/gH9/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f3+Af39/f39/f39/gICAgICAf4CAgICAgICAgICAgICAgICAgICAgICAgICAgYGBgYGBgYGCgYKBgoKCgoKCgoKCgoKCgoKCgoKCgoKDg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODgoKCgoKCgYGBgYGBgYGBgYGBgYGBgYGAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIB/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f3+Af39/f39/f39/f39/f39/f3+AgICAgICAgIGAgYGBgYGBgoGCgoKCgoKCgoKCg4ODg4ODg4ODg4ODg4ODg4ODg4ODgoKCgoKCgYGBgYGBgYGBgICAgICAgICAgICAgICAgICAgICAgICAf4CAf39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/gIB/gH+AgICAgICBgIGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgIGAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4CAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBgIGAgYCBgIGAgYCBgIGAgYCBgIGAgYCBgIGAgYCBgIGAgYCBgIGAgYCBgIGAgYCBgIGAgYCBgIGAgYCBgIGAgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYCBgIGAgYCBgIGAgYCBgIGAgYCBgIGAgYCBgIGAgYCBgIGAgYCBgIGAgYCBgIGAgYCBgIGAgYCBgIGAgYCBgIGAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIB/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/";  // 简单的beep声音
-  beep.volume = 0.3;
-  beepSound.value = beep;
-  
-  // 风声
-  const wind = new Audio();
-  wind.src = "data:audio/wav;base64,UklGRiQDAABXQVZFZm10IBAAAAABAAIARKwAABCxAgAEACAAZGF0YQADAACBgIF/gn6AfIB7gn2EfYZ7iXmLeY14kHKXb5tsnGudaKFho2ClXKlZrFSvULJNtUm4RbtDvkHBP8Q9xzvKOc02zzTSMtUw2C7bLd4r4SnkKOYm6STsIu8g8h70HPca+Rj8FgAUAxEGDwkNDAoQBxMFFQMYARr/Hf0g+yL5JfYo9CnxLO0u6DHlM+E23jngNt0503XWcttv33Lkb+hw7G/wbfVr+WkAZghlBmsDcAB7/Yb6kfeX9J7xpO6q67DovOXH4tPf3dzn2vLXANUL0h3PKMw2yUPGUcNgwG+9frqQuJ+1r7LBrx2sOKlWpnWjlqCxncuazZcBlt2WApeWlo6WcJb8lBeUjJPkkkSSeZE6kbyQ75CPkeSQeJDTj3ePuI7qjWqNGI30jMuMp4yGjGaMR4wrjA6M9ovji9GLxIu3i6uLn4uTi4eLfIt0i3ONb5Wqm3KitaiOrs60w7rJwUrIZ9B20IfYl9+o5rbtvPW4/KoDpwqnEa0YsB8rJi0wKTs0RCpNJ1YkXyFoHnEbehh/FQUSBg8LDA8JEwYXAzsARPxG+VP2V/NY8FrqXORc3l7YYMJZ0VzLXsZgwWO8Zrdpt2q0bbBvq3CmcqF0nHaYeJN6jnuJfIR+gIB7gneFdYdwim2MaI5kkWCTXJVZl1aZUptHnjqhLqQhpxSq/KzlsMO0prh+vFnARMUxySfNGdEG1fHY3dzJ4LLkm+iF7G3wVfQ9+CX8DP70Adv/w/Kt9f34mPuWAIb8JAtJB9YWkxsUGokdVSJUJzcq+S0TMdQ0jTgpPAA/0kKZRllKCE23T1JSIVXsV7RaiV1WYCJj7GW1aIVrUW4ccOdyk3U+eOd6j30ygOCCh4UuiNiKgovejfeQ5JO1lnqZBJ1eoF6lRKtlsGS1TrpDvyvEEcn5zebSt9eP3FrhJeag6h/v0/O6+Ib9TgIhBfEJtA5hEykYyxygIU0g/iTnKa4uZjMzONw8YUDzRHpJ/01IUnpWkFqXXo1iaGZva15vUnM8dzB7G39hgfuJtIxHkN2TYJfKmjGexp/hou6lgql+rTKx3bSIt+a6PL6GwcrEAMgrzGDQh9Sd2KXct+DG5NTo4+zx8Pf0A/kH/QwBDgUTCRIMEBQIGP0b7x/hI9InwCuiL3Qz9DOjPihEwkiATO1PUVOJVp9ZpFyWX4hipWWbaIZrc24ncNdy/XjGgHqFLYrGjU6RzpROmLSbeJ4IoXKjyqfhp4utvbSHunG/WMQbyejNsdJt18nc+eGS40LsJPLn+L39VwJjCV8MZBIdE/8YPxvWIV8muCe9LF8yxTYKOgg/zUKUSI1M51CYVCpYt1vzXt9hkmRwZ0dq/Wy+b19yBXW3d1p63Hz/f7eCR4XWh2SKoozpjiyR6ZLjldyYz5vHnrmhoaSKp3Wqa63Tpru1XrpHvj3CAMbyyerNzNGz1Z3ZhN1r4U7lL+kT7fTwtPSA+Fj8KADlA7cHfguADzgT5RaKGiUepiFJJdQo+yuELvcx7TJlO4w+X0UKROVLh0+5U+RXCFwWYA1k5mcCapNtUHDNcs11aHgZe8l9YIAKg62FU4jfioONF5CakiiVm5fimSKcWJ51oI2ihqRypn6oEapcq6mtCK8nsDmy+LE+tF20srX0s1q1zbX/tSG2QLbGtRq2OreLt9K3CLdztwa27bYBt7O3sLeitwO41rhDuby58rknut65ZrrNula7ybsyvK28Gr18vQO+j75vvy3A6MCwwX3CQMM" // 循环风声音效
-  wind.volume = 0.2;
-  wind.loop = true;
-  windSound.value = wind;
+    // 蜂鸣声
+    const beep = new Audio()
+    beep.src = 'data:audio/wav;base64,UklGRnwkAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YVgkAAB/f39/f39/f39/f39/f39/f4B/f39/f39/f39/gH9/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f3+Af39/f39/f39/gICAgICAf4CAgICAgICAgICAgICAgICAgICAgICAgICAgYGBgYGBgYGCgYKBgoKCgoKCgoKCgoKCgoKCgoKCgoKDg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODgoKCgoKCgYGBgYGBgYGBgYGBgYGBgYGAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIB/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f3+Af39/f39/f39/gH9/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f3+Af39/f39/f39/gICAgICAf4CAgICAgICAgICAgICAgICAgICAgICAgICAgYGBgYGBgYGCgYKBgoKCgoKCgoKCgoKCgoKCgoKDg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODgoKCgoKCgYGBgYGBgYGBgYGBgYGBgYGAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIB/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f3+Af39/f39/f39/gH9/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f3+Af39/f39/f39/gICAgICAf4CAgICAgICAgICAgICAgICAgICAgICAgICAgYGBgYGBgYGCgYKBgoKCgoKCgoKCgoKCgoKCgoKCgoKDg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODgoKCgoKCgYGBgYGBgYGBgYGBgYGBgYGAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIB/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f3+Af39/f39/f39/f39/f39/f3+AgICAgICAgIGAgYGBgYGBgoGCgoKCgoKCgoKCg4ODg4ODg4ODg4ODg4ODg4ODg4ODgoKCgoKCgYGBgYGBgYGBgICAgICAgICAgICAgICAgICAgICAgICAf4CAf39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/gIB/gH+AgICAgICBgIGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgIGAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4CAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBgIGAgYCBgIGAgYCBgIGAgYCBgIGAgYCBgIGAgYCBgIGAgYCBgIGAgYCBgIGAgYCBgIGAgYCBgIGAgYCBgIGAgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYCBgIGAgYCBgIGAgYCBgIGAgYCBgIGAgYCBgIGAgYCBgIGAgYCBgIGAgYCBgIGAgYCBgIGAgYCBgIGAgYCBgIGAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIB/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/' // 简单的beep声音
+    beep.volume = 0.3
+    beepSound.value = beep
+
+    // 风声
+    const wind = new Audio()
+    wind.src = 'data:audio/wav;base64,UklGRiQDAABXQVZFZm10IBAAAAABAAIARKwAABCxAgAEACAAZGF0YQADAACBgIF/gn6AfIB7gn2EfYZ7iXmLeY14kHKXb5tsnGudaKFho2ClXKlZrFSvULJNtUm4RbtDvkHBP8Q9xzvKOc02zzTSMtUw2C7bLd4r4SnkKOYm6STsIu8g8h70HPca+Rj8FgAUAxEGDwkNDAoQBxMFFQMYARr/Hf0g+yL5JfYo9CnxLO0u6DHlM+E23jngNt0503XWcttv33Lkb+hw7G/wbfVr+WkAZghlBmsDcAB7/Yb6kfeX9J7xpO6q67DovOXH4tPf3dzn2vLXANUL0h3PKMw2yUPGUcNgwG+9frqQuJ+1r7LBrx2sOKlWpnWjlqCxncuazZcBlt2WApeWlo6WcJb8lBeUjJPkkkSSeZE6kbyQ75CPkeSQeJDTj3ePuI7qjWqNGI30jMuMp4yGjGaMR4wrjA6M9ovji9GLxIu3i6uLn4uTi4eLfIt0i3ONb5Wqm3KitaiOrs60w7rJwUrIZ9B20IfYl9+o5rbtvPW4/KoDpwqnEa0YsB8rJi0wKTs0RCpNJ1YkXyFoHnEbehh/FQUSBg8LDA8JEwYXAzsARPxG+VP2V/NY8FrqXORc3l7YYMJZ0VzLXsZgwWO8Zrdpt2q0bbBvq3CmcqF0nHaYeJN6jnuJfIR+gIB7gneFdYdwim2MaI5kkWCTXJVZl1aZUptHnjqhLqQhpxSq/KzlsMO0prh+vFnARMUxySfNGdEG1fHY3dzJ4LLkm+iF7G3wVfQ9+CX8DP70Adv/w/Kt9f34mPuWAIb8JAtJB9YWkxsUGokdVSJUJzcq+S0TMdQ0jTgpPAA/0kKZRllKCE23T1JSIVXsV7RaiV1WYCJj7GW1aIVrUW4ccOdyk3U+eOd6j30ygOCCh4UuiNiKgovejfeQ5JO1lnqZBJ1eoF6lRKtlsGS1TrpDvyvEEcn5zebSt9eP3FrhJeag6h/v0/O6+Ib9TgIhBfEJtA5hEykYyxygIU0g/iTnKa4uZjMzONw8YUDzRHpJ/01IUnpWkFqXXo1iaGZva15vUnM8dzB7G39hgfuJtIxHkN2TYJfKmjGexp/hou6lgql+rTKx3bSIt+a6PL6GwcrEAMgrzGDQh9Sd2KXct+DG5NTo4+zx8Pf0A/kH/QwBDgUTCRIMEBQIGP0b7x/hI9InwCuiL3Qz9DOjPihEwkiATO1PUVOJVp9ZpFyWX4hipWWbaIZrc24ncNdy/XjGgHqFLYrGjU6RzpROmLSbeJ4IoXKjyqfhp4utvbSHunG/WMQbyejNsdJt18nc+eGS40LsJPLn+L39VwJjCV8MZBIdE/8YPxvWIV8muCe9LF8yxTYKOgg/zUKUSI1M51CYVCpYt1vzXt9hkmRwZ0dq/Wy+b19yBXW3d1p63Hz/f7eCR4XWh2SKoozpjiyR6ZLjldyYz5vHnrmhoaSKp3Wqa63Tpru1XrpHvj3CAMbyyerNzNGz1Z3ZhN1r4U7lL+kT7fTwtPSA+Fj8KADlA7cHfguADzgT5RaKGiUepiFJJdQo+yuELvcx7TJlO4w+X0UKROVLh0+5U+RXCFwWYA1k5mcCapNtUHDNcs11aHgZe8l9YIAKg62FU4jfioONF5CakiiVm5fimSKcWJ51oI2ihqRypn6oEapcq6mtCK8nsDmy+LE+tF20srX0s1q1zbX/tSG2QLbGtRq2OreLt9K3CLdztwa27bYBt7O3sLeitwO41rhDuby58rknut65ZrrNula7ybsyvK28Gr18vQO+j75vvy3A6MCwwX3CQMM' // 循环风声音效
+    wind.volume = 0.2
+    wind.loop = true
+    windSound.value = wind
 }
 
 // 播放蜂鸣声
 function playBeep() {
-  if (beepSound.value) {
-    beepSound.value.currentTime = 0;
-    beepSound.value.play().catch(err => console.log('无法播放音效:', err));
-  }
+    if (beepSound.value) {
+        beepSound.value.currentTime = 0
+        beepSound.value.play().catch(err => console.log('无法播放音效:', err))
+    }
 }
 
 // 控制风声
 function controlWindSound() {
-  if (!windSound.value) return;
-  
-  if (isPowered.value && !isPlayingWind.value) {
-    windSound.value.play().catch(err => console.log('无法播放风声:', err));
-    isPlayingWind.value = true;
-  } else if (!isPowered.value && isPlayingWind.value) {
-    windSound.value.pause();
-    isPlayingWind.value = false;
-  }
+    if (!windSound.value)
+        return
+
+    if (isPowered.value && !isPlayingWind.value) {
+        windSound.value.play().catch(err => console.log('无法播放风声:', err))
+        isPlayingWind.value = true
+    }
+    else if (!isPowered.value && isPlayingWind.value) {
+        windSound.value.pause()
+        isPlayingWind.value = false
+    }
 }
 
 // 更新风声音量
 function updateWindVolume() {
-  if (!windSound.value || !isPlayingWind.value) return;
-  
-  switch(fanSpeed.value) {
-    case '低':
-      windSound.value.volume = 0.1;
-      break;
-    case '中':
-      windSound.value.volume = 0.2;
-      break;
-    case '高':
-      windSound.value.volume = 0.3;
-      break;
-    case '自动':
-      windSound.value.volume = 0.2;
-      break;
-  }
+    if (!windSound.value || !isPlayingWind.value)
+        return
+
+    switch (fanSpeed.value) {
+        case '低':
+            windSound.value.volume = 0.1
+            break
+        case '中':
+            windSound.value.volume = 0.2
+            break
+        case '高':
+            windSound.value.volume = 0.3
+            break
+        case '自动':
+            windSound.value.volume = 0.2
+            break
+    }
 }
 
 // 风粒子动画
 function animateWind() {
-  if (isPowered.value) {
-    const intensity = fanSpeedIntensity.value;
-    
-    windParticles.value.forEach(particle => {
-      if (particle.active) {
-        // 移动粒子
-        particle.y += particle.speed * intensity;
-        
-        // 如果粒子超出屏幕，重置位置
-        if (particle.y > 300) {
-          resetParticle(particle);
-        }
-      } else if (Math.random() < 0.05 * intensity) {
-        // 随机激活粒子
-        particle.active = true;
-        particle.x = 50 + Math.random() * 200; // 空调出风口范围
-        particle.y = 80;
-        particle.opacity = 0.1 + Math.random() * 0.4;
-      }
-    });
-  } else {
+    if (isPowered.value) {
+        const intensity = fanSpeedIntensity.value
+
+        windParticles.value.forEach((particle) => {
+            if (particle.active) {
+                // 移动粒子
+                particle.y += particle.speed * intensity
+
+                // 如果粒子超出屏幕，重置位置
+                if (particle.y > 300) {
+                    resetParticle(particle)
+                }
+            }
+            else if (Math.random() < 0.05 * intensity) {
+                // 随机激活粒子
+                particle.active = true
+                particle.x = 50 + Math.random() * 200 // 空调出风口范围
+                particle.y = 80
+                particle.opacity = 0.1 + Math.random() * 0.4
+            }
+        })
+    }
+    else {
     // 空调关闭时，停止所有粒子
-    windParticles.value.forEach(particle => {
-      particle.active = false;
-    });
-  }
-  
-  requestAnimationFrame(animateWind);
+        windParticles.value.forEach((particle) => {
+            particle.active = false
+        })
+    }
+
+    requestAnimationFrame(animateWind)
 }
 
 // 重置粒子
-function resetParticle(particle) {
-  particle.active = false;
-  particle.y = 80;
+function resetParticle(particle: {
+    active: boolean
+    y: number
+}) {
+    particle.active = false
+    particle.y = 80
 }
 
 // 切换电源
 function togglePower() {
-  isPowered.value = !isPowered.value;
-  playBeep();
-  
-  // 如果关闭电源，同时关闭控制面板
-  if (!isPowered.value) {
-    isControlPanelOpen.value = false;
-  }
-  
-  // 控制风声
-  controlWindSound();
+    isPowered.value = !isPowered.value
+    playBeep()
+
+    // 如果关闭电源，同时关闭控制面板
+    if (!isPowered.value) {
+        isControlPanelOpen.value = false
+    }
+
+    // 控制风声
+    controlWindSound()
 }
 
 // 打开/关闭控制面板
 function toggleControlPanel() {
-  // 只有在空调开启时才能操作控制面板
-  if (isPowered.value) {
-    isControlPanelOpen.value = !isControlPanelOpen.value;
-    playBeep();
-  }
+    // 只有在空调开启时才能操作控制面板
+    if (isPowered.value) {
+        isControlPanelOpen.value = !isControlPanelOpen.value
+        playBeep()
+    }
 }
 
 // 调节温度
 function changeTemperature(delta: number) {
-  const newTemp = temperature.value + delta;
-  // 温度范围限制：16-30°C
-  if (newTemp >= 16 && newTemp <= 30) {
-    temperature.value = newTemp;
-    playBeep();
-  }
+    const newTemp = temperature.value + delta
+    // 温度范围限制：16-30°C
+    if (newTemp >= 16 && newTemp <= 30) {
+        temperature.value = newTemp
+        playBeep()
+    }
 }
 
 // 调节模式
 function changeMode(newMode: string) {
-  mode.value = newMode;
-  playBeep();
+    mode.value = newMode
+    playBeep()
 }
 
 // 调节风速
 function changeFanSpeed(newSpeed: string) {
-  fanSpeed.value = newSpeed;
-  playBeep();
-  updateWindVolume();
+    fanSpeed.value = newSpeed
+    playBeep()
+    updateWindVolume()
 }
 
 // 切换摆风模式
 function toggleSwing() {
-  swingMode.value = !swingMode.value;
-  playBeep();
+    swingMode.value = !swingMode.value
+    playBeep()
 }
 
 // 监听风速变化
 watch(fanSpeed, () => {
-  updateWindVolume();
-});
+    updateWindVolume()
+})
 
 onUnmounted(() => {
-  // 移除事件监听器
-  window.removeEventListener('turn-on-ac', togglePower);
-  window.removeEventListener('turn-off-ac', togglePower);
-});
+    // 移除事件监听器
+    window.removeEventListener('turn-on-ac', togglePower)
+    window.removeEventListener('turn-off-ac', togglePower)
+})
 </script>
 
 <template>
-  <div class="air-conditioner-container">
-    <!-- 空调主体 -->
-    <div 
-      class="air-conditioner" 
-      :class="{ 'powered': isPowered }"
-      @click="toggleControlPanel"
-    >
-      <!-- 空调外壳 -->
-      <div class="ac-body">
-        <!-- 空调格栅 -->
-        <div class="ac-grilles">
-          <div 
-            v-for="i in 8" 
-            :key="`grille-${i}`" 
-            class="ac-grille"
-            :class="{ 'swing': swingMode && isPowered }"
-            :style="{ 
-              animationPlayState: showAnimation ? 'running' : 'paused',
-              animationDuration: `${5 - fanSpeedIntensity * 0.5}s`
-            }"
-          ></div>
-        </div>
-        
-        <!-- 空调显示屏 -->
-        <div class="ac-display">
-          <div class="display-content" v-if="isPowered">
-            <div class="temperature">{{ displayTemperature }}°C</div>
-            <div class="mode-indicator">{{ mode }}</div>
-            <div class="fan-speed-indicator">
-              <span>风速 · {{ fanSpeed }}</span>
-              <div class="fan-level">
-                <div 
-                  v-for="n in 3" 
-                  :key="`fan-level-${n}`"
-                  :class="{ 'active': fanSpeedIntensity >= n || fanSpeed === '自动' }"
-                  class="fan-bar"
-                ></div>
-              </div>
+    <div class="air-conditioner-container">
+        <!-- 空调主体 -->
+        <div
+            class="air-conditioner"
+            :class="{ powered: isPowered }"
+            @click="toggleControlPanel"
+        >
+            <!-- 空调外壳 -->
+            <div class="ac-body">
+                <!-- 空调格栅 -->
+                <div class="ac-grilles">
+                    <div
+                        v-for="i in 8"
+                        :key="`grille-${i}`"
+                        class="ac-grille"
+                        :class="{ swing: swingMode && isPowered }"
+                        :style="{
+                            animationPlayState: showAnimation ? 'running' : 'paused',
+                            animationDuration: `${5 - fanSpeedIntensity * 0.5}s`,
+                        }"
+                    />
+                </div>
+
+                <!-- 空调显示屏 -->
+                <div class="ac-display">
+                    <div v-if="isPowered" class="display-content">
+                        <div class="temperature">
+                            {{ displayTemperature }}°C
+                        </div>
+                        <div class="mode-indicator">
+                            {{ mode }}
+                        </div>
+                        <div class="fan-speed-indicator">
+                            <span>风速 · {{ fanSpeed }}</span>
+                            <div class="fan-level">
+                                <div
+                                    v-for="n in 3"
+                                    :key="`fan-level-${n}`"
+                                    :class="{ active: fanSpeedIntensity >= n || fanSpeed === '自动' }"
+                                    class="fan-bar"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="status-light" :style="{ backgroundColor: statusLightColor }" />
+                </div>
+
+                <!-- 电源按钮 -->
+                <div class="power-button" @click.stop="togglePower">
+                    <div class="power-icon">
+                        ⏻
+                    </div>
+                </div>
             </div>
-          </div>
-          <div class="status-light" :style="{ backgroundColor: statusLightColor }"></div>
+
+            <!-- 风效果 -->
+            <div v-if="isPowered" class="wind-effect">
+                <!-- 风粒子 -->
+                <div
+                    v-for="particle in windParticles"
+                    v-show="particle.active"
+                    :key="`particle-${particle.id}`"
+                    class="wind-particle"
+                    :style="{
+                        left: `${particle.x}px`,
+                        top: `${particle.y}px`,
+                        width: `${particle.size}px`,
+                        height: `${particle.size * 3}px`,
+                        opacity: particle.opacity,
+                        backgroundColor: windColor,
+                    }"
+                />
+            </div>
         </div>
-        
-        <!-- 电源按钮 -->
-        <div class="power-button" @click.stop="togglePower">
-          <div class="power-icon">⏻</div>
+
+        <!-- 控制面板 (弹出层) -->
+        <div
+            v-if="isControlPanelOpen && isPowered"
+            class="control-panel"
+            @click.stop
+        >
+            <div class="panel-header">
+                <span>空调控制</span>
+                <button class="close-button" @click="isControlPanelOpen = false">
+                    ×
+                </button>
+            </div>
+
+            <div class="panel-body">
+                <!-- 温度控制 -->
+                <div class="control-section temperature-control">
+                    <div class="section-header">
+                        <div class="section-icon">
+                            🌡️
+                        </div>
+                        <h3>温度调节</h3>
+                    </div>
+                    <div class="temp-controls">
+                        <button class="temp-btn temp-down" @click="changeTemperature(-1)">
+                            −
+                        </button>
+                        <div class="temp-display">
+                            {{ displayTemperature }}°C
+                        </div>
+                        <button class="temp-btn temp-up" @click="changeTemperature(1)">
+                            +
+                        </button>
+                    </div>
+                    <div class="temp-slider">
+                        <div class="slider-track">
+                            <div class="slider-progress" :style="{ width: `${((temperature - 16) / 14) * 100}%` }" />
+                        </div>
+                        <div class="slider-markers">
+                            <span>16°</span>
+                            <span>23°</span>
+                            <span>30°</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 模式选择 -->
+                <div class="control-section mode-control">
+                    <div class="section-header">
+                        <div class="section-icon">
+                            ⚙️
+                        </div>
+                        <h3>运行模式</h3>
+                    </div>
+                    <div class="mode-buttons">
+                        <button
+                            v-for="option in modeOptions"
+                            :key="option"
+                            :class="{ active: mode === option }"
+                            @click="changeMode(option)"
+                        >
+                            <span class="mode-icon">
+                                {{ option === '制冷' ? '❄️'
+                                    : option === '制热' ? '🔥'
+                                        : option === '抽湿' ? '💧' : '🔄' }}
+                            </span>
+                            <span>{{ option }}</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 风速选择 -->
+                <div class="control-section fan-control">
+                    <div class="section-header">
+                        <div class="section-icon">
+                            💨
+                        </div>
+                        <h3>风速设置</h3>
+                    </div>
+                    <div class="fan-buttons">
+                        <button
+                            v-for="option in fanSpeedOptions"
+                            :key="option"
+                            :class="{ active: fanSpeed === option }"
+                            @click="changeFanSpeed(option)"
+                        >
+                            {{ option }}
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 摆风模式 -->
+                <div class="control-section swing-control">
+                    <div class="section-header">
+                        <div class="section-icon">
+                            ↕️
+                        </div>
+                        <h3>摆风模式</h3>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" :checked="swingMode" @change="toggleSwing">
+                        <span class="slider round" />
+                    </label>
+                </div>
+            </div>
+
+            <div class="panel-footer">
+                <button class="power-toggle" @click="togglePower">
+                    <span class="power-icon">⏻</span>
+                    {{ isPowered ? '关闭电源' : '开启电源' }}
+                </button>
+            </div>
         </div>
-      </div>
-      
-      <!-- 风效果 -->
-      <div class="wind-effect" v-if="isPowered">
-        <!-- 风粒子 -->
-        <div 
-          v-for="particle in windParticles" 
-          :key="`particle-${particle.id}`"
-          v-show="particle.active"
-          class="wind-particle"
-          :style="{ 
-            left: `${particle.x}px`, 
-            top: `${particle.y}px`, 
-            width: `${particle.size}px`,
-            height: `${particle.size * 3}px`,
-            opacity: particle.opacity,
-            backgroundColor: windColor
-          }"
-        ></div>
-      </div>
     </div>
-    
-    <!-- 控制面板 (弹出层) -->
-    <div 
-      v-if="isControlPanelOpen && isPowered" 
-      class="control-panel"
-      @click.stop
-    >
-      <div class="panel-header">
-        <span>空调控制</span>
-        <button class="close-button" @click="isControlPanelOpen = false">×</button>
-      </div>
-      
-      <div class="panel-body">
-        <!-- 温度控制 -->
-        <div class="control-section temperature-control">
-          <div class="section-header">
-            <div class="section-icon">🌡️</div>
-            <h3>温度调节</h3>
-          </div>
-          <div class="temp-controls">
-            <button @click="changeTemperature(-1)" class="temp-btn temp-down">−</button>
-            <div class="temp-display">{{ displayTemperature }}°C</div>
-            <button @click="changeTemperature(1)" class="temp-btn temp-up">+</button>
-          </div>
-          <div class="temp-slider">
-            <div class="slider-track">
-              <div class="slider-progress" :style="{width: `${((temperature - 16) / 14) * 100}%`}"></div>
-            </div>
-            <div class="slider-markers">
-              <span>16°</span>
-              <span>23°</span>
-              <span>30°</span>
-            </div>
-          </div>
-        </div>
-        
-        <!-- 模式选择 -->
-        <div class="control-section mode-control">
-          <div class="section-header">
-            <div class="section-icon">⚙️</div>
-            <h3>运行模式</h3>
-          </div>
-          <div class="mode-buttons">
-            <button 
-              v-for="option in modeOptions" 
-              :key="option"
-              :class="{ active: mode === option }"
-              @click="changeMode(option)"
-            >
-              <span class="mode-icon">
-                {{ option === '制冷' ? '❄️' : 
-                   option === '制热' ? '🔥' : 
-                   option === '抽湿' ? '💧' : '🔄' }}
-              </span>
-              <span>{{ option }}</span>
-            </button>
-          </div>
-        </div>
-        
-        <!-- 风速选择 -->
-        <div class="control-section fan-control">
-          <div class="section-header">
-            <div class="section-icon">💨</div>
-            <h3>风速设置</h3>
-          </div>
-          <div class="fan-buttons">
-            <button 
-              v-for="option in fanSpeedOptions" 
-              :key="option"
-              :class="{ active: fanSpeed === option }"
-              @click="changeFanSpeed(option)"
-            >
-              {{ option }}
-            </button>
-          </div>
-        </div>
-        
-        <!-- 摆风模式 -->
-        <div class="control-section swing-control">
-          <div class="section-header">
-            <div class="section-icon">↕️</div>
-            <h3>摆风模式</h3>
-          </div>
-          <label class="switch">
-            <input type="checkbox" :checked="swingMode" @change="toggleSwing">
-            <span class="slider round"></span>
-          </label>
-        </div>
-      </div>
-      
-      <div class="panel-footer">
-        <button class="power-toggle" @click="togglePower">
-          <span class="power-icon">⏻</span>
-          {{ isPowered ? '关闭电源' : '开启电源' }}
-        </button>
-      </div>
-    </div>
-  </div>
 </template>
 
 <style scoped>
@@ -1008,4 +1049,4 @@ input:checked + .slider:before {
 .power-toggle .power-icon {
   font-size: 14px;
 }
-</style> 
+</style>

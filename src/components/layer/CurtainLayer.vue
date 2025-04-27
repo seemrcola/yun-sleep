@@ -1,224 +1,236 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, nextTick, watch, onUnmounted } from 'vue';
+import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue'
 
 // Props
 const props = defineProps({
-  width: {
-    type: Number,
-    required: true
-  },
-  height: {
-    type: Number,
-    required: true
-  }
-});
+    width: {
+        type: Number,
+        required: true,
+    },
+    height: {
+        type: Number,
+        required: true,
+    },
+})
 
 // 窗帘状态
-const leftCurtainOpen = ref(true);
-const rightCurtainOpen = ref(true);
+const leftCurtainOpen = ref(true)
+const rightCurtainOpen = ref(true)
 
 // 窗帘元素引用
-const leftCurtainRef = ref(null);
-const rightCurtainRef = ref(null);
+const leftCurtainRef = ref<HTMLElement | null>(null)
+const rightCurtainRef = ref<HTMLElement | null>(null)
 
 // 计算窗帘宽度（总宽度的一半）
-const curtainWidth = computed(() => Math.round(props.width / 2));
+const curtainWidth = computed(() => Math.round(props.width / 2))
 
 // 光线状态
-const isLightDimmed = computed(() => !leftCurtainOpen.value || !rightCurtainOpen.value);
+const isLightDimmed = computed(() => !leftCurtainOpen.value || !rightCurtainOpen.value)
 
 // 直接操作DOM移动窗帘
 function moveCurtains() {
-  // 移动左侧窗帘
-  if (leftCurtainRef.value) {
-    const leftPos = leftCurtainOpen.value ? -curtainWidth.value : 0;
-    leftCurtainRef.value.style.transform = `translateX(${leftPos}px)`;
-  }
-  
-  // 移动右侧窗帘 - 修复右侧窗帘位置计算
-  if (rightCurtainRef.value) {
+    // 移动左侧窗帘
+    if (leftCurtainRef.value) {
+        const leftPos = leftCurtainOpen.value ? -curtainWidth.value : 0
+        leftCurtainRef.value.style.transform = `translateX(${leftPos}px)`
+    }
+
+    // 移动右侧窗帘 - 修复右侧窗帘位置计算
+    if (rightCurtainRef.value) {
     // 右侧窗帘在打开状态下，移动到右边缘外侧
     // 在关闭状态下，移动到中间位置
-    const rightPos = rightCurtainOpen.value ? curtainWidth.value : 0;
-    rightCurtainRef.value.style.transform = `translateX(${rightPos}px)`;
-    console.log('右侧窗帘位置:', rightPos, '打开状态:', rightCurtainOpen.value, '窗帘宽度:', curtainWidth.value);
-  }
+        const rightPos = rightCurtainOpen.value ? curtainWidth.value : 0
+        rightCurtainRef.value.style.transform = `translateX(${rightPos}px)`
+        console.log('右侧窗帘位置:', rightPos, '打开状态:', rightCurtainOpen.value, '窗帘宽度:', curtainWidth.value)
+    }
 }
 
 // 切换左侧窗帘
 async function toggleLeftCurtain() {
-  console.log('切换左侧窗帘');
-  leftCurtainOpen.value = !leftCurtainOpen.value;
-  await nextTick();
-  moveCurtains();
+    console.log('切换左侧窗帘')
+    leftCurtainOpen.value = !leftCurtainOpen.value
+    await nextTick()
+    moveCurtains()
 }
 
 // 切换右侧窗帘
 async function toggleRightCurtain() {
-  rightCurtainOpen.value = !rightCurtainOpen.value;
-  await nextTick();
-  moveCurtains();
+    rightCurtainOpen.value = !rightCurtainOpen.value
+    await nextTick()
+    moveCurtains()
 }
 
 // 组件挂载时初始化
 onMounted(() => {
-  console.log('窗帘组件已挂载，宽度:', props.width, '半宽:', curtainWidth.value);
-  
-  // 确保默认窗帘都是打开的
-  leftCurtainOpen.value = true;
-  rightCurtainOpen.value = true;
-  
-  // 等待DOM更新后移动窗帘到初始位置
-  nextTick(() => {
-    moveCurtains();
-  });
-  
-  // 监听窗口大小变化，重新计算窗帘位置
-  window.addEventListener('resize', () => {
-    moveCurtains();
-  });
-  
-  // 定义事件处理函数
-  const handleOpenCurtains = () => {
-    console.log('接收到打开窗帘事件');
-    if (!leftCurtainOpen.value) toggleLeftCurtain();
-    if (!rightCurtainOpen.value) toggleRightCurtain();
-  };
-  
-  const handleCloseCurtains = () => {
-    console.log('接收到关闭窗帘事件');
-    if (leftCurtainOpen.value) toggleLeftCurtain();
-    if (rightCurtainOpen.value) toggleRightCurtain();
-  };
-  
-  const handleOpenLeftCurtain = () => {
-    console.log('接收到打开左侧窗帘事件');
-    if (!leftCurtainOpen.value) toggleLeftCurtain();
-  };
-  
-  const handleCloseLeftCurtain = () => {
-    console.log('接收到关闭左侧窗帘事件');
-    if (leftCurtainOpen.value) toggleLeftCurtain();
-  };
-  
-  const handleOpenRightCurtain = () => {
-    console.log('接收到打开右侧窗帘事件');
-    if (!rightCurtainOpen.value) toggleRightCurtain();
-  };
-  
-  const handleCloseRightCurtain = () => {
-    console.log('接收到关闭右侧窗帘事件');
-    if (rightCurtainOpen.value) toggleRightCurtain();
-  };
-  
-  // 添加事件监听器来响应小爱同学的命令
-  window.addEventListener('open-curtains', handleOpenCurtains);
-  window.addEventListener('close-curtains', handleCloseCurtains);
-  
-  // 单独控制左右窗帘的事件
-  window.addEventListener('open-left-curtain', handleOpenLeftCurtain);
-  window.addEventListener('close-left-curtain', handleCloseLeftCurtain);
-  window.addEventListener('open-right-curtain', handleOpenRightCurtain);
-  window.addEventListener('close-right-curtain', handleCloseRightCurtain);
-  
-  // 将事件处理函数添加到组件实例上，以便在卸载时移除
-  (window as any).curtainHandlers = {
-    handleOpenCurtains,
-    handleCloseCurtains,
-    handleOpenLeftCurtain,
-    handleCloseLeftCurtain,
-    handleOpenRightCurtain,
-    handleCloseRightCurtain
-  };
-});
+    console.log('窗帘组件已挂载，宽度:', props.width, '半宽:', curtainWidth.value)
+
+    // 确保默认窗帘都是打开的
+    leftCurtainOpen.value = true
+    rightCurtainOpen.value = true
+
+    // 等待DOM更新后移动窗帘到初始位置
+    nextTick(() => {
+        moveCurtains()
+    })
+
+    // 监听窗口大小变化，重新计算窗帘位置
+    window.addEventListener('resize', () => {
+        moveCurtains()
+    })
+
+    // 定义事件处理函数
+    const handleOpenCurtains = () => {
+        console.log('接收到打开窗帘事件')
+        if (!leftCurtainOpen.value)
+            toggleLeftCurtain()
+        if (!rightCurtainOpen.value)
+            toggleRightCurtain()
+    }
+
+    const handleCloseCurtains = () => {
+        console.log('接收到关闭窗帘事件')
+        if (leftCurtainOpen.value)
+            toggleLeftCurtain()
+        if (rightCurtainOpen.value)
+            toggleRightCurtain()
+    }
+
+    const handleOpenLeftCurtain = () => {
+        console.log('接收到打开左侧窗帘事件')
+        if (!leftCurtainOpen.value)
+            toggleLeftCurtain()
+    }
+
+    const handleCloseLeftCurtain = () => {
+        console.log('接收到关闭左侧窗帘事件')
+        if (leftCurtainOpen.value)
+            toggleLeftCurtain()
+    }
+
+    const handleOpenRightCurtain = () => {
+        console.log('接收到打开右侧窗帘事件')
+        if (!rightCurtainOpen.value)
+            toggleRightCurtain()
+    }
+
+    const handleCloseRightCurtain = () => {
+        console.log('接收到关闭右侧窗帘事件')
+        if (rightCurtainOpen.value)
+            toggleRightCurtain()
+    }
+
+    // 添加事件监听器来响应小爱同学的命令
+    window.addEventListener('open-curtains', handleOpenCurtains)
+    window.addEventListener('close-curtains', handleCloseCurtains)
+
+    // 单独控制左右窗帘的事件
+    window.addEventListener('open-left-curtain', handleOpenLeftCurtain)
+    window.addEventListener('close-left-curtain', handleCloseLeftCurtain)
+    window.addEventListener('open-right-curtain', handleOpenRightCurtain)
+    window.addEventListener('close-right-curtain', handleCloseRightCurtain);
+
+    // 将事件处理函数添加到组件实例上，以便在卸载时移除
+    (window as any).curtainHandlers = {
+        handleOpenCurtains,
+        handleCloseCurtains,
+        handleOpenLeftCurtain,
+        handleCloseLeftCurtain,
+        handleOpenRightCurtain,
+        handleCloseRightCurtain,
+    }
+})
 
 // 组件卸载时移除事件监听器
 onUnmounted(() => {
-  const handlers = (window as any).curtainHandlers;
-  
-  // 移除窗口大小变化监听
-  window.removeEventListener('resize', moveCurtains);
-  
-  if (handlers) {
-    window.removeEventListener('open-curtains', handlers.handleOpenCurtains);
-    window.removeEventListener('close-curtains', handlers.handleCloseCurtains);
-    window.removeEventListener('open-left-curtain', handlers.handleOpenLeftCurtain);
-    window.removeEventListener('close-left-curtain', handlers.handleCloseLeftCurtain);
-    window.removeEventListener('open-right-curtain', handlers.handleOpenRightCurtain);
-    window.removeEventListener('close-right-curtain', handlers.handleCloseRightCurtain);
-    
-    // 清除引用
-    delete (window as any).curtainHandlers;
-  }
-});
+    const handlers = (window as any).curtainHandlers
+
+    // 移除窗口大小变化监听
+    window.removeEventListener('resize', moveCurtains)
+
+    if (handlers) {
+        window.removeEventListener('open-curtains', handlers.handleOpenCurtains)
+        window.removeEventListener('close-curtains', handlers.handleCloseCurtains)
+        window.removeEventListener('open-left-curtain', handlers.handleOpenLeftCurtain)
+        window.removeEventListener('close-left-curtain', handlers.handleCloseLeftCurtain)
+        window.removeEventListener('open-right-curtain', handlers.handleOpenRightCurtain)
+        window.removeEventListener('close-right-curtain', handlers.handleCloseRightCurtain)
+
+        // 清除引用
+        delete (window as any).curtainHandlers
+    }
+})
 </script>
 
 <template>
-  <div class="curtain-container" :style="{ width: `${width}px`, height: `${height}px` }">
-    <!-- 窗帘控制卡片 (屏幕右上角) -->
-    <div class="curtain-controls">
-      <div class="curtain-card-header">
-        <span class="curtain-title">窗帘控制</span>
-      </div>
-      
-      <div class="curtain-buttons">
-        <div class="curtain-control-btn" @click.stop="toggleLeftCurtain">
-          <div class="curtain-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16">
-              <path fill="currentColor" d="M20 19V3H4v16H2v2h20v-2h-2zm-2 0H6V5h12v14z"/>
-              <path fill="currentColor" d="M11 10h2v4h-2z"/>
-            </svg>
-          </div>
-          <span>{{ leftCurtainOpen ? '关闭左侧' : '打开左侧' }}</span>
+    <div class="curtain-container" :style="{ width: `${width}px`, height: `${height}px` }">
+        <!-- 窗帘控制卡片 (屏幕右上角) -->
+        <div class="curtain-controls">
+            <div class="curtain-card-header">
+                <span class="curtain-title">窗帘控制</span>
+            </div>
+
+            <div class="curtain-buttons">
+                <div class="curtain-control-btn" @click.stop="toggleLeftCurtain">
+                    <div class="curtain-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16">
+                            <path fill="currentColor" d="M20 19V3H4v16H2v2h20v-2h-2zm-2 0H6V5h12v14z" />
+                            <path fill="currentColor" d="M11 10h2v4h-2z" />
+                        </svg>
+                    </div>
+                    <span>{{ leftCurtainOpen ? '关闭左侧' : '打开左侧' }}</span>
+                </div>
+
+                <div class="curtain-control-btn" @click.stop="toggleRightCurtain">
+                    <div class="curtain-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16">
+                            <path fill="currentColor" d="M20 19V3H4v16H2v2h20v-2h-2zm-2 0H6V5h12v14z" />
+                            <path fill="currentColor" d="M13 10h2v4h-2z" />
+                        </svg>
+                    </div>
+                    <span>{{ rightCurtainOpen ? '关闭右侧' : '打开右侧' }}</span>
+                </div>
+            </div>
+
+            <div class="curtain-state-indicator">
+                <div class="indicator-dot left" :class="{ active: leftCurtainOpen }" />
+                <span>左侧</span>
+                <div class="indicator-dot right" :class="{ active: rightCurtainOpen }" />
+                <span>右侧</span>
+            </div>
         </div>
-        
-        <div class="curtain-control-btn" @click.stop="toggleRightCurtain">
-          <div class="curtain-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16">
-              <path fill="currentColor" d="M20 19V3H4v16H2v2h20v-2h-2zm-2 0H6V5h12v14z"/>
-              <path fill="currentColor" d="M13 10h2v4h-2z"/>
-            </svg>
-          </div>
-          <span>{{ rightCurtainOpen ? '关闭右侧' : '打开右侧' }}</span>
+
+        <!-- 光线变暗效果 -->
+        <div class="light-dimmer" :class="{ dimmed: isLightDimmed }" />
+
+        <!-- 左侧窗帘 -->
+        <div ref="leftCurtainRef" class="curtain left-curtain">
+            <div class="curtain-inner">
+                <div class="cloud-pattern" />
+                <div
+                    v-for="i in 10" :key="`left-fold-${i}`" class="curtain-fold"
+                    :style="{ left: `${i * 10 - 5}%` }"
+                />
+            </div>
+            <div class="curtain-pull-cord left-cord" />
         </div>
-      </div>
-      
-      <div class="curtain-state-indicator">
-        <div class="indicator-dot left" :class="{'active': leftCurtainOpen}"></div>
-        <span>左侧</span>
-        <div class="indicator-dot right" :class="{'active': rightCurtainOpen}"></div>
-        <span>右侧</span>
-      </div>
+
+        <!-- 右侧窗帘 -->
+        <div ref="rightCurtainRef" class="curtain right-curtain">
+            <div class="curtain-inner">
+                <div class="cloud-pattern" />
+                <div
+                    v-for="i in 10" :key="`right-fold-${i}`" class="curtain-fold"
+                    :style="{ left: `${i * 10 - 5}%` }"
+                />
+            </div>
+            <div class="curtain-pull-cord right-cord" />
+        </div>
+
+        <!-- 窗帘杆 -->
+        <div class="curtain-rod" />
+        <div class="curtain-rod-end left-end" />
+        <div class="curtain-rod-end right-end" />
     </div>
-    
-    <!-- 光线变暗效果 -->
-    <div class="light-dimmer" :class="{ 'dimmed': isLightDimmed }"></div>
-    
-    <!-- 左侧窗帘 -->
-    <div ref="leftCurtainRef" class="curtain left-curtain">
-      <div class="curtain-inner">
-        <div class="cloud-pattern"></div>
-        <div class="curtain-fold" v-for="i in 10" :key="`left-fold-${i}`" 
-             :style="{ left: `${i * 10 - 5}%` }"></div>
-      </div>
-      <div class="curtain-pull-cord left-cord"></div>
-    </div>
-    
-    <!-- 右侧窗帘 -->
-    <div ref="rightCurtainRef" class="curtain right-curtain">
-      <div class="curtain-inner">
-        <div class="cloud-pattern"></div>
-        <div class="curtain-fold" v-for="i in 10" :key="`right-fold-${i}`" 
-             :style="{ left: `${i * 10 - 5}%` }"></div>
-      </div>
-      <div class="curtain-pull-cord right-cord"></div>
-    </div>
-    
-    <!-- 窗帘杆 -->
-    <div class="curtain-rod"></div>
-    <div class="curtain-rod-end left-end"></div>
-    <div class="curtain-rod-end right-end"></div>
-  </div>
 </template>
 
 <style scoped>
@@ -382,10 +394,10 @@ onUnmounted(() => {
   position: relative;
   width: 100%;
   height: 100%;
-  background-image: linear-gradient(to bottom, 
-    #B0E2FF 0%, 
-    #87CEEB 40%, 
-    #73B6E6 70%, 
+  background-image: linear-gradient(to bottom,
+    #B0E2FF 0%,
+    #87CEEB 40%,
+    #73B6E6 70%,
     #5CACEE 100%);
   overflow: hidden;
 }
@@ -397,7 +409,7 @@ onUnmounted(() => {
   left: 0;
   width: 100%;
   height: 100%;
-  background-image: 
+  background-image:
     radial-gradient(circle at 30% 20%, rgba(255,255,255,0.95) 5%, rgba(255,255,255,0.2) 15%),
     radial-gradient(circle at 70% 40%, rgba(255,255,255,0.95) 8%, rgba(255,255,255,0.2) 20%),
     radial-gradient(circle at 20% 60%, rgba(255,255,255,0.95) 6%, rgba(255,255,255,0.2) 15%),
@@ -413,10 +425,10 @@ onUnmounted(() => {
   top: 0;
   width: 1px;
   height: 100%;
-  background: linear-gradient(to bottom, 
-    rgba(255,255,255,0.5) 0%, 
-    rgba(255,255,255,0.3) 50%, 
-    rgba(0,0,0,0.05) 50%, 
+  background: linear-gradient(to bottom,
+    rgba(255,255,255,0.5) 0%,
+    rgba(255,255,255,0.3) 50%,
+    rgba(0,0,0,0.05) 50%,
     rgba(0,0,0,0.1) 100%);
   z-index: 3;
 }
@@ -488,24 +500,24 @@ onUnmounted(() => {
     font-size: 14px;
     min-width: 120px;
   }
-  
+
   .curtain-rod {
     height: 8px;
     top: 3px;
   }
-  
+
   .curtain-rod-end {
     width: 16px;
     height: 16px;
     top: -4px;
   }
-  
+
   .left-end {
     left: -8px;
   }
-  
+
   .right-end {
     right: -8px;
   }
 }
-</style> 
+</style>

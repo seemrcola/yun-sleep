@@ -1,65 +1,71 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { onMounted, ref } from 'vue'
 
 // 天气类型
-type WeatherType = 'sunny' | 'cloudy' | 'rainy' | 'storm';
+type WeatherType = 'sunny' | 'cloudy' | 'rainy' | 'storm'
 
 // 当前天气
-const currentWeather = ref<WeatherType>('sunny');
+const currentWeather = ref<WeatherType>('sunny')
 
 // 天气选项
 const weatherOptions = [
-  { id: 'sunny', name: '晴天', icon: '☀️' },
-  { id: 'cloudy', name: '阴天', icon: '☁️' },
-  { id: 'rainy', name: '雨天', icon: '🌧️' },
-  { id: 'storm', name: '雷雨', icon: '⛈️' }
-];
+    { id: 'sunny', name: '晴天', icon: '☀️' },
+    { id: 'cloudy', name: '阴天', icon: '☁️' },
+    { id: 'rainy', name: '雨天', icon: '🌧️' },
+    { id: 'storm', name: '雷雨', icon: '⛈️' },
+]
 
 // 更改天气
 function changeWeather(type: WeatherType) {
-  if (currentWeather.value !== type) {
-    console.log(`Changing weather to: ${type}`);
-    currentWeather.value = type;
-    
-    // 发送全局事件
-    window.dispatchEvent(new CustomEvent('change-weather', {
-      detail: { type }
-    }));
-  }
+    if (currentWeather.value !== type) {
+        console.log(`Changing weather to: ${type}`)
+        currentWeather.value = type
+
+        // 发送全局事件
+        window.dispatchEvent(new CustomEvent('change-weather', {
+            detail: { type },
+        }))
+    }
 }
 
 // 在组件挂载后初始化天气
 onMounted(() => {
-  // 初始化时发送一次事件来设置默认天气
-  setTimeout(() => {
-    changeWeather('sunny');
-  }, 500);
-});
+    // 初始化时发送一次事件来设置默认天气
+    setTimeout(() => {
+        changeWeather('sunny')
+    }, 500)
+})
 </script>
 
 <template>
-  <div class="weather-control-card">
-    <div class="card-header">
-      <div class="card-title">天气控制</div>
-      <div class="current-weather">
-        <span class="weather-icon">{{ weatherOptions.find(w => w.id === currentWeather)?.icon }}</span>
-        {{ weatherOptions.find(w => w.id === currentWeather)?.name }}
-      </div>
+    <div class="weather-control-card">
+        <div class="card-header">
+            <div class="card-title">
+                天气控制
+            </div>
+            <div class="current-weather">
+                <span class="weather-icon">{{ weatherOptions.find(w => w.id === currentWeather)?.icon }}</span>
+                {{ weatherOptions.find(w => w.id === currentWeather)?.name }}
+            </div>
+        </div>
+
+        <div class="card-content">
+            <div
+                v-for="option in weatherOptions"
+                :key="option.id"
+                class="weather-option"
+                :class="{ active: currentWeather === option.id }"
+                @click="changeWeather(option.id as WeatherType)"
+            >
+                <div class="option-icon">
+                    {{ option.icon }}
+                </div>
+                <div class="option-name">
+                    {{ option.name }}
+                </div>
+            </div>
+        </div>
     </div>
-    
-    <div class="card-content">
-      <div 
-        v-for="option in weatherOptions" 
-        :key="option.id"
-        class="weather-option"
-        :class="{ active: currentWeather === option.id }"
-        @click="changeWeather(option.id as WeatherType)"
-      >
-        <div class="option-icon">{{ option.icon }}</div>
-        <div class="option-name">{{ option.name }}</div>
-      </div>
-    </div>
-  </div>
 </template>
 
 <style scoped>
@@ -182,4 +188,4 @@ onMounted(() => {
   color: #0288d1;
   font-weight: bold;
 }
-</style> 
+</style>
