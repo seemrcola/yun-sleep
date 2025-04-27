@@ -27,23 +27,14 @@ const currentChannel = ref(0)
 
 // 监听全局事件以控制电视机
 onMounted(() => {
-    window.addEventListener('tv-toggle', handleTvToggle)
-    window.addEventListener('tv-show', handleTvShow)
-    window.addEventListener('tv-hide', handleTvHide)
+    window.addEventListener('turn-on-tv', handleTvShow)
+    window.addEventListener('turn-off-tv', handleTvHide)
 })
-
-// 升降电视机
-function handleTvToggle() {
-    if (isVisible.value) {
-        handleTvHide()
-    }
-    else {
-        handleTvShow()
-    }
-}
 
 // 显示电视机 - 调整位置更靠下
 function handleTvShow() {
+    if (isVisible.value)
+        return
     isVisible.value = true
     // 动画过渡到屏幕内更下方的位置
     const targetPosition = 120 // 增加距离顶部的位置
@@ -54,6 +45,8 @@ function handleTvShow() {
 
 // 隐藏电视机
 function handleTvHide() {
+    if (!isVisible.value)
+        return
     // 动画过渡到屏幕外的位置
     const targetPosition = -tvHeight.value
     animateTv(tvPosition.value, targetPosition, () => {

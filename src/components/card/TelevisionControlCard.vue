@@ -6,18 +6,14 @@ const isTvVisible = ref(false)
 
 // 显示电视机
 function showTelevision() {
-    if (!isTvVisible.value) {
-        isTvVisible.value = true
-        window.dispatchEvent(new CustomEvent('turn-on-tv'))
-    }
+    isTvVisible.value = true
+    window.dispatchEvent(new CustomEvent('turn-on-tv'))
 }
 
 // 隐藏电视机
 function hideTelevision() {
-    if (isTvVisible.value) {
-        isTvVisible.value = false
-        window.dispatchEvent(new CustomEvent('turn-off-tv'))
-    }
+      isTvVisible.value = false
+      window.dispatchEvent(new CustomEvent('turn-off-tv'))
 }
 
 onMounted(() => {
@@ -26,8 +22,8 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
-    window.removeEventListener('tv-show', showTelevision)
-    window.removeEventListener('tv-hide', hideTelevision)
+    window.removeEventListener('turn-on-tv', showTelevision)
+    window.removeEventListener('turn-off-tv', hideTelevision)
 })
 </script>
 
@@ -44,10 +40,10 @@ onUnmounted(() => {
         <div class="card-content">
             <div class="buttons-row">
                 <button class="control-button" @click="showTelevision">
-                    <span class="arrow-icon">▲</span> 降下
+                    <span class="arrow-icon">▼</span> 降下
                 </button>
                 <button class="control-button" @click="hideTelevision">
-                    <span class="arrow-icon">▼</span> 升起
+                    <span class="arrow-icon">▲</span> 升起
                 </button>
             </div>
         </div>
