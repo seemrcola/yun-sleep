@@ -1,0 +1,96 @@
+<script setup lang="ts">
+import { ref, onMounted, computed } from 'vue';
+import BackgroundLayer from './components/BackgroundLayer.vue';
+import CurtainLayer from './components/CurtainLayer.vue';
+import GameLayerSvg from './components/GameLayer.vue';
+import SleepTimeCard from './components/SleepTimeCard.vue';
+import AirConditioner from './components/AirConditioner.vue';
+import Television from './components/Television.vue';
+import TelevisionControlCard from './components/TelevisionControlCard.vue';
+
+// 应用尺寸
+const windowWidth = ref(window.innerWidth);
+const windowHeight = ref(window.innerHeight);
+
+// 游戏尺寸（屏幕的70%）
+const gameWidth = computed(() => Math.round(windowWidth.value * 0.7));
+const gameHeight = computed(() => Math.round(windowHeight.value * 0.7));
+
+// 居中游戏的位置
+const gameLeft = computed(() => Math.round((windowWidth.value - gameWidth.value) / 2));
+const gameTop = computed(() => Math.round((windowHeight.value - gameHeight.value) / 2));
+
+// 处理窗口大小调整
+onMounted(() => {
+  window.addEventListener('resize', () => {
+    windowWidth.value = window.innerWidth;
+    windowHeight.value = window.innerHeight;
+  });
+});
+</script>
+
+<template>
+  <div class="game-app" :style="{ width: '100vw', height: '100vh' }">
+    <!-- 睡眠时间卡片 - 固定在页面左上角 -->
+    <SleepTimeCard />
+    
+    <!-- 空调组件 - 固定在页面顶部中央 -->
+    <AirConditioner />
+    
+    <!-- 电视控制卡片 - 固定在右上角 -->
+    <TelevisionControlCard />
+    
+    <!-- 电视机组件 - 从顶部降下 -->
+    <Television :width="gameWidth * 0.8" :height="gameHeight * 0.5" />
+    
+    <div class="game-container" 
+      :style="{ 
+        width: `${gameWidth}px`, 
+        height: `${gameHeight}px`,
+        left: `${gameLeft}px`,
+        top: `${gameTop}px`
+      }">
+      <!-- 背景层（天空和云朵） -->
+      <BackgroundLayer :width="gameWidth" :height="gameHeight" />
+      
+      <!-- 游戏层（床和角色） -->
+      <GameLayerSvg 
+        :width="gameWidth" 
+        :height="gameHeight" 
+      />
+      
+      <!-- 幕布层（位于其他所有层之上） -->
+      <CurtainLayer :width="gameWidth" :height="gameHeight" />
+    </div>
+  </div>
+</template>
+
+<style>
+/* 全局样式 */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: #EFEFEF; /* 浅色背景 */
+}
+
+.game-app {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.game-container {
+  position: absolute;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+</style>
