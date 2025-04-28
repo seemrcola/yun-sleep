@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- 背景圆形 -->
+  <circle cx="16" cy="16" r="15" fill="#3498db" />
+  
+  <!-- 窗户外框 -->
+  <rect x="8" y="6" width="16" height="20" rx="1" fill="#ecf0f1" stroke="#2c3e50" stroke-width="1.5" />
+  
+  <!-- 窗帘杆 -->
+  <rect x="6" y="6" width="20" height="2" rx="1" fill="#d35400" />
+  
+  <!-- 左侧窗帘 -->
+  <path d="M8 8 L8 26 L13 26 L13 8 Z" fill="#e74c3c" />
+  <path d="M8 8 L13 8 L13 26 L8 26 Z" fill="#e74c3c">
+    <animate attributeName="d" values="M8 8 L13 8 L13 26 L8 26 Z; M8 8 L12 8 L9 26 L8 26 Z; M8 8 L13 8 L13 26 L8 26 Z" dur="3s" repeatCount="indefinite" />
+  </path>
+  
+  <!-- 右侧窗帘 -->
+  <path d="M19 8 L24 8 L24 26 L19 26 Z" fill="#3498db">
+    <animate attributeName="d" values="M19 8 L24 8 L24 26 L19 26 Z; M21 8 L24 8 L24 26 L23 26 Z; M19 8 L24 8 L24 26 L19 26 Z" dur="3s" repeatCount="indefinite" />
+  </path>
+  
+  <!-- 窗户内部 -->
+  <rect x="13" y="8" width="6" height="18" fill="#f9ca24" />
+  
+  <!-- 小云朵 -->
+  <circle cx="16" cy="12" r="2" fill="white" opacity="0.8" />
+  <circle cx="18" cy="12" r="1.5" fill="white" opacity="0.8" />
+  <circle cx="14" cy="12" r="1.5" fill="white" opacity="0.8" />
+</svg> 
