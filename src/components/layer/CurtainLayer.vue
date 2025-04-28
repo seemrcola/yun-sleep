@@ -203,10 +203,24 @@ onUnmounted(() => {
             <div class="curtain-pull-cord right-cord" />
         </div>
 
+        <!-- 窗帘支架 -->
+        <div class="curtain-bracket left-bracket" />
+        <div class="curtain-bracket right-bracket" />
+
         <!-- 窗帘杆 -->
-        <div class="curtain-rod" />
-        <div class="curtain-rod-end left-end" />
-        <div class="curtain-rod-end right-end" />
+        <div class="curtain-rod">
+            <div class="curtain-rod-highlight" />
+        </div>
+        
+        <!-- 窗帘杆端点 -->
+        <div class="curtain-rod-end left-end">
+            <div class="rod-end-inner" />
+            <div class="rod-end-highlight" />
+        </div>
+        <div class="curtain-rod-end right-end">
+            <div class="rod-end-inner" />
+            <div class="rod-end-highlight" />
+        </div>
     </div>
 </template>
 
@@ -239,9 +253,9 @@ onUnmounted(() => {
 
 .curtain {
   position: absolute;
-  top: 0;
+  top: 9px;
   width: 50%;
-  height: 100%;
+  height: calc(100% - 9px);
   background-color: #87CEEB; /* 天蓝色窗帘 */
   will-change: transform;
   pointer-events: auto; /* 使窗帘可点击 */
@@ -304,36 +318,108 @@ onUnmounted(() => {
   transform: translateX(0%); /* 修正初始位置 */
 }
 
-.curtain-rod {
+/* 窗帘支架 */
+.curtain-bracket {
   position: absolute;
-  top: 5px;
-  left: 0;
-  width: 100%;
-  height: 12px;
-  background: linear-gradient(to bottom, #B5985A, #D6B964, #B5985A);
-  border-radius: 6px;
-  z-index: 5;
+  width: 14px;
+  height: 20px;
+  background: linear-gradient(to right, #8B6914, #D6B964, #8B6914);
+  border-radius: 0 0 7px 7px;
+  top: 0;
+  z-index: 4;
   pointer-events: none;
+  box-shadow: 0 2px 3px rgba(0,0,0,0.2);
 }
 
+.left-bracket {
+  left: 15%;
+}
+
+.right-bracket {
+  right: 15%;
+}
+
+/* 窗帘杆 */
+.curtain-rod {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 14px;
+  background: linear-gradient(to bottom, 
+    #8B4513 0%, 
+    #CD853F 20%, 
+    #D2B48C 50%, 
+    #CD853F 80%, 
+    #8B4513 100%);
+  border-radius: 7px;
+  z-index: 5;
+  pointer-events: none;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.curtain-rod-highlight {
+  position: absolute;
+  top: 3px;
+  left: 5%;
+  width: 90%;
+  height: 2px;
+  background: linear-gradient(to right,
+    rgba(255,255,255,0) 0%,
+    rgba(255,255,255,0.7) 50%,
+    rgba(255,255,255,0) 100%);
+  border-radius: 1px;
+  opacity: 0.7;
+}
+
+/* 窗帘杆端点 */
 .curtain-rod-end {
   position: absolute;
-  top: -5px;
-  width: 24px;
-  height: 24px;
-  background-color: #D6B964;
-  border: 2px solid #B5985A;
+  top: -8px;
+  width: 30px;
+  height: 30px;
+  background: radial-gradient(circle at center, 
+    #D4AF37 30%, 
+    #B8860B 70%, 
+    #8B6914 100%);
   border-radius: 50%;
   z-index: 6;
   pointer-events: none;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.4);
+  overflow: hidden;
+}
+
+.rod-end-inner {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  width: 20px;
+  height: 20px;
+  background: radial-gradient(circle at center, 
+    #FFD700 30%, 
+    #DAA520 80%, 
+    #B8860B 100%);
+  border-radius: 50%;
+}
+
+.rod-end-highlight {
+  position: absolute;
+  top: 6px;
+  left: 8px;
+  width: 8px;
+  height: 8px;
+  background: radial-gradient(circle at center, 
+    rgba(255,255,255,0.9) 0%, 
+    rgba(255,255,255,0) 80%);
+  border-radius: 50%;
 }
 
 .left-end {
-  left: -12px;
+  left: -15px;
 }
 
 .right-end {
-  right: -12px;
+  right: -15px;
 }
 
 .curtain-pull-cord {
@@ -360,23 +446,55 @@ onUnmounted(() => {
     min-width: 120px;
   }
 
+  .curtain {
+    top: 7px;
+    height: calc(100% - 7px);
+  }
+
   .curtain-rod {
-    height: 8px;
-    top: 3px;
+    height: 10px;
+    top: 0;
+    border-radius: 5px;
+  }
+
+  .curtain-rod-highlight {
+    top: 2px;
+    height: 1px;
   }
 
   .curtain-rod-end {
-    width: 16px;
-    height: 16px;
-    top: -4px;
+    width: 20px;
+    height: 20px;
+    top: -5px;
+  }
+
+  .rod-end-inner {
+    top: 3px;
+    left: 3px;
+    width: 14px;
+    height: 14px;
+  }
+
+  .rod-end-highlight {
+    top: 4px;
+    left: 6px;
+    width: 5px;
+    height: 5px;
   }
 
   .left-end {
-    left: -8px;
+    left: -10px;
   }
 
   .right-end {
-    right: -8px;
+    right: -10px;
+  }
+
+  .curtain-bracket {
+    width: 10px;
+    height: 16px;
+    border-radius: 0 0 5px 5px;
+    top: 0;
   }
 }
 </style>

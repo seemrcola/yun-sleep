@@ -35,7 +35,7 @@ watch(() => props.message, (newVal) => {
     // 当有新消息时，重新触发动画
         bubbleClass.value = 'speech-bubble'
         setTimeout(() => {
-            bubbleClass.value = 'speech-bubble show floating'
+            bubbleClass.value = 'speech-bubble show'
         }, 10)
     }
     else {
@@ -84,12 +84,6 @@ watch(() => props.message, (newVal) => {
   transform: translate(-50%, -100%) scale(1);
 }
 
-.speech-bubble.show.floating {
-  opacity: 1;
-  transform: translate(-50%, -100%) scale(1) translateY(-10px);
-  animation: float 3s ease-in-out infinite alternate;
-}
-
 .speech-bubble.hide {
   opacity: 0;
   transform: translate(-50%, -100%) scale(0.5);
@@ -131,16 +125,5 @@ watch(() => props.message, (newVal) => {
   border-top: 12px solid rgba(79, 172, 254, 0.1);
   z-index: -1;
   filter: blur(2px);
-}
-
-@keyframes float {
-  0% {
-    transform: translate(-50%, -100%) scale(1) translateY(0);
-    box-shadow: 0 3px 15px rgba(79, 172, 254, 0.4), 0 0 5px rgba(0, 242, 254, 0.5);
-  }
-  100% {
-    transform: translate(-50%, -100%) scale(1) translateY(-5px);
-    box-shadow: 0 5px 20px rgba(79, 172, 254, 0.6), 0 0 8px rgba(0, 242, 254, 0.8);
-  }
 }
 </style>
