@@ -3,6 +3,9 @@ import { computed, onMounted, reactive, ref, watch } from 'vue'
 import SpeechBubble from '../SpeechBubble.vue'
 import BedSvg from '../svg/BedSvg.vue'
 import CharacterSvg from '../svg/CharacterSvg.vue'
+import NightstandSvg from '../svg/NightstandSvg.vue'
+import NightstandItems from '../svg/NightstandItems.vue'
+import NightstandModal from '../NightstandModal.vue'
 
 // 定义属性
 const props = defineProps<{
@@ -29,6 +32,16 @@ const character = reactive<Character>({
     direction: 'down',
     isMoving: false,
     bubbleMessage: null,
+})
+
+// 床头柜状态
+const nightstandVisible = ref(false)
+const nightstandModalVisible = ref(false)
+const nightstandItems = reactive({
+    eyeMask: false,
+    lamp: false,
+    melatonin: false,
+    musicPlayer: false
 })
 
 // 移动控制
@@ -75,6 +88,30 @@ const characterPosition = computed(() => {
     }
 })
 
+// 床头柜位置计算
+const nightstandPosition = computed(() => {
+    if (character.currentBedIndex >= 0 && character.isSleeping) {
+        const bed = beds[character.currentBedIndex]
+        return {
+            x: bed.x + bed.width + 5, // 床右侧
+            y: bed.y + 20,
+            width: 30,
+            height: 40,
+            visible: true
+        }
+    }
+    return {
+        x: 0,
+        y: 0,
+        width: 30,
+        height: 40,
+        visible: false
+    }
+})
+
+// 放大的zZZ
+const largeZZZ = computed(() => nightstandItems.melatonin && character.isSleeping)
+
 // 初始化游戏
 onMounted(() => {
     // 设置键盘控制
@@ -104,6 +141,12 @@ onMounted(() => {
 
                     // 触发睡眠开始事件
                     window.dispatchEvent(new CustomEvent('character-sleep-start'))
+                    
+                    // 恢复床头柜状态
+                    loadNightstandItems()
+                    
+                    // 确保床头柜可见
+                    nightstandVisible.value = true
                 }, 100)
             }
         }
@@ -300,9 +343,16 @@ function handleBedClicked(bedId: number) {
 
         // 保存当前睡眠的床位索引
         localStorage.setItem('currentBedIndex', bedId.toString())
+        localStorage.setItem('isSleeping', 'true')
 
         // 触发睡眠开始事件
         window.dispatchEvent(new CustomEvent('character-sleep-start'))
+        
+        // 睡觉后显示床头柜
+        nightstandVisible.value = true
+        
+        // 保存床头柜状态
+        saveNightstandItems()
     }
 }
 
@@ -320,9 +370,16 @@ function wakeUpCharacter() {
 
     // 清除睡眠床位索引
     localStorage.removeItem('currentBedIndex')
+    localStorage.removeItem('isSleeping')
+    
+    // 清除床头柜可见性状态
+    localStorage.removeItem('nightstandVisible')
 
     // 触发睡眠结束事件
     window.dispatchEvent(new CustomEvent('character-sleep-end'))
+    
+    // 隐藏床头柜
+    nightstandVisible.value = false
 }
 
 function handleBedDragStart(bedId: number) {
@@ -376,17 +433,72 @@ function setBubbleMessage(message: string) {
     }, 20000)
 }
 
+// 床头柜点击处理
+function handleNightstandClicked() {
+    nightstandModalVisible.value = true
+}
+
+// 处理床头柜选项选择
+function handleItemSelection(item: 'eyeMask' | 'lamp' | 'melatonin' | 'musicPlayer') {
+    nightstandItems[item] = !nightstandItems[item]
+    saveNightstandItems()
+}
+
+// 保存床头柜选项到localStorage
+function saveNightstandItems() {
+    localStorage.setItem('nightstandItems', JSON.stringify(nightstandItems))
+    // 保存床头柜可见性状态
+    localStorage.setItem('nightstandVisible', String(nightstandVisible.value))
+}
+
+// 从localStorage加载床头柜选项
+function loadNightstandItems() {
+    const savedItems = localStorage.getItem('nightstandItems')
+    if (savedItems) {
+        const items = JSON.parse(savedItems)
+        Object.assign(nightstandItems, items)
+    }
+    
+    // 恢复床头柜可见性状态
+    const savedVisibility = localStorage.getItem('nightstandVisible')
+    if (savedVisibility !== null) {
+        nightstandVisible.value = savedVisibility === 'true'
+    } else {
+        // 如果没有保存过，则在睡眠状态下默认显示床头柜
+        nightstandVisible.value = character.isSleeping
+    }
+}
+
 // 暴露方法给父组件使用
 defineExpose({
     setBubbleMessage,
 })
+
+// 处理容器点击，避免点击床头柜时唤醒角色
+function handleContainerClick(event: MouseEvent) {
+    // 如果点击的是床头柜或其子元素，不要唤醒角色
+    const targetElement = event.target as HTMLElement;
+    
+    // 检查点击的元素是否是床头柜组件的一部分或床头柜模态框
+    const isNightstandClick = targetElement.closest('.nightstand') !== null;
+    const isNightstandModalClick = targetElement.closest('.modal-overlay') !== null;
+    
+    if (isNightstandClick || isNightstandModalClick) {
+        // 阻止事件冒泡，防止唤醒角色
+        event.stopPropagation();
+        return;
+    }
+    
+    // 否则，唤醒角色
+    wakeUpCharacter();
+}
 </script>
 
 <template>
     <div
         ref="containerRef"
         class="game-container"
-        @click="wakeUpCharacter"
+        @click="handleContainerClick"
     >
         <svg
             :width="containerWidth"
@@ -420,6 +532,54 @@ defineExpose({
                 :direction="character.direction"
                 :is-moving="character.isMoving"
             />
+            
+            <!-- 睡觉 zZZ 效果 -->
+            <g v-if="character.isSleeping && character.currentBedIndex >= 0">
+                <text
+                    :x="beds[character.currentBedIndex].x + beds[character.currentBedIndex].width * 0.7"
+                    :y="beds[character.currentBedIndex].y + 15"
+                    :font-size="largeZZZ ? '24' : '16'"
+                    fill="#5C6BC0"
+                    opacity="0.8"
+                >
+                    zZZ
+                    <animate
+                        attributeName="opacity"
+                        values="0.8;0.3;0.8"
+                        dur="3s"
+                        repeatCount="indefinite"
+                    />
+                    <animate
+                        attributeName="y"
+                        :values="`${beds[character.currentBedIndex].y + 15};${beds[character.currentBedIndex].y + 5};${beds[character.currentBedIndex].y + 15}`"
+                        dur="3s"
+                        repeatCount="indefinite"
+                    />
+                </text>
+            </g>
+            
+            <!-- 床头柜 -->
+            <NightstandSvg
+                v-if="character.isSleeping && character.currentBedIndex >= 0"
+                :x="nightstandPosition.x"
+                :y="nightstandPosition.y"
+                :width="nightstandPosition.width"
+                :height="nightstandPosition.height"
+                :visible="nightstandVisible"
+                @nightstand-clicked="handleNightstandClicked"
+            />
+            
+            <!-- 床头柜物品 -->
+            <NightstandItems
+                v-if="character.isSleeping && character.currentBedIndex >= 0"
+                :x="beds[character.currentBedIndex].x"
+                :y="beds[character.currentBedIndex].y"
+                :bed-width="beds[character.currentBedIndex].width"
+                :bed-height="beds[character.currentBedIndex].height"
+                :show-eye-mask="nightstandItems.eyeMask"
+                :show-lamp="nightstandItems.lamp"
+                :show-music-notes="nightstandItems.musicPlayer"
+            />
         </svg>
 
         <!-- 使用DOM方式的气泡框 -->
@@ -429,6 +589,14 @@ defineExpose({
             :character-y="characterPosition.y"
             :character-width="characterPosition.width"
             :character-height="characterPosition.height"
+        />
+        
+        <!-- 床头柜弹窗 -->
+        <NightstandModal
+            :visible="nightstandModalVisible"
+            :active-items="nightstandItems"
+            @close="nightstandModalVisible = false"
+            @select-item="handleItemSelection"
         />
     </div>
 </template>
@@ -448,6 +616,5 @@ defineExpose({
   position: absolute;
   top: 0;
   left: 0;
-  z-index: 10; /* 确保SVG在正确的层级 */
 }
 </style>
