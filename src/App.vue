@@ -4,6 +4,7 @@ import AirConditioner from './components/AirConditioner.vue'
 import SleepTimeCard from './components/card/SleepTimeCard.vue'
 import TelevisionControlCard from './components/card/TelevisionControlCard.vue'
 import WeatherControlCard from './components/card/WeatherControlCard.vue'
+import CurtainControlCard from './components/card/CurtainControlCard.vue'
 import CurtainLayer from './components/layer/CurtainLayer.vue'
 import GameLayerSvg from './components/layer/GameLayer.vue'
 import WeatherLayer from './components/layer/WeatherLayer.vue'
@@ -53,14 +54,19 @@ onMounted(() => {
         <!-- 睡眠时间卡片 - 固定在页面左上角 -->
         <SleepTimeCard />
 
-        <!-- 天气控制卡片 - 固定在左上角下方 -->
-        <WeatherControlCard />
-
         <!-- 空调组件 - 固定在页面顶部中央 -->
         <AirConditioner />
 
-        <!-- 电视控制卡片 - 固定在右上角 -->
-        <TelevisionControlCard />
+        <div class="control-container">
+            <!-- 窗帘控制卡片 - 固定在右上角 -->
+            <CurtainControlCard />
+
+            <!-- 电视控制卡片 - 固定在右上角下方 -->
+            <TelevisionControlCard />
+
+            <!-- 天气控制卡片 - 固定在左上角下方 -->
+            <WeatherControlCard />
+        </div>
 
         <!-- 电视机组件 - 从顶部降下 -->
         <Television :width="gameWidth * 0.8" :height="gameHeight * 0.5" />
@@ -68,24 +74,17 @@ onMounted(() => {
         <!-- 小爱同学 - 固定在右下角 -->
         <XiaoAi />
 
-        <div
-            class="game-container"
-            :style="{
-                width: `${gameWidth}px`,
-                height: `${gameHeight}px`,
-                left: `${gameLeft}px`,
-                top: `${gameTop}px`,
-            }"
-        >
+        <div class="game-container" :style="{
+            width: `${gameWidth}px`,
+            height: `${gameHeight}px`,
+            left: `${gameLeft}px`,
+            top: `${gameTop}px`,
+        }">
             <!-- 不再需要背景层，因为天气图层已经代替它 -->
             <!-- <BackgroundLayer :width="gameWidth" :height="gameHeight" /> -->
 
             <!-- 游戏层（床和角色） -->
-            <GameLayerSvg
-                ref="gameLayerRef"
-                :width="gameWidth"
-                :height="gameHeight"
-            />
+            <GameLayerSvg ref="gameLayerRef" :width="gameWidth" :height="gameHeight" />
 
             <!-- 幕布层（位于其他所有层之上） -->
             <CurtainLayer :width="gameWidth" :height="gameHeight" />
@@ -99,39 +98,53 @@ onMounted(() => {
 <style>
 /* 全局样式 */
 * {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
-html, body {
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  background-color: #EFEFEF; /* 浅色背景 */
+html,
+body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background-color: #EFEFEF;
+    /* 浅色背景 */
 }
 
 .game-app {
-  position: relative;
-  width: 100%;
-  height: 100vh;
-  overflow: hidden;
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
 }
 
 .weather-container {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
 }
 
 .game-container {
-  position: absolute;
-  overflow: hidden;
-  border-radius: 10px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-  z-index: 5;
+    position: absolute;
+    overflow: hidden;
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    z-index: 5;
+}
+
+.control-container {
+    position: fixed;
+    top: 20px;
+    right: 0;
+    width: 210px;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 5px;
 }
 </style>

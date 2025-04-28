@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
+import './BaseCardStyles.vue'
 
 // 天气类型
 type WeatherType = 'sunny' | 'cloudy' | 'rainy' | 'storm'
@@ -38,30 +39,32 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="weather-control-card">
-        <div class="card-header">
+    <div class="control-card">
+        <div class="card-header theme-blue">
             <div class="card-title">
                 天气控制
             </div>
-            <div class="current-weather">
+            <div class="card-status">
                 <span class="weather-icon">{{ weatherOptions.find(w => w.id === currentWeather)?.icon }}</span>
                 {{ weatherOptions.find(w => w.id === currentWeather)?.name }}
             </div>
         </div>
 
         <div class="card-content">
-            <div
-                v-for="option in weatherOptions"
-                :key="option.id"
-                class="weather-option"
-                :class="{ active: currentWeather === option.id }"
-                @click="changeWeather(option.id as WeatherType)"
-            >
-                <div class="option-icon">
-                    {{ option.icon }}
-                </div>
-                <div class="option-name">
-                    {{ option.name }}
+            <div class="weather-options-grid">
+                <div
+                    v-for="option in weatherOptions"
+                    :key="option.id"
+                    class="weather-option"
+                    :class="{ active: currentWeather === option.id }"
+                    @click="changeWeather(option.id as WeatherType)"
+                >
+                    <div class="option-icon">
+                        {{ option.icon }}
+                    </div>
+                    <div class="option-name">
+                        {{ option.name }}
+                    </div>
                 </div>
             </div>
         </div>
@@ -69,49 +72,7 @@ onMounted(() => {
 </template>
 
 <style scoped>
-.weather-control-card {
-  position: fixed;
-  top: 360px;
-  right: 20px;
-  width: 180px;
-  background-color: rgba(255, 255, 255, 0.9);
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  padding: 15px;
-  font-family: sans-serif;
-  backdrop-filter: blur(10px);
-  z-index: 100;
-  border: 1px solid rgba(255, 255, 255, 0.5);
-}
-
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 15px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-}
-
-.card-title {
-  font-size: 16px;
-  font-weight: bold;
-  color: #333;
-}
-
-.current-weather {
-  font-size: 14px;
-  color: #666;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-
-.weather-icon {
-  font-size: 18px;
-}
-
-.card-content {
+.weather-options-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
@@ -121,11 +82,11 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 10px;
+  padding: 10px 5px;
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s ease;
-  border: 1px solid transparent;
+  border: 1px solid #eee;
   background-color: rgba(240, 240, 240, 0.5);
   position: relative;
   overflow: hidden;
@@ -157,35 +118,17 @@ onMounted(() => {
 }
 
 .weather-option.active {
-  background-color: #e1f5fe;
-  border-color: #4fc3f7;
-  animation: pulseOption 1s ease-in-out;
-}
-
-.weather-option.active::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: radial-gradient(circle, rgba(79, 195, 247, 0.2) 0%, rgba(225, 245, 254, 0) 70%);
-  animation: ripple 1.5s linear infinite;
-}
-
-@keyframes ripple {
-  0% { transform: scale(0.8); opacity: 0.8; }
-  100% { transform: scale(1.5); opacity: 0; }
-}
-
-@keyframes pulseOption {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.05); }
-  100% { transform: scale(1); }
+  background-color: #e0f2fe;
+  border-color: #7dd3fc;
+  box-shadow: 0 0 8px rgba(125, 211, 252, 0.5);
 }
 
 .weather-option.active .option-name {
-  color: #0288d1;
+  color: #0284c7;
   font-weight: bold;
+}
+
+.weather-icon {
+  margin-right: 4px;
 }
 </style>

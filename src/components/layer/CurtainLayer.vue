@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue'
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 
 // Props
 const props = defineProps({
@@ -59,6 +59,19 @@ async function toggleRightCurtain() {
     await nextTick()
     moveCurtains()
 }
+
+// 窗帘状态变化时触发事件
+watch(leftCurtainOpen, (newValue) => {
+    window.dispatchEvent(new CustomEvent('left-curtain-state-change', { 
+        detail: { isOpen: newValue } 
+    }))
+})
+
+watch(rightCurtainOpen, (newValue) => {
+    window.dispatchEvent(new CustomEvent('right-curtain-state-change', { 
+        detail: { isOpen: newValue } 
+    }))
+})
 
 // 组件挂载时初始化
 onMounted(() => {
@@ -163,42 +176,6 @@ onUnmounted(() => {
 
 <template>
     <div class="curtain-container" :style="{ width: `${width}px`, height: `${height}px` }">
-        <!-- 窗帘控制卡片 (屏幕右上角) -->
-        <div class="curtain-controls">
-            <div class="curtain-card-header">
-                <span class="curtain-title">窗帘控制</span>
-            </div>
-
-            <div class="curtain-buttons">
-                <div class="curtain-control-btn" @click.stop="toggleLeftCurtain">
-                    <div class="curtain-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16">
-                            <path fill="currentColor" d="M20 19V3H4v16H2v2h20v-2h-2zm-2 0H6V5h12v14z" />
-                            <path fill="currentColor" d="M11 10h2v4h-2z" />
-                        </svg>
-                    </div>
-                    <span>{{ leftCurtainOpen ? '关闭左侧' : '打开左侧' }}</span>
-                </div>
-
-                <div class="curtain-control-btn" @click.stop="toggleRightCurtain">
-                    <div class="curtain-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16">
-                            <path fill="currentColor" d="M20 19V3H4v16H2v2h20v-2h-2zm-2 0H6V5h12v14z" />
-                            <path fill="currentColor" d="M13 10h2v4h-2z" />
-                        </svg>
-                    </div>
-                    <span>{{ rightCurtainOpen ? '关闭右侧' : '打开右侧' }}</span>
-                </div>
-            </div>
-
-            <div class="curtain-state-indicator">
-                <div class="indicator-dot left" :class="{ active: leftCurtainOpen }" />
-                <span>左侧</span>
-                <div class="indicator-dot right" :class="{ active: rightCurtainOpen }" />
-                <span>右侧</span>
-            </div>
-        </div>
-
         <!-- 光线变暗效果 -->
         <div class="light-dimmer" :class="{ dimmed: isLightDimmed }" />
 
@@ -241,124 +218,6 @@ onUnmounted(() => {
   z-index: 10; /* 将z-index恢复为高值，使窗帘显示在所有元素之上 */
   overflow: hidden;
   pointer-events: none; /* 允许点击穿透到底层 */
-}
-
-.curtain-controls {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  display: flex;
-  flex-direction: column;
-  z-index: 1000;
-  pointer-events: auto;
-  background: rgba(255, 255, 255, 0.9);
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.6);
-  backdrop-filter: blur(10px);
-  overflow: hidden;
-  width: 180px;
-  border: 1px solid rgba(255, 255, 255, 0.6);
-  transform: scale(1);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  animation: float 6s infinite ease-in-out;
-}
-
-.curtain-controls:hover {
-  transform: scale(1.03);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.8);
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-5px); }
-}
-
-.curtain-card-header {
-  background: linear-gradient(to right, #B5985A, #D6B964);
-  padding: 8px 12px;
-  color: #fff;
-  font-weight: bold;
-  text-align: center;
-  font-size: 14px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-}
-
-.curtain-title {
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-}
-
-.curtain-buttons {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 10px;
-}
-
-.curtain-control-btn {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
-  background: linear-gradient(to bottom, #f9f9f9, #e9e9e9);
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  color: #333;
-  font-size: 13px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
-
-.curtain-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #8B4513;
-}
-
-.curtain-control-btn:hover {
-  background: linear-gradient(to bottom, #fff, #f0f0f0);
-  transform: translateY(-1px);
-  box-shadow: 0 3px 5px rgba(0, 0, 0, 0.1);
-}
-
-.curtain-control-btn:active {
-  transform: translateY(1px);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-}
-
-.curtain-state-indicator {
-  display: flex;
-  align-items: center;
-  justify-content: space-around;
-  padding: 8px 10px;
-  background: rgba(0, 0, 0, 0.05);
-  font-size: 12px;
-  color: #555;
-}
-
-.indicator-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background-color: #ccc;
-  margin-right: 4px;
-  transition: all 0.3s ease;
-}
-
-.indicator-dot.active {
-  background-color: #4CAF50;
-  box-shadow: 0 0 4px rgba(76, 175, 80, 0.5);
-}
-
-.indicator-dot.left.active {
-  background-color: #2196F3;
-  box-shadow: 0 0 4px rgba(33, 150, 243, 0.5);
-}
-
-.indicator-dot.right.active {
-  background-color: #FF9800;
-  box-shadow: 0 0 4px rgba(255, 152, 0, 0.5);
 }
 
 /* 光线变暗效果 */
