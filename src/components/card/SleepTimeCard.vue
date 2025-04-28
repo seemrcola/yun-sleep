@@ -29,21 +29,47 @@ onMounted(() => {
         totalSleepTime.value = Number.parseInt(savedSleepTime)
     }
 
-    // 监听睡眠状态事件
-    window.addEventListener('character-sleep-start', onSleepStart)
-    window.addEventListener('character-sleep-end', onSleepEnd)
-
     // 检查是否已经在睡觉
     const sleepingState = localStorage.getItem('isSleeping')
     if (sleepingState === 'true') {
+        // 检查是否有保存的睡眠开始时间
+        const savedStartTime = localStorage.getItem('sleepStartTime')
+        if (savedStartTime) {
+            const startTimestamp = Number.parseInt(savedStartTime)
+            const currentTime = Date.now()
+            // 计算离线睡眠时间（秒）
+            const offlineSeconds = Math.floor((currentTime - startTimestamp) / 1000)
+            if (offlineSeconds > 0) {
+                // 将离线睡眠时间加入总睡眠时间
+                totalSleepTime.value += offlineSeconds
+                // 保存更新后的总睡眠时间
+                localStorage.setItem('totalSleepTime', totalSleepTime.value.toString())
+                // 更新睡眠开始时间为当前时间
+                localStorage.setItem('sleepStartTime', currentTime.toString())
+            }
+        }
+        // 重新开始睡眠计时
         onSleepStart()
     }
+
+    // 监听睡眠状态事件
+    window.addEventListener('character-sleep-start', onSleepStart)
+    window.addEventListener('character-sleep-end', onSleepEnd)
 })
 
 onUnmounted(() => {
     // 清理事件监听
     window.removeEventListener('character-sleep-start', onSleepStart)
     window.removeEventListener('character-sleep-end', onSleepEnd)
+
+    // 如果还在睡觉，记录离开时的时间
+    if (isSleeping.value && sleepStartTime.value) {
+        const currentTime = Date.now()
+        const elapsedSeconds = Math.floor((currentTime - sleepStartTime.value) / 1000)
+        totalSleepTime.value += elapsedSeconds
+        localStorage.setItem('totalSleepTime', totalSleepTime.value.toString())
+        localStorage.setItem('sleepStartTime', currentTime.toString())
+    }
 
     // 停止计时器
     stopSleepTimer()
@@ -53,9 +79,13 @@ onUnmounted(() => {
 function onSleepStart() {
     isSleeping.value = true
     localStorage.setItem('isSleeping', 'true')
+    
+    // 记录睡眠开始时间戳
+    const currentTime = Date.now()
+    sleepStartTime.value = currentTime
+    localStorage.setItem('sleepStartTime', currentTime.toString())
 
     if (sleepTimerInterval.value === null) {
-        sleepStartTime.value = Date.now()
         sleepTimerInterval.value = window.setInterval(() => {
             // 更新总睡觉时间
             totalSleepTime.value++
@@ -75,9 +105,17 @@ function onSleepEnd() {
     if (sleepTimerInterval.value !== null) {
         clearInterval(sleepTimerInterval.value)
         sleepTimerInterval.value = null
-        sleepStartTime.value = null
-        // 保存总睡觉时间到localStorage
+        
+        // 计算睡眠持续时间并添加到总时间
+        if (sleepStartTime.value) {
+            const elapsedSeconds = Math.floor((Date.now() - sleepStartTime.value) / 1000)
+            totalSleepTime.value = totalSleepTime.value + elapsedSeconds
+            sleepStartTime.value = null
+        }
+        
+        // 保存总睡觉时间到localStorage并清除睡眠开始时间
         localStorage.setItem('totalSleepTime', totalSleepTime.value.toString())
+        localStorage.removeItem('sleepStartTime')
     }
 }
 
