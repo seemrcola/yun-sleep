@@ -144,7 +144,7 @@ function stopSleepTimer() {
 <style scoped>
 .sleep-time-card {
   position: fixed;
-  top: 20px;
+  top: 90px;
   left: 20px;
   background-color: rgba(255, 255, 255, 0.9);
   border-radius: 8px;

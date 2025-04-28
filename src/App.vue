@@ -2,13 +2,14 @@
 import { computed, onMounted, ref } from 'vue'
 import AirConditioner from './components/AirConditioner.vue'
 import CurtainControlCard from './components/card/CurtainControlCard.vue'
-import SleepTimeCard from './components/card/SleepTimeCard.vue'
 import TelevisionControlCard from './components/card/TelevisionControlCard.vue'
 import WeatherControlCard from './components/card/WeatherControlCard.vue'
 import CurtainLayer from './components/layer/CurtainLayer.vue'
 import GameLayerSvg from './components/layer/GameLayer.vue'
 import WeatherLayer from './components/layer/WeatherLayer.vue'
 import MessageInput from './components/MessageInput.vue'
+import OperationBar from './components/OperationBar.vue'
+import SleepTimeCard from './components/SleepTime.vue'
 import Television from './components/Television.vue'
 import XiaoAi from './components/XiaoAi.vue'
 
@@ -27,11 +28,41 @@ const gameTop = computed(() => Math.round((windowHeight.value - gameHeight.value
 // 游戏层引用
 const gameLayerRef = ref<InstanceType<typeof GameLayerSvg> | null>(null)
 
+// 灯光和拖动控制
+const isLightOn = ref(true)
+const bedsAreDraggable = ref(false)
+
 // 处理消息输入
 function handleMessageInput(text: string) {
     if (gameLayerRef.value) {
         // 触发游戏层中的setBubbleMessage方法
         gameLayerRef.value.setBubbleMessage(text)
+    }
+}
+
+// 处理灯光切换
+function toggleLight() {
+    isLightOn.value = !isLightOn.value
+    if (gameLayerRef.value) {
+        // 调用游戏层中的toggleLight方法
+        gameLayerRef.value.toggleLight()
+    }
+}
+
+// 处理床位拖动状态切换
+function toggleBedDraggable() {
+    bedsAreDraggable.value = !bedsAreDraggable.value
+    if (gameLayerRef.value) {
+        // 调用游戏层中的toggleBedDraggable方法
+        gameLayerRef.value.toggleBedDraggable()
+    }
+}
+
+// 处理床位位置重置
+function resetBedPositions() {
+    if (gameLayerRef.value) {
+        // 调用游戏层中的resetBedPositions方法
+        gameLayerRef.value.resetBedPositions()
     }
 }
 
@@ -56,6 +87,15 @@ onMounted(() => {
 
         <!-- 空调组件 - 固定在页面顶部中央 -->
         <AirConditioner />
+
+        <!-- 操作栏 - 固定在左上角 -->
+        <OperationBar
+            :initial-light-on="isLightOn"
+            :initial-draggable="bedsAreDraggable"
+            @toggle-light="toggleLight"
+            @toggle-bed-draggable="toggleBedDraggable"
+            @reset-bed-positions="resetBedPositions"
+        />
 
         <div class="control-container">
             <!-- 窗帘控制卡片 - 固定在右上角 -->

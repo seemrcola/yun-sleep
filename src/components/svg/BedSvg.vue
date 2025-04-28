@@ -6,6 +6,7 @@ const props = defineProps<{
     width: number
     height: number
     isOccupied: boolean
+    isDraggable?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -27,6 +28,9 @@ let lastX = 0
 let lastY = 0
 
 function handleMouseDown(event: MouseEvent) {
+    if (!props.isDraggable)
+        return
+
     isDragging = true
     lastX = event.clientX
     lastY = event.clientY
@@ -65,6 +69,9 @@ function handleMouseUp() {
 
 // 触摸事件处理器
 function handleTouchStart(event: TouchEvent) {
+    if (!props.isDraggable)
+        return
+
     if (event.touches.length > 0) {
         isDragging = true
         lastX = event.touches[0].clientX
@@ -107,7 +114,10 @@ function handleTouchEnd(event: TouchEvent) {
         :height="height"
         viewBox="0 0 60 90"
         class="bed"
-        :class="{ 'bed-occupied': isOccupied }"
+        :class="{
+            'bed-occupied': isOccupied,
+            'bed-draggable': isDraggable,
+        }"
         @click="handleClick"
         @mousedown="handleMouseDown"
         @touchstart="handleTouchStart"
@@ -641,75 +651,83 @@ function handleTouchEnd(event: TouchEvent) {
 
 <style scoped>
 .bed {
-  cursor: move;
-  transition: filter 0.2s ease;
-  filter: drop-shadow(2px 4px 3px rgba(0, 0, 0, 0.3));
+    cursor: pointer;
+    transition: transform 0.2s, filter 0.2s;
 }
 
 .bed:hover {
-  filter: brightness(1.05) drop-shadow(3px 5px 5px rgba(0, 0, 0, 0.4));
+    transform: scale(1.02);
 }
 
 .bed-occupied {
-  cursor: pointer;
+    filter: drop-shadow(0 0 8px rgba(46, 204, 113, 0.6));
+}
+
+.bed-draggable {
+    cursor: move;
+}
+
+.bed-draggable:hover {
+    transform: scale(1.05);
+    filter: drop-shadow(0 0 10px rgba(66, 139, 202, 0.6));
 }
 
 .sleeping-person {
-  animation: breathe 4s infinite ease-in-out;
+    animation: breathe 4s infinite ease-in-out;
 }
 
 .bed-legs {
-  filter: drop-shadow(0px 1px 1px rgba(0, 0, 0, 0.3));
+    filter: drop-shadow(0px 1px 1px rgba(0, 0, 0, 0.3));
 }
 
 .z1 {
-  animation: float 1.5s infinite ease-in-out;
+    animation: float 1.5s infinite ease-in-out;
 }
 
 .z2 {
-  animation: float 1.5s infinite ease-in-out;
-  animation-delay: 0.2s;
+    animation: float 1.5s infinite ease-in-out;
+    animation-delay: 0.2s;
 }
 
 .z3 {
-  animation: float 1.5s infinite ease-in-out;
-  animation-delay: 0.4s;
+    animation: float 1.5s infinite ease-in-out;
+    animation-delay: 0.4s;
 }
 
 /* 添加轻微摇摆动画 */
 .arm-out {
-  transform-origin: 48px 48px;
-  animation: armMove 8s infinite ease-in-out;
+    transform-origin: 48px 48px;
+    animation: armMove 8s infinite ease-in-out;
 }
 
 .blanket-details {
-  animation: blanketShift 6s infinite ease-in-out, blanketWave 10s infinite ease-in-out;
+    animation: blanketShift 6s infinite ease-in-out, blanketWave 10s infinite ease-in-out;
 }
 
 @keyframes breathe {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.02); }
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.02); }
 }
 
 @keyframes armMove {
-  0%, 100% { transform: rotate(0deg); }
-  50% { transform: rotate(-2deg); }
+    0%, 100% { transform: rotate(0deg); }
+    50% { transform: rotate(-2deg); }
 }
 
 @keyframes blanketShift {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(0.5px); }
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(0.5px); }
 }
 
 @keyframes blanketWave {
-  0%, 100% { transform: scaleY(1); }
-  30% { transform: scaleY(1.005) scaleX(0.998); }
-  70% { transform: scaleY(0.998) scaleX(1.002); }
+    0%, 100% { transform: scaleY(1); }
+    30% { transform: scaleY(1.005) scaleX(0.998); }
+    70% { transform: scaleY(0.998) scaleX(1.002); }
 }
 
 @keyframes float {
-  0% { opacity: 0; transform: translateY(0) scale(0.8); }
-  50% { opacity: 1; transform: translateY(-3px) scale(1); }
-  100% { opacity: 0; transform: translateY(-8px) scale(1.2); }
+    0% { opacity: 0; transform: translateY(0) scale(0.8); }
+    50% { opacity: 1; transform: translateY(-3px) scale(1); }
+    100% { opacity: 0; transform: translateY(-8px) scale(1.2); }
 }
 </style>

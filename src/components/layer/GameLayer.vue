@@ -52,6 +52,15 @@ const keys = reactive({
     ArrowRight: false,
 })
 
+// 床位拖动功能控制
+const bedsAreDraggable = ref(false)
+
+// 灯光控制
+const isLightOn = ref(true)
+
+// 原始床位位置存储，用于复原
+const originalBedPositions = ref<{ id: number, x: number, y: number }[]>([])
+
 // 类型定义
 interface Bed {
     id: number
@@ -170,17 +179,30 @@ function initializeBeds() {
     const horizontalSpacing = containerWidth.value / columns
     const verticalSpacing = containerHeight.value / rows
 
+    // 清空原始位置记录
+    originalBedPositions.value = []
+
     for (let i = 0; i < bedsCount; i++) {
         const row = Math.floor(i / columns)
         const col = i % columns
 
+        const x = col * horizontalSpacing + (horizontalSpacing - bedWidth) / 2
+        const y = row * verticalSpacing + (verticalSpacing - bedHeight) / 2
+
         beds.push({
             id: i,
-            x: col * horizontalSpacing + (horizontalSpacing - bedWidth) / 2,
-            y: row * verticalSpacing + (verticalSpacing - bedHeight) / 2,
+            x,
+            y,
             width: bedWidth,
             height: bedHeight,
             isOccupied: false,
+        })
+
+        // 保存原始位置
+        originalBedPositions.value.push({
+            id: i,
+            x,
+            y,
         })
     }
 }
@@ -474,6 +496,9 @@ function loadNightstandItems() {
 // 暴露方法给父组件使用
 defineExpose({
     setBubbleMessage,
+    toggleLight,
+    toggleBedDraggable,
+    resetBedPositions,
 })
 
 // 处理容器点击，避免点击床头柜时唤醒角色
@@ -494,12 +519,43 @@ function handleContainerClick(event: MouseEvent) {
     // 否则，唤醒角色
     wakeUpCharacter()
 }
+
+// 复原床位位置
+function resetBedPositions() {
+    if (originalBedPositions.value.length === 0)
+        return
+
+    for (const position of originalBedPositions.value) {
+        const bed = beds.find(b => b.id === position.id)
+        if (bed) {
+            bed.x = position.x
+            bed.y = position.y
+
+            // 如果角色正在这张床上睡觉，同时移动角色
+            if (character.isSleeping && character.currentBedIndex === position.id) {
+                character.x = position.x + (bed.width - character.width) / 2
+                character.y = position.y + 35 // 更新为相同的位置
+            }
+        }
+    }
+}
+
+// 切换床位拖动功能
+function toggleBedDraggable() {
+    bedsAreDraggable.value = !bedsAreDraggable.value
+}
+
+// 切换灯光
+function toggleLight() {
+    isLightOn.value = !isLightOn.value
+}
 </script>
 
 <template>
     <div
         ref="containerRef"
         class="game-container"
+        :class="{ 'lights-off': !isLightOn }"
         @click="handleContainerClick"
     >
         <svg
@@ -517,6 +573,7 @@ function handleContainerClick(event: MouseEvent) {
                 :width="bed.width"
                 :height="bed.height"
                 :is-occupied="bed.id === character.currentBedIndex && character.isSleeping"
+                :is-draggable="bedsAreDraggable"
                 @bed-clicked="handleBedClicked"
                 @drag-start="handleBedDragStart"
                 @drag-move="handleBedDragMove"
@@ -611,6 +668,16 @@ function handleContainerClick(event: MouseEvent) {
   overflow: hidden;
   background-color: #87CEEB; /* 天蓝色背景 */
   touch-action: none; /* 防止浏览器处理触摸事件 */
+  transition: background-color 0.5s ease, filter 0.5s ease;
+  transform-style: preserve-3d;
+  transform: translateZ(0);
+  will-change: background-color, filter;
+}
+
+/* 灯光关闭时的效果 */
+.game-container.lights-off {
+  background-color: #1a2939; /* 深蓝色夜间背景 */
+  filter: brightness(0.7);
 }
 
 .game-svg {
@@ -618,5 +685,10 @@ function handleContainerClick(event: MouseEvent) {
   position: absolute;
   top: 0;
   left: 0;
+  pointer-events: none;
+}
+
+.game-svg * {
+  pointer-events: auto;
 }
 </style>
