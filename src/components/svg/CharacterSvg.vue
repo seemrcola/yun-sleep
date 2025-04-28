@@ -196,7 +196,7 @@ defineExpose({
     x: props.x,
     y: props.y,
     width: props.width,
-    height: props.height
+    height: props.height,
 })
 </script>
 

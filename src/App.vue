@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import AirConditioner from './components/AirConditioner.vue'
+import CurtainControlCard from './components/card/CurtainControlCard.vue'
 import SleepTimeCard from './components/card/SleepTimeCard.vue'
 import TelevisionControlCard from './components/card/TelevisionControlCard.vue'
 import WeatherControlCard from './components/card/WeatherControlCard.vue'
-import CurtainControlCard from './components/card/CurtainControlCard.vue'
 import CurtainLayer from './components/layer/CurtainLayer.vue'
 import GameLayerSvg from './components/layer/GameLayer.vue'
 import WeatherLayer from './components/layer/WeatherLayer.vue'
@@ -74,12 +74,14 @@ onMounted(() => {
         <!-- 小爱同学 - 固定在右下角 -->
         <XiaoAi />
 
-        <div class="game-container" :style="{
-            width: `${gameWidth}px`,
-            height: `${gameHeight}px`,
-            left: `${gameLeft}px`,
-            top: `${gameTop}px`,
-        }">
+        <div
+            class="game-container" :style="{
+                width: `${gameWidth}px`,
+                height: `${gameHeight}px`,
+                left: `${gameLeft}px`,
+                top: `${gameTop}px`,
+            }"
+        >
             <!-- 不再需要背景层，因为天气图层已经代替它 -->
             <!-- <BackgroundLayer :width="gameWidth" :height="gameHeight" /> -->
 

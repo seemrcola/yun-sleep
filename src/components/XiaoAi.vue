@@ -273,7 +273,7 @@ onMounted(() => {
             </div>
             <div class="message-tail" />
         </div>
-        
+
         <div
             class="xiao-ai-robot"
             :class="{ active: isActive, listening: isListening }"

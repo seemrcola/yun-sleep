@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref, watch } from 'vue'
+import NightstandModal from '../NightstandModal.vue'
 import SpeechBubble from '../SpeechBubble.vue'
 import BedSvg from '../svg/BedSvg.vue'
 import CharacterSvg from '../svg/CharacterSvg.vue'
-import NightstandSvg from '../svg/NightstandSvg.vue'
 import NightstandItems from '../svg/NightstandItems.vue'
-import NightstandModal from '../NightstandModal.vue'
+import NightstandSvg from '../svg/NightstandSvg.vue'
 
 // 定义属性
 const props = defineProps<{
@@ -41,7 +41,7 @@ const nightstandItems = reactive({
     eyeMask: false,
     lamp: false,
     melatonin: false,
-    musicPlayer: false
+    musicPlayer: false,
 })
 
 // 移动控制
@@ -97,7 +97,7 @@ const nightstandPosition = computed(() => {
             y: bed.y + 20,
             width: 30,
             height: 40,
-            visible: true
+            visible: true,
         }
     }
     return {
@@ -105,7 +105,7 @@ const nightstandPosition = computed(() => {
         y: 0,
         width: 30,
         height: 40,
-        visible: false
+        visible: false,
     }
 })
 
@@ -141,10 +141,10 @@ onMounted(() => {
 
                     // 触发睡眠开始事件
                     window.dispatchEvent(new CustomEvent('character-sleep-start'))
-                    
+
                     // 恢复床头柜状态
                     loadNightstandItems()
-                    
+
                     // 确保床头柜可见
                     nightstandVisible.value = true
                 }, 100)
@@ -200,8 +200,9 @@ function gameLoop(time = 0) {
 // 根据键盘输入更新角色位置
 function updateCharacterPosition(deltaTime?: number) {
     // console.log('updateCharacterPosition', deltaTime)
-    if (deltaTime) void 0 // 如果deltaTime存在，则表示是游戏循环
-    
+    if (deltaTime)
+        void 0 // 如果deltaTime存在，则表示是游戏循环
+
     if (character.isSleeping)
         return
 
@@ -347,10 +348,10 @@ function handleBedClicked(bedId: number) {
 
         // 触发睡眠开始事件
         window.dispatchEvent(new CustomEvent('character-sleep-start'))
-        
+
         // 睡觉后显示床头柜
         nightstandVisible.value = true
-        
+
         // 保存床头柜状态
         saveNightstandItems()
     }
@@ -371,13 +372,13 @@ function wakeUpCharacter() {
     // 清除睡眠床位索引
     localStorage.removeItem('currentBedIndex')
     localStorage.removeItem('isSleeping')
-    
+
     // 清除床头柜可见性状态
     localStorage.removeItem('nightstandVisible')
 
     // 触发睡眠结束事件
     window.dispatchEvent(new CustomEvent('character-sleep-end'))
-    
+
     // 隐藏床头柜
     nightstandVisible.value = false
 }
@@ -458,12 +459,13 @@ function loadNightstandItems() {
         const items = JSON.parse(savedItems)
         Object.assign(nightstandItems, items)
     }
-    
+
     // 恢复床头柜可见性状态
     const savedVisibility = localStorage.getItem('nightstandVisible')
     if (savedVisibility !== null) {
         nightstandVisible.value = savedVisibility === 'true'
-    } else {
+    }
+    else {
         // 如果没有保存过，则在睡眠状态下默认显示床头柜
         nightstandVisible.value = character.isSleeping
     }
@@ -477,20 +479,20 @@ defineExpose({
 // 处理容器点击，避免点击床头柜时唤醒角色
 function handleContainerClick(event: MouseEvent) {
     // 如果点击的是床头柜或其子元素，不要唤醒角色
-    const targetElement = event.target as HTMLElement;
-    
+    const targetElement = event.target as HTMLElement
+
     // 检查点击的元素是否是床头柜组件的一部分或床头柜模态框
-    const isNightstandClick = targetElement.closest('.nightstand') !== null;
-    const isNightstandModalClick = targetElement.closest('.modal-overlay') !== null;
-    
+    const isNightstandClick = targetElement.closest('.nightstand') !== null
+    const isNightstandModalClick = targetElement.closest('.modal-overlay') !== null
+
     if (isNightstandClick || isNightstandModalClick) {
         // 阻止事件冒泡，防止唤醒角色
-        event.stopPropagation();
-        return;
+        event.stopPropagation()
+        return
     }
-    
+
     // 否则，唤醒角色
-    wakeUpCharacter();
+    wakeUpCharacter()
 }
 </script>
 
@@ -532,7 +534,7 @@ function handleContainerClick(event: MouseEvent) {
                 :direction="character.direction"
                 :is-moving="character.isMoving"
             />
-            
+
             <!-- 睡觉 zZZ 效果 -->
             <g v-if="character.isSleeping && character.currentBedIndex >= 0">
                 <text
@@ -557,7 +559,7 @@ function handleContainerClick(event: MouseEvent) {
                     />
                 </text>
             </g>
-            
+
             <!-- 床头柜 -->
             <NightstandSvg
                 v-if="character.isSleeping && character.currentBedIndex >= 0"
@@ -568,7 +570,7 @@ function handleContainerClick(event: MouseEvent) {
                 :visible="nightstandVisible"
                 @nightstand-clicked="handleNightstandClicked"
             />
-            
+
             <!-- 床头柜物品 -->
             <NightstandItems
                 v-if="character.isSleeping && character.currentBedIndex >= 0"
@@ -590,7 +592,7 @@ function handleContainerClick(event: MouseEvent) {
             :character-width="characterPosition.width"
             :character-height="characterPosition.height"
         />
-        
+
         <!-- 床头柜弹窗 -->
         <NightstandModal
             :visible="nightstandModalVisible"

@@ -26,58 +26,86 @@ function handleClose() {
 </script>
 
 <template>
-    <div v-if="visible" class="modal-overlay" @click.self="handleClose">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>床头柜</h2>
-                <button class="close-button" @click="handleClose">×</button>
-            </div>
-            
-            <div class="modal-body">
-                <div class="item-grid">
-                    <div 
-                        class="item-card" 
-                        :class="{ selected: activeItems.eyeMask }"
-                        @click="toggleSelection('eyeMask')"
-                    >
-                        <div class="item-icon">😴</div>
-                        <div class="item-name">眼罩</div>
-                        <div class="item-description">睡觉时佩戴眼罩</div>
-                    </div>
-                    
-                    <div 
-                        class="item-card" 
-                        :class="{ selected: activeItems.lamp }"
-                        @click="toggleSelection('lamp')"
-                    >
-                        <div class="item-icon">💡</div>
-                        <div class="item-name">台灯</div>
-                        <div class="item-description">温暖的黄色光晕</div>
-                    </div>
-                    
-                    <div 
-                        class="item-card" 
-                        :class="{ selected: activeItems.melatonin }"
-                        @click="toggleSelection('melatonin')"
-                    >
-                        <div class="item-icon">💊</div>
-                        <div class="item-name">褪黑素</div>
-                        <div class="item-description">睡眠更加沉稳</div>
-                    </div>
-                    
-                    <div 
-                        class="item-card" 
-                        :class="{ selected: activeItems.musicPlayer }"
-                        @click="toggleSelection('musicPlayer')"
-                    >
-                        <div class="item-icon">🎵</div>
-                        <div class="item-name">音乐播放器</div>
-                        <div class="item-description">助眠音乐</div>
+    <Teleport to="body">
+        <div v-if="visible" class="modal-overlay" @click.self="handleClose">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>床头柜</h2>
+                    <button class="close-button" @click="handleClose">
+                        ×
+                    </button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="item-grid">
+                        <div
+                            class="item-card"
+                            :class="{ selected: activeItems.eyeMask }"
+                            @click="toggleSelection('eyeMask')"
+                        >
+                            <div class="item-icon">
+                                😴
+                            </div>
+                            <div class="item-name">
+                                眼罩
+                            </div>
+                            <div class="item-description">
+                                睡觉时佩戴眼罩
+                            </div>
+                        </div>
+
+                        <div
+                            class="item-card"
+                            :class="{ selected: activeItems.lamp }"
+                            @click="toggleSelection('lamp')"
+                        >
+                            <div class="item-icon">
+                                💡
+                            </div>
+                            <div class="item-name">
+                                台灯
+                            </div>
+                            <div class="item-description">
+                                温暖的黄色光晕
+                            </div>
+                        </div>
+
+                        <div
+                            class="item-card"
+                            :class="{ selected: activeItems.melatonin }"
+                            @click="toggleSelection('melatonin')"
+                        >
+                            <div class="item-icon">
+                                💊
+                            </div>
+                            <div class="item-name">
+                                褪黑素
+                            </div>
+                            <div class="item-description">
+                                睡眠更加沉稳
+                            </div>
+                        </div>
+
+                        <div
+                            class="item-card"
+                            :class="{ selected: activeItems.musicPlayer }"
+                            @click="toggleSelection('musicPlayer')"
+                        >
+                            <div class="item-icon">
+                                🎵
+                            </div>
+                            <div class="item-name">
+                                音乐播放器
+                            </div>
+                            <div class="item-description">
+                                助眠音乐
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+    </Teleport>
 </template>
 
 <style scoped>
@@ -91,7 +119,7 @@ function handleClose() {
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000;
+  z-index: 100000;
   backdrop-filter: blur(3px);
 }
 
@@ -231,4 +259,4 @@ function handleClose() {
   color: #666;
   text-align: center;
 }
-</style> 
+</style>

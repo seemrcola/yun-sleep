@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
 import './BaseCardStyles.vue'
 
 // 窗帘状态
@@ -12,7 +12,8 @@ function toggleLeftCurtain() {
     // 触发自定义事件，通知CurtainLayer组件更新窗帘状态
     if (leftCurtainOpen.value) {
         window.dispatchEvent(new CustomEvent('open-left-curtain'))
-    } else {
+    }
+    else {
         window.dispatchEvent(new CustomEvent('close-left-curtain'))
     }
 }
@@ -23,7 +24,8 @@ function toggleRightCurtain() {
     // 触发自定义事件，通知CurtainLayer组件更新窗帘状态
     if (rightCurtainOpen.value) {
         window.dispatchEvent(new CustomEvent('open-right-curtain'))
-    } else {
+    }
+    else {
         window.dispatchEvent(new CustomEvent('close-right-curtain'))
     }
 }
@@ -42,7 +44,7 @@ onMounted(() => {
     window.addEventListener('left-curtain-state-change', ((e: CustomEvent) => {
         updateLeftCurtainState(e.detail.isOpen)
     }) as EventListener)
-    
+
     window.addEventListener('right-curtain-state-change', ((e: CustomEvent) => {
         updateRightCurtainState(e.detail.isOpen)
     }) as EventListener)
@@ -53,7 +55,7 @@ onUnmounted(() => {
     window.removeEventListener('left-curtain-state-change', ((e: CustomEvent) => {
         updateLeftCurtainState(e.detail.isOpen)
     }) as EventListener)
-    
+
     window.removeEventListener('right-curtain-state-change', ((e: CustomEvent) => {
         updateRightCurtainState(e.detail.isOpen)
     }) as EventListener)
@@ -101,4 +103,4 @@ onUnmounted(() => {
 
 <style scoped>
 /* 组件特定样式可以添加在这里 */
-</style> 
+</style>

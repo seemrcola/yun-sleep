@@ -79,7 +79,7 @@ onUnmounted(() => {
 function onSleepStart() {
     isSleeping.value = true
     localStorage.setItem('isSleeping', 'true')
-    
+
     // 记录睡眠开始时间戳
     const currentTime = Date.now()
     sleepStartTime.value = currentTime
@@ -105,14 +105,14 @@ function onSleepEnd() {
     if (sleepTimerInterval.value !== null) {
         clearInterval(sleepTimerInterval.value)
         sleepTimerInterval.value = null
-        
+
         // 计算睡眠持续时间并添加到总时间
         if (sleepStartTime.value) {
             const elapsedSeconds = Math.floor((Date.now() - sleepStartTime.value) / 1000)
             totalSleepTime.value = totalSleepTime.value + elapsedSeconds
             sleepStartTime.value = null
         }
-        
+
         // 保存总睡觉时间到localStorage并清除睡眠开始时间
         localStorage.setItem('totalSleepTime', totalSleepTime.value.toString())
         localStorage.removeItem('sleepStartTime')

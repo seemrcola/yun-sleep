@@ -62,14 +62,14 @@ async function toggleRightCurtain() {
 
 // 窗帘状态变化时触发事件
 watch(leftCurtainOpen, (newValue) => {
-    window.dispatchEvent(new CustomEvent('left-curtain-state-change', { 
-        detail: { isOpen: newValue } 
+    window.dispatchEvent(new CustomEvent('left-curtain-state-change', {
+        detail: { isOpen: newValue },
     }))
 })
 
 watch(rightCurtainOpen, (newValue) => {
-    window.dispatchEvent(new CustomEvent('right-curtain-state-change', { 
-        detail: { isOpen: newValue } 
+    window.dispatchEvent(new CustomEvent('right-curtain-state-change', {
+        detail: { isOpen: newValue },
     }))
 })
 

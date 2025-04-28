@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const props = defineProps<{
+defineProps<{
     x: number
     y: number
     width: number
@@ -143,25 +143,26 @@ function handleClick(event: MouseEvent) {
         />
 
         <!-- 提示闪光效果 -->
-        <circle 
-            cx="20" 
-            cy="25" 
-            r="18" 
-            fill="rgba(255,255,255,0.0)" 
-            stroke="#FFD700" 
+        <circle
+            cx="20"
+            cy="25"
+            r="18"
+            fill="rgba(255,255,255,0.0)"
+            stroke="#FFD700"
             stroke-width="0.7"
-            stroke-dasharray="2,2">
-            <animate 
-                attributeName="stroke-opacity" 
-                values="0.8;0.1;0.8" 
-                dur="2s" 
-                repeatCount="indefinite" 
+            stroke-dasharray="2,2"
+        >
+            <animate
+                attributeName="stroke-opacity"
+                values="0.8;0.1;0.8"
+                dur="2s"
+                repeatCount="indefinite"
             />
-            <animate 
-                attributeName="r" 
-                values="16;18;16" 
-                dur="2s" 
-                repeatCount="indefinite" 
+            <animate
+                attributeName="r"
+                values="16;18;16"
+                dur="2s"
+                repeatCount="indefinite"
             />
         </circle>
     </svg>
@@ -176,4 +177,4 @@ function handleClick(event: MouseEvent) {
 .nightstand:hover {
   transform: scale(1.05);
 }
-</style> 
+</style>
