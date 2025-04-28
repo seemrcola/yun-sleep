@@ -152,4 +152,10 @@ function sendMessage() {
     padding: 12px 16px;
   }
 }
+
+/** 去掉滚动条样式 */
+textarea::-webkit-scrollbar {
+    display: none;
+}
+
 </style>
