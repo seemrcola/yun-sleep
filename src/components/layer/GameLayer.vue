@@ -155,8 +155,10 @@ function gameLoop(time = 0) {
 }
 
 // 根据键盘输入更新角色位置
-function updateCharacterPosition(deltaTime: number) {
+function updateCharacterPosition(deltaTime?: number) {
     // console.log('updateCharacterPosition', deltaTime)
+    if (deltaTime) void 0 // 如果deltaTime存在，则表示是游戏循环
+    
     if (character.isSleeping)
         return
 
