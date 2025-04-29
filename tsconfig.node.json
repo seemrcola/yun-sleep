@@ -4,10 +4,16 @@
         "target": "ES2022",
         "lib": ["ES2023"],
         "moduleDetection": "force",
+
+        /* Path aliases */
+        "baseUrl": ".",
         "module": "ESNext",
 
         /* Bundler mode */
         "moduleResolution": "bundler",
+        "paths": {
+            "@/*": ["src/*"]
+        },
         "allowImportingTsExtensions": true,
 
         /* Linting */

@@ -157,5 +157,4 @@ function sendMessage() {
 textarea::-webkit-scrollbar {
     display: none;
 }
-
 </style>

@@ -211,7 +211,7 @@ onUnmounted(() => {
         <div class="curtain-rod">
             <div class="curtain-rod-highlight" />
         </div>
-        
+
         <!-- 窗帘杆端点 -->
         <div class="curtain-rod-end left-end">
             <div class="rod-end-inner" />
@@ -346,11 +346,11 @@ onUnmounted(() => {
   left: 0;
   width: 100%;
   height: 14px;
-  background: linear-gradient(to bottom, 
-    #8B4513 0%, 
-    #CD853F 20%, 
-    #D2B48C 50%, 
-    #CD853F 80%, 
+  background: linear-gradient(to bottom,
+    #8B4513 0%,
+    #CD853F 20%,
+    #D2B48C 50%,
+    #CD853F 80%,
     #8B4513 100%);
   border-radius: 7px;
   z-index: 5;
@@ -378,9 +378,9 @@ onUnmounted(() => {
   top: -8px;
   width: 30px;
   height: 30px;
-  background: radial-gradient(circle at center, 
-    #D4AF37 30%, 
-    #B8860B 70%, 
+  background: radial-gradient(circle at center,
+    #D4AF37 30%,
+    #B8860B 70%,
     #8B6914 100%);
   border-radius: 50%;
   z-index: 6;
@@ -395,9 +395,9 @@ onUnmounted(() => {
   left: 5px;
   width: 20px;
   height: 20px;
-  background: radial-gradient(circle at center, 
-    #FFD700 30%, 
-    #DAA520 80%, 
+  background: radial-gradient(circle at center,
+    #FFD700 30%,
+    #DAA520 80%,
     #B8860B 100%);
   border-radius: 50%;
 }
@@ -408,8 +408,8 @@ onUnmounted(() => {
   left: 8px;
   width: 8px;
   height: 8px;
-  background: radial-gradient(circle at center, 
-    rgba(255,255,255,0.9) 0%, 
+  background: radial-gradient(circle at center,
+    rgba(255,255,255,0.9) 0%,
     rgba(255,255,255,0) 80%);
   border-radius: 50%;
 }
