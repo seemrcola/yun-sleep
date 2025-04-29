@@ -57,8 +57,14 @@ function playWeatherSound() {
         audioPlayer = new Audio()
         audioPlayer.src = weather.sound
         audioPlayer.loop = true
-        audioPlayer.volume = 0.3
-
+        
+        // 根据天气类型设置音量
+        if (currentWeather.value === 'cloudy') {
+            audioPlayer.volume = 0.6 // 阴天时音量提高
+        } else {
+            audioPlayer.volume = 0.3
+        }
+        
         // 添加错误处理
         audioPlayer.onerror = (e) => {
             console.error('音频播放失败:', e)
