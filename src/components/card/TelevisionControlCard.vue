@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from 'vue'
-import './BaseCardStyles.vue'
 
 // 电视状态
 const isTvVisible = ref(false)
@@ -53,4 +52,5 @@ onUnmounted(() => {
 
 <style scoped>
 /* 组件特定样式可以添加在这里 */
+@import './BaseCardStyles.css';
 </style>

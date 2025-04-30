@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from 'vue'
-import './BaseCardStyles.vue'
 
 // 窗帘状态
 const leftCurtainOpen = ref(true)
@@ -103,4 +102,5 @@ onUnmounted(() => {
 
 <style scoped>
 /* 组件特定样式可以添加在这里 */
+@import './BaseCardStyles.css';
 </style>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref, onBeforeUnmount } from 'vue'
+import { onBeforeUnmount, onMounted, ref } from 'vue'
 
 // 天气类型
 type WeatherType = 'sunny' | 'cloudy' | 'rainy' | 'storm'
@@ -43,7 +43,8 @@ function changeWeather(type: WeatherType) {
 function playWeatherSound() {
     try {
         const weather = weatherOptions.find(w => w.id === currentWeather.value)
-        if (!weather) return
+        if (!weather)
+            return
 
         console.log(`开始播放${weather.name}音效`, weather.sound)
 
@@ -57,14 +58,15 @@ function playWeatherSound() {
         audioPlayer = new Audio()
         audioPlayer.src = weather.sound
         audioPlayer.loop = true
-        
+
         // 根据天气类型设置音量
         if (currentWeather.value === 'cloudy') {
             audioPlayer.volume = 0.6 // 阴天时音量提高
-        } else {
+        }
+        else {
             audioPlayer.volume = 0.3
         }
-        
+
         // 添加错误处理
         audioPlayer.onerror = (e) => {
             console.error('音频播放失败:', e)
@@ -74,7 +76,7 @@ function playWeatherSound() {
         audioPlayer.oncanplaythrough = () => {
             console.log('音频已加载完成，开始播放')
             if (audioPlayer) {
-                audioPlayer.play().catch(err => {
+                audioPlayer.play().catch((err) => {
                     console.error('播放音频失败:', err)
                 })
             }
@@ -82,7 +84,8 @@ function playWeatherSound() {
 
         // 尝试预加载音频
         audioPlayer.load()
-    } catch (error) {
+    }
+    catch (error) {
         console.error('播放天气音效时出错:', error)
     }
 }
@@ -94,7 +97,8 @@ function toggleAudio() {
 
     if (audioEnabled.value) {
         playWeatherSound()
-    } else if (audioPlayer) {
+    }
+    else if (audioPlayer) {
         audioPlayer.pause()
         audioPlayer = null
     }
@@ -116,7 +120,7 @@ onMounted(() => {
     }, 500)
 
     // 预加载所有音频以提高响应速度
-    weatherOptions.forEach(option => {
+    weatherOptions.forEach((option) => {
         const audio = new Audio()
         audio.src = option.sound
         audio.preload = 'auto'
@@ -131,15 +135,17 @@ onMounted(() => {
                 天气控制
             </div>
             <div class="card-status">
-                <span class="weather-icon">{{weatherOptions.find(w => w.id === currentWeather)?.icon}}</span>
-                {{weatherOptions.find(w => w.id === currentWeather)?.name}}
+                <span class="weather-icon">{{ weatherOptions.find(w => w.id === currentWeather)?.icon }}</span>
+                {{ weatherOptions.find(w => w.id === currentWeather)?.name }}
             </div>
         </div>
 
         <div class="card-content">
             <div class="weather-options-grid">
-                <div v-for="option in weatherOptions" :key="option.id" class="weather-option"
-                    :class="{ active: currentWeather === option.id }" @click="changeWeather(option.id as WeatherType)">
+                <div
+                    v-for="option in weatherOptions" :key="option.id" class="weather-option"
+                    :class="{ active: currentWeather === option.id }" @click="changeWeather(option.id as WeatherType)"
+                >
                     <div class="option-icon">
                         {{ option.icon }}
                     </div>
@@ -160,6 +166,8 @@ onMounted(() => {
 </template>
 
 <style scoped>
+@import './BaseCardStyles.css';
+
 .weather-options-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -223,6 +231,7 @@ onMounted(() => {
 /* 音频控制样式 */
 .audio-control {
     margin-top: 15px;
+    margin-bottom: 10px;
     padding-top: 10px;
     border-top: 1px solid rgba(0, 0, 0, 0.1);
     display: flex;

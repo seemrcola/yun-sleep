@@ -11,6 +11,7 @@ import NightstandSvg from '../svg/NightstandSvg.vue'
 const props = defineProps<{
     width?: number
     height?: number
+    bedCount: number
 }>()
 
 // 游戏尺寸
@@ -171,8 +172,10 @@ watch([containerWidth, containerHeight], () => {
 function initializeBeds() {
     beds.length = 0 // 清空现有床位
 
-    const columns = 6 // 调整为6列4行以适应24张床
-    const rows = 4
+    // 根据床位数量计算列数和行数 一行最多六个
+    const columns = Math.min(6, props.bedCount || 24)
+    const rows = Math.ceil(props.bedCount / columns)
+
     const bedWidth = 60
     const bedHeight = 90
 
