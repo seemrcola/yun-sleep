@@ -3,7 +3,7 @@
   line-height: 1.5;
   font-weight: 400;
 
-  color-scheme: light dark;
+  color-scheme: light only;
   color: rgba(255, 255, 255, 0.87);
   background-color: #87CEEB;
 
@@ -17,6 +17,8 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  -webkit-forced-color-adjust: none;
+  forced-color-adjust: none;
 }
 
 html, body, #app {
@@ -25,6 +27,8 @@ html, body, #app {
   margin: 0;
   padding: 0;
   overflow: hidden;
+  background-color: #ffffff;
+  color-scheme: light only;
 }
 
 body {
@@ -78,5 +82,11 @@ button:focus-visible {
   }
   button {
     background-color: #f9f9f9;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  html {
+    color-scheme: light only;
   }
 }

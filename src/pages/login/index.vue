@@ -635,29 +635,45 @@ input::placeholder {
 .error-message {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 12px 14px;
-  background: #fff5f5;
-  border-radius: 10px;
+  gap: 8px;
+  padding: 10px 14px;
+  background: rgba(254, 226, 226, 0.6);
+  border-radius: 8px;
   margin: 0 30px 20px;
-  border-left: 3px solid #f56565;
-  animation: shake 0.5s both;
-  box-shadow: 0 2px 8px rgba(245, 101, 101, 0.1);
+  border: 1px solid rgba(248, 113, 113, 0.2);
+  border-left: 3px solid #f87171;
+  animation: fadeIn 0.3s ease, shake 0.5s ease 0.15s;
+  box-shadow: 0 2px 8px rgba(248, 113, 113, 0.08);
+  color: #ef4444;
+  font-weight: 400;
+  font-size: 0.9rem;
 }
 
 .error-icon {
   display: inline-block;
-  width: 20px;
-  height: 20px;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z' fill='%23f56565'/%3E%3C/svg%3E");
+  width: 18px;
+  height: 18px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z' fill='%23ef4444'/%3E%3C/svg%3E");
   background-size: contain;
   flex-shrink: 0;
+  opacity: 0.8;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes shake {
   0%, 100% { transform: translateX(0); }
-  10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
-  20%, 40%, 60%, 80% { transform: translateX(5px); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-3px); }
+  20%, 40%, 60%, 80% { transform: translateX(3px); }
 }
 
 /* 表单操作区 */
