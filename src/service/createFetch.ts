@@ -1,4 +1,5 @@
 import useToken from '@/utils/token'
+import { Message } from '@/components/ui/Message'
 
 // 定义响应结构
 export interface ApiResponse<T = any> {
@@ -51,6 +52,7 @@ export function createFetch(defaultConfig: RequestConfig = {}) {
             return data.data
         }
         else {
+            Message.error(data.message || '请求失败')
             throw new Error(data.message || '请求失败')
         }
     }
@@ -73,8 +75,7 @@ export function createFetch(defaultConfig: RequestConfig = {}) {
 
             return handleResponse<T>(response)
         }
-        catch (error) {
-            // 统一错误处理
+        catch (error: any) {
             console.error('Request failed:', error)
             throw error
         }
