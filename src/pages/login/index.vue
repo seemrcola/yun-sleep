@@ -78,7 +78,12 @@ async function handleLogin() {
         console.log(user, 'user')
         const token = user.token
         useToken.setToken(token)
+
+        // 删除token 并设置用户
+        Reflect.deleteProperty(user, 'token')
         userStore.setUser(user)
+
+        // 跳转至房间页面
         router.push('/room')
     }
     catch (error: any) {

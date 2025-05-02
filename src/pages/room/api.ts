@@ -2,9 +2,12 @@ import type { ApiResponseData } from '@/service/createFetch'
 import { http } from '@/service/createFetch'
 
 enum RoomApi {
+    GET_USER_INFO = '/api/user/getUserInfo',
+
     CREATE_ROOM = '/api/room/create',
     LIST_ROOMS = '/api/room/list',
     GET_ROOM_BY_ID = '/api/room/getRoomById',
+    LEAVE_ROOM = '/api/room/leave',
 }
 
 interface CreateRoomParams {
@@ -21,6 +24,14 @@ export function listRoomsAction(): Promise<ApiResponseData> {
     return http.post(RoomApi.LIST_ROOMS)
 }
 
-export function getRoomByIdAction(id: string): Promise<ApiResponseData> {
-    return http.post(RoomApi.GET_ROOM_BY_ID, { id })
+export function getRoomByIdAction(roomId: number): Promise<ApiResponseData> {
+    return http.post(RoomApi.GET_ROOM_BY_ID, { roomId })
+}
+
+export function getUserInfoAction(): Promise<ApiResponseData> {
+    return http.post(RoomApi.GET_USER_INFO)
+}
+
+export function leaveRoomAction(data: { roomId: number }): Promise<ApiResponseData> {
+    return http.post(RoomApi.LEAVE_ROOM, data)
 }

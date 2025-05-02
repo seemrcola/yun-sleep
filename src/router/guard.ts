@@ -11,7 +11,7 @@ function setupGuard(router: Router) {
                 return next()
             const userStore = useUserStore()
             const user = userStore.user
-            if (!user)
+            if (!user.id)
                 return next({ path: '/' })
             next()
         })

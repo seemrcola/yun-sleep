@@ -115,7 +115,7 @@ async function handleCreateRoom() {
           <button
             type="button"
             class="capacity-btn plus"
-            :disabled="roomForm.capacity >= 8"
+            :disabled="roomForm.capacity >= 24"
             @click="roomForm.capacity++"
           >
             <span class="btn-icon">+</span>

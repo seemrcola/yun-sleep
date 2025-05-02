@@ -1,15 +1,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-
-interface Room {
-  id: string
-  name: string
-  capacity: number
-  current: number
-  ownerName: string
-  description: string
-  createTime: string
-}
+import type { Room } from '../type'
+import dayjs from 'dayjs'
 
 const props = defineProps<{
   rooms: Room[]
@@ -82,7 +74,7 @@ const filteredRooms = computed(() => {
             </div>
           </div>
           <div class="room-footer">
-            <span class="room-time">{{ room.createTime }}</span>
+            <span class="room-time">{{ dayjs(room.createdAt).format('YY-MM-DD HH:mm:ss') }}</span>
             <button
               class="join-btn"
               :disabled="room.current >= room.capacity || (currentRoom !== null && currentRoom.id === room.id)"
@@ -120,10 +112,13 @@ const filteredRooms = computed(() => {
   display: flex;
   flex-direction: column;
   box-shadow: -4px 0 24px rgba(31, 41, 55, 0.03);
+  height: 100vh;
+  overflow: hidden;
 }
 
 .list-header {
   margin-bottom: 24px;
+  flex-shrink: 0;
 }
 
 .section-title {
@@ -173,6 +168,7 @@ const filteredRooms = computed(() => {
   flex: 1;
   overflow-y: auto;
   padding-right: 8px;
+  margin-right: -8px;
 }
 
 .room-list::-webkit-scrollbar {
@@ -191,23 +187,37 @@ const filteredRooms = computed(() => {
 .room-card {
   background: white;
   border-radius: 16px;
-  padding: 20px;
-  margin-bottom: 16px;
-  transition: all 0.3s;
-  border: 1px solid #e2e8f0;
+  padding: 16px;
+  margin-bottom: 14px;
+  transition: all 0.3s ease;
+  border-left: 4px solid #e2e8f0;
+  position: relative;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+}
+
+.room-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 40%;
+  height: 100%;
+  background: linear-gradient(135deg, transparent, rgba(248, 250, 252, 0.8));
+  pointer-events: none;
 }
 
 .room-card:hover {
-  transform: translateX(-4px);
-  box-shadow: 4px 4px 20px rgba(31, 41, 55, 0.05);
-  border-color: #3b82f6;
+  border-left-color: #3b82f6;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
 }
 
 .room-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .room-name {
@@ -215,14 +225,20 @@ const filteredRooms = computed(() => {
   color: #1a365d;
   font-weight: 600;
   margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 70%;
 }
 
 .room-status {
   font-size: 0.8rem;
-  padding: 4px 8px;
-  border-radius: 6px;
+  padding: 3px 12px;
+  border-radius: 20px;
   background: #dcfce7;
   color: #166534;
+  font-weight: 500;
+  flex-shrink: 0;
 }
 
 .room-status.almost-full {
@@ -230,55 +246,76 @@ const filteredRooms = computed(() => {
   color: #92400e;
 }
 
-.room-meta {
-  margin-bottom: 16px;
-}
-
 .room-description {
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   color: #64748b;
-  margin: 8px 0 16px;
+  margin: 6px 0 12px;
   line-height: 1.4;
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 1;
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
+.room-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
 .meta-item {
   display: flex;
   align-items: center;
-  gap: 6px;
-  color: #64748b;
+  gap: 8px;
   font-size: 0.9rem;
-  margin-bottom: 8px;
+  color: #64748b;
+}
+
+.meta-item.creator {
+  color: #1e40af;
+  font-weight: 500;
 }
 
 .meta-icon {
-  color: #94a3b8;
+  flex-shrink: 0;
+  margin-right: 2px;
+  color: #3b82f6;
+}
+
+.capacity {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .capacity-bar {
-  flex: 1;
-  height: 6px;
+  width: 80px;
+  height: 8px;
   background: #f1f5f9;
-  border-radius: 3px;
+  border-radius: 4px;
   overflow: hidden;
-  margin: 0 8px;
 }
 
 .capacity-fill {
   height: 100%;
   background: linear-gradient(90deg, #3b82f6, #60a5fa);
-  border-radius: 3px;
+  border-radius: 4px;
   transition: width 0.3s;
+}
+
+.capacity-text {
+  font-weight: 500;
+  color: #334155;
 }
 
 .room-footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding-top: 12px;
+  border-top: 1px solid #f1f5f9;
 }
 
 .room-time {
@@ -287,36 +324,39 @@ const filteredRooms = computed(() => {
 }
 
 .join-btn {
-  padding: 8px 16px;
+  padding: 6px 16px;
   border: none;
-  border-radius: 8px;
-  background: #f1f5f9;
-  color: #3b82f6;
+  border-radius: 12px;
+  background: #3b82f6;
+  color: white;
   font-weight: 600;
+  font-size: 0.9rem;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
 }
 
 .join-btn:not(:disabled):hover {
-  background: #3b82f6;
-  color: white;
+  background: #2563eb;
   transform: translateY(-1px);
 }
 
 .join-btn:disabled {
-  opacity: 0.5;
+  background: #f1f5f9;
+  color: #94a3b8;
   cursor: not-allowed;
 }
 
 .btn-arrow {
   transition: transform 0.2s;
+  width: 16px;
+  height: 16px;
 }
 
 .join-btn:hover .btn-arrow {
-  transform: translateX(2px);
+  transform: translateX(3px);
 }
 
 .no-results {
@@ -345,8 +385,14 @@ const filteredRooms = computed(() => {
 }
 
 @media (max-width: 480px) {
+  .room-card {
+    padding: 14px;
+  }
+  
   .room-meta {
     flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
   }
 }
 </style>

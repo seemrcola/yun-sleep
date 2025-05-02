@@ -1,13 +1,21 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { createRoomAction, listRoomsAction, getRoomByIdAction } from './api'
+import { ref, onMounted } from 'vue'
+import { 
+  createRoomAction, 
+  listRoomsAction, 
+  getRoomByIdAction, 
+  getUserInfoAction,
+  leaveRoomAction
+} from './api'
 import { useUserStore } from '@/store/user'
 import CreateRoom from './components/Create.vue'
 import CurrentRoom from './components/Current.vue'
 import RoomList from './components/List.vue'
+import Profile from '@/components/Profile.vue'
+import { useRouter } from 'vue-router'
 
 const userStore = useUserStore()
-const user = userStore.user
+const router = useRouter()
 
 interface Room {
     id: string
@@ -16,20 +24,19 @@ interface Room {
     current: number
     ownerName: string
     description: string
-    createTime: string
+    createdAt: string
 }
 
 const rooms = ref<Room[]>([])
 const currentRoom = ref<Room | null>(null)
 
-searchRooms()
 async function searchRooms() {
     const roomsList = await listRoomsAction()
     rooms.value = roomsList as Room[]
 }
 
-getCurrentRoom()
 async function getCurrentRoom() {
+    const user = userStore.user
     if (user?.roomId) {
         const room = await getRoomByIdAction(user.roomId)
         currentRoom.value = room as Room
@@ -43,8 +50,12 @@ async function handleCreateRoom(
     capacity: number 
   }
 ) {
-    await createRoomAction(form)
-    await searchRooms()
+    const room = await createRoomAction(form)
+    userStore.setUser({
+        roomId: room.id,
+    })
+    // await searchRooms()
+    router.push('/public')
 }
 
 async function handleJoinRoom(room: Room) {
@@ -52,13 +63,18 @@ async function handleJoinRoom(room: Room) {
     currentRoom.value = room
     // TODO: 调用加入房间接口
     console.log('加入房间:', room)
+    router.push('/public')
 }
 
-function handleLeaveRoom() {
-    // 清除当前房间
-    currentRoom.value = null
-    // TODO: 调用离开房间接口
-    console.log('离开房间')
+async function handleLeaveRoom() {
+    if (currentRoom.value?.id) {
+      try {
+        await leaveRoomAction({ roomId: parseInt(currentRoom.value.id) })
+        currentRoom.value = null
+      } catch (error) {
+        console.error('离开房间失败:', error)
+      }
+    }
 }
 
 function handleEnterRoom() {
@@ -67,17 +83,34 @@ function handleEnterRoom() {
         console.log('进入休息区:', currentRoom.value.id)
         // 这里可以添加导航到休息区内部页面的代码
         // 例如: router.push(`/room/${currentRoom.value.id}/chat`)
+        router.push('/public')
     }
 }
+
+async function getUserInfo() {
+    const userInfo = await getUserInfoAction()
+    userStore.setUser(userInfo)
+}
+
+onMounted(async () => {
+    await getUserInfo()
+    getCurrentRoom()
+    searchRooms()
+})
 </script>
 
 <template>
     <div class="room-container">
+        <!-- 用户头像 -->
+        <div class="profile-section">
+            <Profile />
+        </div>
+
         <!-- 左侧区域 - 创建或当前房间信息 -->
         <div class="create-section">
             <!-- 当用户未加入房间时显示创建卡片 -->
             <CreateRoom 
-                v-if="!user?.roomId" 
+                v-if="currentRoom === null" 
                 :on-create-room="handleCreateRoom" 
             />
 
@@ -105,6 +138,14 @@ function handleEnterRoom() {
   min-height: 100vh;
   background: linear-gradient(135deg, #f6f9fc 0%, #edf3f8 100%);
   color: #2c3e50;
+  position: relative;
+}
+
+.profile-section {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  z-index: 100;
 }
 
 .create-section {
@@ -122,6 +163,11 @@ function handleEnterRoom() {
 
   .create-section {
     padding: 24px;
+  }
+
+  .profile-section {
+    top: 16px;
+    left: 16px;
   }
 }
 </style>

@@ -1,15 +1,8 @@
 <script setup lang="ts">
-interface Room {
-  id: string
-  name: string
-  capacity: number
-  current: number
-  ownerName: string
-  description: string
-  createTime: string
-}
+import type { Room } from '../type'
+import dayjs from 'dayjs'
 
-const props = defineProps<{
+defineProps<{
   room: Room | null
   onEnterRoom: () => void
   onLeaveRoom: () => void
@@ -71,7 +64,8 @@ const props = defineProps<{
             </div>
             <div class="info-content">
               <div class="info-label">创建时间</div>
-              <div class="info-value">{{ room?.createTime }}</div>
+              <div class="info-value">{{ dayjs(room?.createdAt).format('YY-MM-DD') }}</div>
+              <div class="info-value">{{ dayjs(room?.createdAt).format('HH:mm:ss') }}</div>
             </div>
           </div>
         </div>
@@ -173,7 +167,7 @@ const props = defineProps<{
 
 .room-info-card {
   display: flex;
-  align-items: center;
+  align-items: stretch;
   justify-content: space-between;
   padding: 16px 24px;
   background: #f8fafc;
@@ -181,6 +175,7 @@ const props = defineProps<{
   border: 1px solid #3b82f6;
   position: relative;
   margin-bottom: 24px;
+  gap: 12px;
 }
 
 .info-item {
@@ -189,6 +184,7 @@ const props = defineProps<{
   gap: 10px;
   flex: 1;
   padding: 8px 0;
+  min-width: 0;
 }
 
 .info-icon {
@@ -199,11 +195,14 @@ const props = defineProps<{
   align-items: center;
   justify-content: center;
   color: #3b82f6;
+  flex-shrink: 0;
 }
 
 .info-content {
   display: flex;
   flex-direction: column;
+  min-width: 0;
+  flex: 1;
 }
 
 .info-label {
@@ -217,13 +216,16 @@ const props = defineProps<{
   font-size: 0.95rem;
   font-weight: 500;
   color: #1e293b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .info-divider {
   width: 1px;
   height: 30px;
   background: #e2e8f0;
-  margin: 0 12px;
+  flex-shrink: 0;
 }
 
 .current-room-capacity {

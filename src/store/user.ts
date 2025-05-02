@@ -1,6 +1,9 @@
 import { defineStore } from 'pinia'
 
 interface User {
+    id: number,
+    roomId: number,
+    username: string,
     [key: string]: any
 }
 
@@ -8,15 +11,15 @@ export const useUserStore = defineStore(
     'user',
     {
         state: () => ({
-            user: null as User | null,
+            user: {} as User,
         }),
         actions: {
-            setUser(value: User) {
-                this.user = value
+            setUser(user: Partial<User>) {
+                this.user = { ...this.user, ...user }
             },
 
             clearUser() {
-                this.user = null
+                this.user = {} as User
             },
         },
         persist: {
