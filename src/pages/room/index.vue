@@ -71,8 +71,9 @@ async function handleLeaveRoom() {
       try {
         await leaveRoomAction({ roomId: parseInt(currentRoom.value.id) })
         currentRoom.value = null
+        await searchRooms()
       } catch (error) {
-        console.error('离开房间失败:', error)
+        console.error('离开过程报错:', error)
       }
     }
 }
