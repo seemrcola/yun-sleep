@@ -137,9 +137,24 @@ onMounted(async () => {
 .room-container {
   display: flex;
   min-height: 100vh;
-  background: linear-gradient(135deg, #f6f9fc 0%, #edf3f8 100%);
+  background: linear-gradient(135deg, #f0f7ff 0%, #e6f0fb 100%);
   color: #2c3e50;
   position: relative;
+  overflow: hidden;
+}
+
+.room-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(circle at 10% 20%, rgba(59, 130, 246, 0.03) 0%, transparent 20%),
+    radial-gradient(circle at 90% 80%, rgba(59, 130, 246, 0.03) 0%, transparent 20%),
+    radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.05) 0%, transparent 40%);
+  pointer-events: none;
 }
 
 .profile-section {
@@ -155,6 +170,8 @@ onMounted(async () => {
   display: flex;
   justify-content: center;
   align-items: flex-start;
+  position: relative;
+  z-index: 1;
 }
 
 @media (max-width: 1024px) {

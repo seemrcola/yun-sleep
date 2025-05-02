@@ -105,7 +105,7 @@ const filteredRooms = computed(() => {
 .list-section {
   width: 30%;
   min-width: 320px;
-  background: rgba(255, 255, 255, 0.8);
+  background: linear-gradient(180deg, rgba(240, 249, 255, 0.9) 0%, rgba(224, 242, 254, 0.9) 100%);
   backdrop-filter: blur(20px);
   border-left: 1px solid rgba(255, 255, 255, 0.8);
   padding: 32px 24px;
