@@ -57,7 +57,7 @@ onUnmounted(() => {
     <div>
         <!-- 触发按钮 - 允许通过slot自定义 -->
         <div @click="toggleDrawer">
-          <slot name="trigger"></slot>
+            <slot name="trigger" />
         </div>
 
         <div class="drawer-container">

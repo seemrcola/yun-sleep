@@ -17,9 +17,6 @@ defineProps({
     },
 })
 
-// 定义事件
-const emit = defineEmits(['send'])
-
 // 消息列表
 const messages = ref<Message[]>([
     {
@@ -49,12 +46,12 @@ function scrollToBottom() {
 }
 
 // 添加消息的方法，暴露给父组件
-const addMessage = (sender: string, content: string) => {
+function addMessage(sender: string, content: string) {
     const newMessage: Message = {
         id: Date.now(),
         sender,
         content,
-        timestamp: new Date()
+        timestamp: new Date(),
     }
     messages.value.push(newMessage)
     scrollToBottom()
@@ -62,7 +59,7 @@ const addMessage = (sender: string, content: string) => {
 
 // 暴露方法给父组件
 defineExpose({
-    addMessage
+    addMessage,
 })
 
 // 初始滚动到底部

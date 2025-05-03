@@ -123,7 +123,7 @@ defineProps<{
 <style scoped>
 .current-room-card {
   width: 100%;
-  max-width: 480px;
+  max-width: 520px;
   background: rgba(255, 255, 255, 0.9);
   border-radius: 24px;
   padding: 32px;
