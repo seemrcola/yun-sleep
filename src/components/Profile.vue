@@ -58,6 +58,7 @@ function showMenu() {
 function handleLogout() {
     useToken.removeToken()
     userStore.clearUser()
+    localStorage.clear()
     router.push('/login')
 }
 

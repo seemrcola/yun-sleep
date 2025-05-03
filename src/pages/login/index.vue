@@ -94,15 +94,6 @@ async function handleLogin() {
     }
 }
 
-// 按下回车键登录
-function handleKeyDown(event: KeyboardEvent) {
-    if (event.key === 'Enter') {
-        handleLogin()
-    }
-    // 清除错误信息
-    errorMessage.value = ''
-}
-
 function handleSleep() {
     router.push('/single')
 }
@@ -193,7 +184,6 @@ async function submitRegister() {
                                 type="text"
                                 placeholder="请输入用户名"
                                 @focus="onFocus"
-                                @keydown="handleKeyDown"
                             >
                         </div>
                     </div>
@@ -207,7 +197,6 @@ async function submitRegister() {
                                 type="password"
                                 placeholder="请输入密码"
                                 @focus="onFocus"
-                                @keydown="handleKeyDown"
                             >
                         </div>
                     </div>
@@ -264,7 +253,6 @@ async function submitRegister() {
                                 type="text"
                                 placeholder="请输入用户名"
                                 @focus="onFocus"
-                                @keydown="handleKeyDown"
                             >
                         </div>
                     </div>
@@ -278,7 +266,6 @@ async function submitRegister() {
                                 type="password"
                                 placeholder="设置密码"
                                 @focus="onFocus"
-                                @keydown="handleKeyDown"
                             >
                         </div>
                     </div>
@@ -292,7 +279,6 @@ async function submitRegister() {
                                 type="password"
                                 placeholder="再次输入密码"
                                 @focus="onFocus"
-                                @keydown="handleKeyDown"
                             >
                         </div>
                     </div>

@@ -21,17 +21,6 @@ export interface RequestConfig extends RequestInit {
 
 // 创建请求实例
 export function createFetch(defaultConfig: RequestConfig = {}) {
-    // 默认配置
-    const baseConfig: RequestConfig = {
-        baseURL: '',
-        timeout: 15 * 1_000,
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${useToken.getToken()}`,
-        },
-        ...defaultConfig,
-    }
-
     // 超时控制
     const timeoutPromise = (timeout: number): Promise<never> => {
         return new Promise((_, reject) => {
@@ -62,8 +51,16 @@ export function createFetch(defaultConfig: RequestConfig = {}) {
         url: string,
         config: RequestConfig = {},
     ): Promise<ApiResponse<T>> {
-    // 合并配置
-        const finalConfig = { ...baseConfig, ...config }
+        // 合并配置
+        const finalConfig = {
+            ...defaultConfig,
+            ...config,
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${useToken.getToken()}`,
+                ...config.headers,
+            },
+        }
         const finalUrl = (finalConfig.baseURL || '') + url
 
         try {
@@ -114,4 +111,5 @@ export function createFetch(defaultConfig: RequestConfig = {}) {
 // 创建默认实例
 export const http = createFetch({
     baseURL: import.meta.env.VITE_API_URL || '',
+    timeout: 15 * 1_000,
 })
