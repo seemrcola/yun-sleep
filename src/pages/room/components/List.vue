@@ -1,104 +1,104 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
 import type { Room } from '../type'
 import dayjs from 'dayjs'
+import { computed, ref } from 'vue'
 
 const props = defineProps<{
-  rooms: Room[]
-  currentRoom: Room | null
-  onJoinRoom: (room: Room) => void
+    rooms: Room[]
+    currentRoom: Room | null
+    onJoinRoom: (room: Room) => void
 }>()
 
 const searchQuery = ref('')
 
 const filteredRooms = computed(() => {
-  if (!searchQuery.value)
-    return props.rooms
-  
-  const query = searchQuery.value.toLowerCase()
-  return props.rooms.filter(room =>
-    room.name.toLowerCase().includes(query)
-    || room.ownerName.toLowerCase().includes(query),
-  )
+    if (!searchQuery.value)
+        return props.rooms
+
+    const query = searchQuery.value.toLowerCase()
+    return props.rooms.filter(room =>
+        room.name.toLowerCase().includes(query)
+        || room.ownerName.toLowerCase().includes(query),
+    )
 })
 </script>
 
 <template>
-  <div class="list-section">
-    <div class="list-header">
-      <h2 class="section-title">
-        休息区列表
-      </h2>
-      <div class="search-box">
-        <svg class="search-icon" viewBox="0 0 24 24" width="18" height="18">
-          <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" fill="currentColor" />
-        </svg>
-        <input
-          v-model="searchQuery"
-          type="text"
-          placeholder="搜索房间名或创建者"
-          class="search-input"
-        >
-      </div>
-    </div>
-
-    <div class="room-list">
-      <div v-for="room in filteredRooms" :key="room.id" class="room-card">
-        <div class="room-info">
-          <div class="room-header">
-            <h3 class="room-name">
-              {{ room.name }}
-            </h3>
-            <span class="room-status" :class="{ 'almost-full': room.current >= room.capacity - 1 }">
-              {{ room.current >= room.capacity ? '已满' : '可加入' }}
-            </span>
-          </div>
-          <p v-if="room.description" class="room-description">
-            {{ room.description }}
-          </p>
-          <div class="room-meta">
-            <div class="meta-item creator">
-              <svg class="meta-icon" viewBox="0 0 24 24" width="16" height="16">
-                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" fill="currentColor" />
-              </svg>
-              <span>{{ room.ownerName }}</span>
+    <div class="list-section">
+        <div class="list-header">
+            <h2 class="section-title">
+                休息区列表
+            </h2>
+            <div class="search-box">
+                <svg class="search-icon" viewBox="0 0 24 24" width="18" height="18">
+                    <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" fill="currentColor" />
+                </svg>
+                <input
+                    v-model="searchQuery"
+                    type="text"
+                    placeholder="搜索房间名或创建者"
+                    class="search-input"
+                >
             </div>
-            <div class="meta-item capacity">
-              <div class="capacity-bar">
-                <div
-                  class="capacity-fill"
-                  :style="{ width: `${room.current / room.capacity * 100}%` }"
-                />
-              </div>
-              <span class="capacity-text">{{ room.current }}/{{ room.capacity }}</span>
-            </div>
-          </div>
-          <div class="room-footer">
-            <span class="room-time">{{ dayjs(room.createdAt).format('YY-MM-DD HH:mm:ss') }}</span>
-            <button
-              class="join-btn"
-              :disabled="room.current >= room.capacity || (currentRoom !== null && currentRoom.id === room.id)"
-              @click="onJoinRoom(room)"
-            >
-              <span class="btn-text">{{ currentRoom && currentRoom.id === room.id ? '已加入' : '加入' }}</span>
-              <svg class="btn-arrow" viewBox="0 0 24 24" width="16" height="16">
-                <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z" fill="currentColor" />
-              </svg>
-            </button>
-          </div>
         </div>
-      </div>
 
-      <div v-if="filteredRooms.length === 0" class="no-results">
-        <svg class="empty-icon" viewBox="0 0 24 24" width="48" height="48">
-          <path d="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V8h16v10z" fill="currentColor" />
-        </svg>
-        <p class="empty-text">
-          没有找到匹配的休息区
-        </p>
-      </div>
+        <div class="room-list">
+            <div v-for="room in filteredRooms" :key="room.id" class="room-card">
+                <div class="room-info">
+                    <div class="room-header">
+                        <h3 class="room-name">
+                            {{ room.name }}
+                        </h3>
+                        <span class="room-status" :class="{ 'almost-full': room.current >= room.capacity - 1 }">
+                            {{ room.current >= room.capacity ? '已满' : '可加入' }}
+                        </span>
+                    </div>
+                    <p v-if="room.description" class="room-description">
+                        {{ room.description }}
+                    </p>
+                    <div class="room-meta">
+                        <div class="meta-item creator">
+                            <svg class="meta-icon" viewBox="0 0 24 24" width="16" height="16">
+                                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" fill="currentColor" />
+                            </svg>
+                            <span>{{ room.ownerName }}</span>
+                        </div>
+                        <div class="meta-item capacity">
+                            <div class="capacity-bar">
+                                <div
+                                    class="capacity-fill"
+                                    :style="{ width: `${room.current / room.capacity * 100}%` }"
+                                />
+                            </div>
+                            <span class="capacity-text">{{ room.current }}/{{ room.capacity }}</span>
+                        </div>
+                    </div>
+                    <div class="room-footer">
+                        <span class="room-time">{{ dayjs(room.createdAt).format('YY-MM-DD HH:mm:ss') }}</span>
+                        <button
+                            class="join-btn"
+                            :disabled="room.current >= room.capacity || (currentRoom !== null && currentRoom.id === room.id)"
+                            @click="onJoinRoom(room)"
+                        >
+                            <span class="btn-text">{{ currentRoom && currentRoom.id === room.id ? '已加入' : '加入' }}</span>
+                            <svg class="btn-arrow" viewBox="0 0 24 24" width="16" height="16">
+                                <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z" fill="currentColor" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div v-if="filteredRooms.length === 0" class="no-results">
+                <svg class="empty-icon" viewBox="0 0 24 24" width="48" height="48">
+                    <path d="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V8h16v10z" fill="currentColor" />
+                </svg>
+                <p class="empty-text">
+                    没有找到匹配的休息区
+                </p>
+            </div>
+        </div>
     </div>
-  </div>
 </template>
 
 <style scoped>
@@ -388,7 +388,7 @@ const filteredRooms = computed(() => {
   .room-card {
     padding: 14px;
   }
-  
+
   .room-meta {
     flex-direction: column;
     align-items: flex-start;

@@ -105,9 +105,6 @@ function openGithub() {
 
 <style scoped>
 .operation-bar {
-    position: fixed;
-    top: 10px;
-    left: 20px;
     display: flex;
     gap: 5px;
     background: rgba(255, 255, 255, 0.85);

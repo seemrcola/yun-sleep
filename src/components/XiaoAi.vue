@@ -320,10 +320,6 @@ onMounted(() => {
 
 <style scoped>
 .xiao-ai-container {
-  position: fixed;
-  right: 30px;
-  bottom: 30px;
-  z-index: 1000;
   display: flex;
   flex-direction: column;
   align-items: flex-end;

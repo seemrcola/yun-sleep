@@ -2,147 +2,147 @@
 import { reactive, ref } from 'vue'
 
 interface RoomForm {
-  name: string
-  description: string
-  capacity: number
+    name: string
+    description: string
+    capacity: number
 }
 
 const props = defineProps<{
-  onCreateRoom: (form: RoomForm) => Promise<void>
+    onCreateRoom: (form: RoomForm) => Promise<void>
 }>()
 
 const roomForm = reactive({
-  name: '',
-  description: '',
-  capacity: 20,
+    name: '',
+    description: '',
+    capacity: 20,
 })
 
 const isCreating = ref(false)
 const errorMessage = ref('')
 
 async function handleCreateRoom() {
-  if (!roomForm.name.trim()) {
-    errorMessage.value = '请输入房间名称'
-    return
-  }
-  isCreating.value = true
-  try {
-    await props.onCreateRoom(roomForm)
-  }
-  catch (err) {
-    console.log(err)
-  }
-  finally {
-    isCreating.value = false
-  }
+    if (!roomForm.name.trim()) {
+        errorMessage.value = '请输入房间名称'
+        return
+    }
+    isCreating.value = true
+    try {
+        await props.onCreateRoom(roomForm)
+    }
+    catch (err) {
+        console.log(err)
+    }
+    finally {
+        isCreating.value = false
+    }
 }
 </script>
 
 <template>
-  <div class="create-card">
-    <div class="card-header">
-      <h2 class="section-title">
-        创建休息区
-      </h2>
-      <div class="decoration-line" />
+    <div class="create-card">
+        <div class="card-header">
+            <h2 class="section-title">
+                创建休息区
+            </h2>
+            <div class="decoration-line" />
+        </div>
+
+        <!-- 装饰性SVG -->
+        <div class="decoration-container">
+            <svg class="decoration-svg" viewBox="0 0 200 200" fill="none">
+                <path class="deco-path" d="M40 100 Q70 40 100 100 T160 100" />
+                <circle class="deco-dot" cx="40" cy="100" r="4" />
+                <circle class="deco-dot" cx="160" cy="100" r="4" />
+                <path class="deco-path-2" d="M60 140 Q100 180 140 140" />
+                <circle class="deco-dot" cx="60" cy="140" r="3" />
+                <circle class="deco-dot" cx="140" cy="140" r="3" />
+            </svg>
+        </div>
+
+        <form class="create-form" @submit.prevent="handleCreateRoom">
+            <div class="form-item">
+                <label for="room-name">
+                    <span class="label-text">房间名称</span>
+                    <span class="label-desc">给你的休息区起个名字</span>
+                </label>
+                <div class="input-wrapper">
+                    <input
+                        id="room-name"
+                        v-model="roomForm.name"
+                        type="text"
+                        placeholder="例如：深夜修仙室"
+                    >
+                    <span class="input-focus-border" />
+                </div>
+            </div>
+
+            <div class="form-item">
+                <label for="room-desc">
+                    <span class="label-text">房间描述</span>
+                    <span class="label-desc">简单描述一下你的休息区</span>
+                </label>
+                <div class="input-wrapper">
+                    <textarea
+                        id="room-desc"
+                        v-model="roomForm.description"
+                        placeholder="例如：适合深夜修仙的休息室"
+                        rows="3"
+                        :max-length="100"
+                        class="description-textarea"
+                    />
+                    <span class="input-focus-border" />
+                </div>
+            </div>
+
+            <div class="form-item">
+                <label for="capacity">
+                    <span class="label-text">容纳人数</span>
+                    <span class="label-desc">选择休息区可容纳的人数</span>
+                </label>
+                <div class="capacity-selector">
+                    <button
+                        type="button"
+                        class="capacity-btn minus"
+                        :disabled="roomForm.capacity <= 2"
+                        @click="roomForm.capacity--"
+                    >
+                        <span class="btn-icon">-</span>
+                    </button>
+                    <div class="capacity-display">
+                        <span class="capacity-number">{{ roomForm.capacity }}</span>
+                        <span class="capacity-text">人</span>
+                    </div>
+                    <button
+                        type="button"
+                        class="capacity-btn plus"
+                        :disabled="roomForm.capacity >= 24"
+                        @click="roomForm.capacity++"
+                    >
+                        <span class="btn-icon">+</span>
+                    </button>
+                </div>
+            </div>
+
+            <transition name="fade">
+                <div v-if="errorMessage" class="error-message">
+                    <svg class="error-icon" viewBox="0 0 24 24" width="16" height="16">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" fill="currentColor" />
+                    </svg>
+                    {{ errorMessage }}
+                </div>
+            </transition>
+
+            <button type="submit" class="create-btn" :class="{ creating: isCreating }">
+                <span class="btn-content">
+                    <svg v-if="isCreating" class="loading-icon" viewBox="0 0 24 24">
+                        <circle class="loading-circle" cx="12" cy="12" r="10" />
+                    </svg>
+                    <span class="btn-text">{{ isCreating ? '创建中...' : '创建休息区' }}</span>
+                </span>
+                <span class="btn-shine" />
+            </button>
+        </form>
     </div>
-
-    <!-- 装饰性SVG -->
-    <div class="decoration-container">
-      <svg class="decoration-svg" viewBox="0 0 200 200" fill="none">
-        <path class="deco-path" d="M40 100 Q70 40 100 100 T160 100" />
-        <circle class="deco-dot" cx="40" cy="100" r="4" />
-        <circle class="deco-dot" cx="160" cy="100" r="4" />
-        <path class="deco-path-2" d="M60 140 Q100 180 140 140" />
-        <circle class="deco-dot" cx="60" cy="140" r="3" />
-        <circle class="deco-dot" cx="140" cy="140" r="3" />
-      </svg>
-    </div>
-
-    <form class="create-form" @submit.prevent="handleCreateRoom">
-      <div class="form-item">
-        <label for="room-name">
-          <span class="label-text">房间名称</span>
-          <span class="label-desc">给你的休息区起个名字</span>
-        </label>
-        <div class="input-wrapper">
-          <input
-            id="room-name"
-            v-model="roomForm.name"
-            type="text"
-            placeholder="例如：深夜修仙室"
-          >
-          <span class="input-focus-border" />
-        </div>
-      </div>
-
-      <div class="form-item">
-        <label for="room-desc">
-          <span class="label-text">房间描述</span>
-          <span class="label-desc">简单描述一下你的休息区</span>
-        </label>
-        <div class="input-wrapper">
-          <textarea
-            id="room-desc"
-            v-model="roomForm.description"
-            placeholder="例如：适合深夜修仙的休息室"
-            rows="3"
-            :max-length="100"
-            class="description-textarea"
-          />
-          <span class="input-focus-border" />
-        </div>
-      </div>
-
-      <div class="form-item">
-        <label for="capacity">
-          <span class="label-text">容纳人数</span>
-          <span class="label-desc">选择休息区可容纳的人数</span>
-        </label>
-        <div class="capacity-selector">
-          <button
-            type="button"
-            class="capacity-btn minus"
-            :disabled="roomForm.capacity <= 2"
-            @click="roomForm.capacity--"
-          >
-            <span class="btn-icon">-</span>
-          </button>
-          <div class="capacity-display">
-            <span class="capacity-number">{{ roomForm.capacity }}</span>
-            <span class="capacity-text">人</span>
-          </div>
-          <button
-            type="button"
-            class="capacity-btn plus"
-            :disabled="roomForm.capacity >= 24"
-            @click="roomForm.capacity++"
-          >
-            <span class="btn-icon">+</span>
-          </button>
-        </div>
-      </div>
-
-      <transition name="fade">
-        <div v-if="errorMessage" class="error-message">
-          <svg class="error-icon" viewBox="0 0 24 24" width="16" height="16">
-            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" fill="currentColor" />
-          </svg>
-          {{ errorMessage }}
-        </div>
-      </transition>
-
-      <button type="submit" class="create-btn" :class="{ creating: isCreating }">
-        <span class="btn-content">
-          <svg v-if="isCreating" class="loading-icon" viewBox="0 0 24 24">
-            <circle class="loading-circle" cx="12" cy="12" r="10" />
-          </svg>
-          <span class="btn-text">{{ isCreating ? '创建中...' : '创建休息区' }}</span>
-        </span>
-        <span class="btn-shine" />
-      </button>
-    </form>
-  </div>
 </template>
 
 <style scoped>

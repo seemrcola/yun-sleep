@@ -1,18 +1,18 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { 
-  createRoomAction, 
-  listRoomsAction, 
-  getRoomByIdAction, 
-  getUserInfoAction,
-  leaveRoomAction
-} from './api'
+import Profile from '@/components/Profile.vue'
 import { useUserStore } from '@/store/user'
+import { onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
+import {
+    createRoomAction,
+    getRoomByIdAction,
+    getUserInfoAction,
+    leaveRoomAction,
+    listRoomsAction,
+} from './api'
 import CreateRoom from './components/Create.vue'
 import CurrentRoom from './components/Current.vue'
 import RoomList from './components/List.vue'
-import Profile from '@/components/Profile.vue'
-import { useRouter } from 'vue-router'
 
 const userStore = useUserStore()
 const router = useRouter()
@@ -44,11 +44,11 @@ async function getCurrentRoom() {
 }
 
 async function handleCreateRoom(
-  form: { 
-    name: string; 
-    description: string; 
-    capacity: number 
-  }
+    form: {
+        name: string
+        description: string
+        capacity: number
+    },
 ) {
     const room = await createRoomAction(form)
     userStore.setUser({
@@ -68,13 +68,14 @@ async function handleJoinRoom(room: Room) {
 
 async function handleLeaveRoom() {
     if (currentRoom.value?.id) {
-      try {
-        await leaveRoomAction({ roomId: parseInt(currentRoom.value.id) })
-        currentRoom.value = null
-        await searchRooms()
-      } catch (error) {
-        console.error('离开过程报错:', error)
-      }
+        try {
+            await leaveRoomAction({ roomId: Number.parseInt(currentRoom.value.id) })
+            currentRoom.value = null
+            await searchRooms()
+        }
+        catch (error) {
+            console.error('离开过程报错:', error)
+        }
     }
 }
 
@@ -110,9 +111,9 @@ onMounted(async () => {
         <!-- 左侧区域 - 创建或当前房间信息 -->
         <div class="create-section">
             <!-- 当用户未加入房间时显示创建卡片 -->
-            <CreateRoom 
-                v-if="currentRoom === null" 
-                :on-create-room="handleCreateRoom" 
+            <CreateRoom
+                v-if="currentRoom === null"
+                :on-create-room="handleCreateRoom"
             />
 
             <!-- 当用户已加入房间时显示当前房间信息 -->
@@ -150,7 +151,7 @@ onMounted(async () => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: 
+  background:
     radial-gradient(circle at 10% 20%, rgba(59, 130, 246, 0.03) 0%, transparent 20%),
     radial-gradient(circle at 90% 80%, rgba(59, 130, 246, 0.03) 0%, transparent 20%),
     radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.05) 0%, transparent 40%);

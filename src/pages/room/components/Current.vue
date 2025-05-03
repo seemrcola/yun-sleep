@@ -3,103 +3,121 @@ import type { Room } from '../type'
 import dayjs from 'dayjs'
 
 defineProps<{
-  room: Room | null
-  onEnterRoom: () => void
-  onLeaveRoom: () => void
+    room: Room | null
+    onEnterRoom: () => void
+    onLeaveRoom: () => void
 }>()
 </script>
 
 <template>
-  <div class="current-room-card">
-    <div class="card-header">
-      <h2 class="section-title">
-        当前休息区
-      </h2>
-      <div class="decoration-line" />
-    </div>
-
-    <div class="current-room-content">
-      <h3 class="current-room-name">{{ room?.name }}</h3>
-      
-      <div class="current-room-info">
-        <p v-if="room?.description" class="current-room-description">
-          {{ room?.description }}
-        </p>
-        
-        <!-- 休息区信息卡片 -->
-        <div class="room-info-card">
-          <div class="info-item">
-            <div class="info-icon">
-              <svg viewBox="0 0 24 24" width="20" height="20">
-                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" fill="currentColor" />
-              </svg>
-            </div>
-            <div class="info-content">
-              <div class="info-label">创建者</div>
-              <div class="info-value">{{ room?.ownerName }}</div>
-            </div>
-          </div>
-          
-          <div class="info-divider"></div>
-          
-          <div class="info-item">
-            <div class="info-icon">
-              <svg viewBox="0 0 24 24" width="20" height="20">
-                <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5s-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5z" fill="currentColor" />
-              </svg>
-            </div>
-            <div class="info-content">
-              <div class="info-label">人数</div>
-              <div class="info-value">{{ room?.current }}/{{ room?.capacity }}</div>
-            </div>
-          </div>
-          
-          <div class="info-divider"></div>
-          
-          <div class="info-item">
-            <div class="info-icon">
-              <svg viewBox="0 0 24 24" width="20" height="20">
-                <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z" fill="currentColor" />
-              </svg>
-            </div>
-            <div class="info-content">
-              <div class="info-label">创建时间</div>
-              <div class="info-value">{{ dayjs(room?.createdAt).format('YY-MM-DD') }}</div>
-              <div class="info-value">{{ dayjs(room?.createdAt).format('HH:mm:ss') }}</div>
-            </div>
-          </div>
+    <div class="current-room-card">
+        <div class="card-header">
+            <h2 class="section-title">
+                当前休息区
+            </h2>
+            <div class="decoration-line" />
         </div>
 
-        <div class="current-room-capacity">
-          <div class="capacity-label">房间容量</div>
-          <div class="capacity-bar-large">
-            <div 
-              class="capacity-fill-large" 
-              :style="{ width: room ? `${room.current / room.capacity * 100}%` : '0%' }"
-            >
-              <span class="capacity-text-inner">{{ room?.current }}/{{ room?.capacity }}</span>
-            </div>
-          </div>
-        </div>
-      </div>
+        <div class="current-room-content">
+            <h3 class="current-room-name">
+                {{ room?.name }}
+            </h3>
 
-      <div class="room-action-buttons">
-        <button class="enter-btn" @click="onEnterRoom">
-          <svg class="btn-icon" viewBox="0 0 24 24" width="20" height="20">
-            <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" fill="currentColor" />
-          </svg>
-          进入休息区
-        </button>
-        
-        <button class="leave-btn" @click="onLeaveRoom">
-          <svg class="btn-icon" viewBox="0 0 24 24" width="20" height="20">
-            <path d="M10.09 15.59L11.5 17l5-5-5-5-1.41 1.41L12.67 11H3v2h9.67l-2.58 2.59zM19 3H5c-1.11 0-2 .9-2 2v4h2V5h14v14H5v-4H3v4c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z" fill="currentColor" />
-          </svg>
-          离开休息区
-        </button>
-      </div>
+            <div class="current-room-info">
+                <p v-if="room?.description" class="current-room-description">
+                    {{ room?.description }}
+                </p>
+
+                <!-- 休息区信息卡片 -->
+                <div class="room-info-card">
+                    <div class="info-item">
+                        <div class="info-icon">
+                            <svg viewBox="0 0 24 24" width="20" height="20">
+                                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" fill="currentColor" />
+                            </svg>
+                        </div>
+                        <div class="info-content">
+                            <div class="info-label">
+                                创建者
+                            </div>
+                            <div class="info-value">
+                                {{ room?.ownerName }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="info-divider" />
+
+                    <div class="info-item">
+                        <div class="info-icon">
+                            <svg viewBox="0 0 24 24" width="20" height="20">
+                                <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5s-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5z" fill="currentColor" />
+                            </svg>
+                        </div>
+                        <div class="info-content">
+                            <div class="info-label">
+                                人数
+                            </div>
+                            <div class="info-value">
+                                {{ room?.current }}/{{ room?.capacity }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="info-divider" />
+
+                    <div class="info-item">
+                        <div class="info-icon">
+                            <svg viewBox="0 0 24 24" width="20" height="20">
+                                <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z" fill="currentColor" />
+                            </svg>
+                        </div>
+                        <div class="info-content">
+                            <div class="info-label">
+                                创建时间
+                            </div>
+                            <div class="info-value">
+                                {{ dayjs(room?.createdAt).format('YY-MM-DD') }}
+                            </div>
+                            <div class="info-value">
+                                {{ dayjs(room?.createdAt).format('HH:mm:ss') }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="current-room-capacity">
+                    <div class="capacity-label">
+                        房间容量
+                    </div>
+                    <div class="capacity-bar-large">
+                        <div
+                            class="capacity-fill-large"
+                            :style="{ width: room ? `${room.current / room.capacity * 100}%` : '0%' }"
+                        >
+                            <span class="capacity-text-inner">{{ room?.current }}/{{ room?.capacity }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="room-action-buttons">
+                <button class="enter-btn" @click="onEnterRoom">
+                    <svg class="btn-icon" viewBox="0 0 24 24" width="20" height="20">
+                        <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" fill="currentColor" />
+                    </svg>
+                    进入休息区
+                </button>
+
+                <button class="leave-btn" @click="onLeaveRoom">
+                    <svg class="btn-icon" viewBox="0 0 24 24" width="20" height="20">
+                        <path d="M10.09 15.59L11.5 17l5-5-5-5-1.41 1.41L12.67 11H3v2h9.67l-2.58 2.59zM19 3H5c-1.11 0-2 .9-2 2v4h2V5h14v14H5v-4H3v4c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z" fill="currentColor" />
+                    </svg>
+                    离开休息区
+                </button>
+            </div>
+        </div>
     </div>
-  </div>
 </template>
 
 <style scoped>

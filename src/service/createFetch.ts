@@ -1,5 +1,5 @@
-import useToken from '@/utils/token'
 import { Message } from '@/components/ui/Message'
+import useToken from '@/utils/token'
 
 // 定义响应结构
 export interface ApiResponse<T = any> {

@@ -1,125 +1,125 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
-import { useRouter } from 'vue-router'
 import { useUserStore } from '@/store/user'
 import useToken from '@/utils/token'
+import { onMounted, onUnmounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
 
 const router = useRouter()
 const userStore = useUserStore()
 const showDropdown = ref(false)
 const dropdownStyle = ref({
-  top: '0px',
-  left: '0px'
+    top: '0px',
+    left: '0px',
 })
 
-const updateDropdownPosition = () => {
-  const avatar = document.querySelector('.avatar-wrapper') as HTMLElement
-  if (avatar && showDropdown.value) {
-    const rect = avatar.getBoundingClientRect()
-    const spaceBelow = window.innerHeight - rect.bottom
-    const spaceRight = window.innerWidth - rect.left
-    
-    // 计算下拉菜单的位置
-    let top = rect.bottom + 10
-    let left = rect.left
+function updateDropdownPosition() {
+    const avatar = document.querySelector('.avatar-wrapper') as HTMLElement
+    if (avatar && showDropdown.value) {
+        const rect = avatar.getBoundingClientRect()
+        const spaceBelow = window.innerHeight - rect.bottom
+        const spaceRight = window.innerWidth - rect.left
 
-    // 如果下方空间不足，则显示在上方
-    if (spaceBelow < 300) {
-      top = rect.top - 10 - 220
-    }
+        // 计算下拉菜单的位置
+        let top = rect.bottom + 10
+        let left = rect.left
 
-    // 如果右侧空间不足，则向左对齐
-    if (spaceRight < 220) {
-      left = window.innerWidth - 220 - 20
-    }
+        // 如果下方空间不足，则显示在上方
+        if (spaceBelow < 300) {
+            top = rect.top - 10 - 220
+        }
 
-    dropdownStyle.value = {
-      top: `${top}px`,
-      left: `${left}px`
+        // 如果右侧空间不足，则向左对齐
+        if (spaceRight < 220) {
+            left = window.innerWidth - 220 - 20
+        }
+
+        dropdownStyle.value = {
+            top: `${top}px`,
+            left: `${left}px`,
+        }
     }
-  }
 }
 
 // 监听窗口大小变化
 onMounted(() => {
-  window.addEventListener('resize', updateDropdownPosition)
+    window.addEventListener('resize', updateDropdownPosition)
 })
 
 onUnmounted(() => {
-  window.removeEventListener('resize', updateDropdownPosition)
+    window.removeEventListener('resize', updateDropdownPosition)
 })
 
 // 显示下拉菜单时更新位置
-const showMenu = () => {
-  showDropdown.value = true
-  setTimeout(updateDropdownPosition, 0)
+function showMenu() {
+    showDropdown.value = true
+    setTimeout(updateDropdownPosition, 0)
 }
 
-const handleLogout = () => {
-  useToken.removeToken()
-  userStore.clearUser()
-  router.push('/login')
+function handleLogout() {
+    useToken.removeToken()
+    userStore.clearUser()
+    router.push('/login')
 }
 
-const handleChangePassword = () => {
-  // TODO: 实现修改密码功能
-  console.log('修改密码')
+function handleChangePassword() {
+    // TODO: 实现修改密码功能
+    console.log('修改密码')
 }
 
-const handleUserData = () => {
-  // TODO: 实现查看角色数据功能
-  console.log('查看角色数据')
+function handleUserData() {
+    // TODO: 实现查看角色数据功能
+    console.log('查看角色数据')
 }
 </script>
 
 <template>
-  <div class="profile-container">
-    <div
-      class="avatar-wrapper"
-      @mouseenter="showMenu"
-    >
-      <div class="avatar">
-        {{ userStore.user?.username?.charAt(0)?.toUpperCase() }}
-      </div>
-      <div class="status-dot" />
-    </div>
-
-    <div
-      v-show="showDropdown"
-      class="dropdown-container"
-      @mouseleave="showDropdown = false"
-    >
-      <div 
-        class="dropdown-menu" 
-        :class="{ active: showDropdown }"
-        :style="dropdownStyle"
-      >
-        <div class="menu-header">
-          <div class="user-info">
-            <span class="username">{{ userStore.user?.username }}</span>
-            <span class="user-status">在线</span>
-          </div>
+    <div class="profile-container">
+        <div
+            class="avatar-wrapper"
+            @mouseenter="showMenu"
+        >
+            <div class="avatar">
+                {{ userStore.user?.username?.charAt(0)?.toUpperCase() }}
+            </div>
+            <div class="status-dot" />
         </div>
 
-        <div class="menu-divider" />
+        <div
+            v-show="showDropdown"
+            class="dropdown-container"
+            @mouseleave="showDropdown = false"
+        >
+            <div
+                class="dropdown-menu"
+                :class="{ active: showDropdown }"
+                :style="dropdownStyle"
+            >
+                <div class="menu-header">
+                    <div class="user-info">
+                        <span class="username">{{ userStore.user?.username }}</span>
+                        <span class="user-status">在线</span>
+                    </div>
+                </div>
 
-        <div class="menu-items">
-          <div class="menu-item" @click="handleUserData">
-            <i class="item-icon user-data-icon" />
-            <span>角色数据</span>
-          </div>
-          <div class="menu-item" @click="handleChangePassword">
-            <i class="item-icon password-icon" />
-            <span>修改密码</span>
-          </div>
-          <div class="menu-item logout" @click="handleLogout">
-            <i class="item-icon logout-icon" />
-            <span>退出登录</span>
-          </div>
+                <div class="menu-divider" />
+
+                <div class="menu-items">
+                    <div class="menu-item" @click="handleUserData">
+                        <i class="item-icon user-data-icon" />
+                        <span>角色数据</span>
+                    </div>
+                    <div class="menu-item" @click="handleChangePassword">
+                        <i class="item-icon password-icon" />
+                        <span>修改密码</span>
+                    </div>
+                    <div class="menu-item logout" @click="handleLogout">
+                        <i class="item-icon logout-icon" />
+                        <span>退出登录</span>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
     </div>
-  </div>
 </template>
 
 <style scoped>
@@ -225,7 +225,7 @@ const handleUserData = () => {
   background: rgba(255, 255, 255, 0.98);
   backdrop-filter: blur(12px);
   border-radius: 20px;
-  box-shadow: 
+  box-shadow:
     0 8px 32px rgba(0, 0, 0, 0.12),
     0 2px 8px rgba(0, 0, 0, 0.06),
     0 0 0 1px rgba(255, 255, 255, 0.9) inset;

@@ -1,9 +1,9 @@
 import { defineStore } from 'pinia'
 
 interface User {
-    id: number,
-    roomId: number,
-    username: string,
+    id: number
+    roomId: number
+    username: string
     [key: string]: any
 }
 

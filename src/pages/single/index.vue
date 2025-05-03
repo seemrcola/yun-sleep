@@ -94,26 +94,26 @@ onMounted(() => {
 <template>
     <div class="game-app" :style="{ width: '100vw', height: '100vh' }">
         <!-- 天气图层 - 在最底层但需覆盖整个页面 -->
-        <div class="weather-container">
-            <WeatherLayer :width="windowWidth" :height="windowHeight" />
-        </div>
-
-        <!-- 睡眠时间卡片 - 固定在页面左上角 -->
-        <SleepTimeCard />
+        <WeatherLayer class="weather-container" :width="windowWidth" :height="windowHeight" />
 
         <!-- 空调组件 - 固定在页面顶部中央 -->
         <AirConditioner />
 
-        <!-- 操作栏 - 固定在左上角 -->
-        <OperationBar
-            :initial-light-on="isLightOn"
-            :initial-draggable="bedsAreDraggable"
-            @toggle-light="toggleLight"
-            @toggle-bed-draggable="toggleBedDraggable"
-            @reset-bed-positions="resetBedPositions"
-        />
+        <div class="left-control-container">
+            <!-- 操作栏 - 固定在左上角 -->
+            <OperationBar
+                :initial-light-on="isLightOn"
+                :initial-draggable="bedsAreDraggable"
+                @toggle-light="toggleLight"
+                @toggle-bed-draggable="toggleBedDraggable"
+                @reset-bed-positions="resetBedPositions"
+            />
 
-        <div class="control-container">
+            <!-- 睡眠时间卡片 - 固定在页面左上角 -->
+            <SleepTimeCard />
+        </div>
+
+        <div class="right-control-container">
             <!-- 窗帘控制卡片 - 固定在右上角 -->
             <CurtainControlCard />
 
@@ -128,7 +128,7 @@ onMounted(() => {
         <Television :width="gameWidth * 0.8" :height="gameHeight * 0.5" />
 
         <!-- 小爱同学 - 固定在右下角 -->
-        <XiaoAi />
+        <XiaoAi class="xiao-ai" />
 
         <div
             class="game-container" :style="{
@@ -138,9 +138,6 @@ onMounted(() => {
                 top: `${gameTop}px`,
             }"
         >
-            <!-- 不再需要背景层，因为天气图层已经代替它 -->
-            <!-- <BackgroundLayer :width="gameWidth" :height="gameHeight" /> -->
-
             <!-- 游戏层（床和角色） -->
             <GameLayerSvg ref="gameLayerRef" :width="gameWidth" :height="gameHeight" :bed-count="24" />
 
@@ -171,7 +168,7 @@ onMounted(() => {
     </div>
 </template>
 
-<style>
+<style scoped>
 /* 全局样式 */
 * {
     margin: 0;
@@ -212,7 +209,19 @@ body {
     z-index: 5;
 }
 
-.control-container {
+.left-control-container {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    width: 210px;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 5px;
+}
+
+.right-control-container {
     position: fixed;
     top: 20px;
     right: 0;
@@ -366,5 +375,11 @@ body {
 
 .public-area-btn:hover {
     opacity: 1;
+}
+
+.xiao-ai {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
 }
 </style>

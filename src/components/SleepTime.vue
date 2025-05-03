@@ -143,17 +143,14 @@ function stopSleepTimer() {
 
 <style scoped>
 .sleep-time-card {
-  position: fixed;
-  top: 90px;
-  left: 20px;
-  background-color: rgba(255, 255, 255, 0.9);
-  border-radius: 8px;
-  padding: 12px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  z-index: 1000;
-  min-width: 150px;
-  transition: all 0.3s ease;
-  border: 2px solid #FFC107;
+    width: 100%;
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 8px;
+    padding: 12px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    transition: all 0.3s ease;
+    border: 2px solid #FFC107;
 }
 
 .sleep-card-title {
