@@ -106,7 +106,6 @@ onMounted(() => {
   height: 100%;
   width: 100%;
   overflow: hidden;
-  border-radius: 12px;
   background: rgba(255, 255, 255, 0.8);
   backdrop-filter: blur(10px);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
@@ -118,7 +117,6 @@ onMounted(() => {
   padding: 14px 16px;
   background: linear-gradient(135deg, rgba(79, 70, 229, 0.15), rgba(99, 102, 241, 0.08));
   border-bottom: 1px solid rgba(200, 219, 240, 0.5);
-  border-radius: 12px 12px 0 0;
 }
 
 .header-icon {

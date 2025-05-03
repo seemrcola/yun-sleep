@@ -150,7 +150,6 @@ async function submitRegister() {
 <template>
     <div
         class="login-container"
-        :class="{ active: isFormActive }"
         @mouseenter="onFormHover"
         @mouseleave="onBlur($event)"
         @click="onBlur($event)"
@@ -167,7 +166,7 @@ async function submitRegister() {
 
         <div class="login-content">
             <!-- 表单区域 -->
-            <div class="form-container" :class="{ 'active': isFormActive, 'login-form': isLoginForm, 'register-form': !isLoginForm }">
+            <div class="form-container" :class="{ 'login-form': isLoginForm, 'register-form': !isLoginForm }">
                 <div class="form-header">
                     <h2>{{ isLoginForm ? '欢迎回来' : '创建账号' }}</h2>
                     <p>{{ isLoginForm ? '请登录您的账号' : '填写信息以注册新账号' }}</p>
@@ -839,9 +838,6 @@ input::placeholder {
 }
 
 @media (max-width: 480px) {
-  .brand-title {
-    font-size: 2.5rem;
-  }
 
   .login-content {
     padding: 15px;

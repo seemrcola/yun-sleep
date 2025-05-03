@@ -60,65 +60,55 @@ onUnmounted(() => {
             <slot name="trigger" />
         </div>
 
-        <div class="drawer-container">
-            <!-- 遮罩层 -->
-            <div
-                v-if="showMask && isOpen"
-                class="drawer-mask"
-                @click="closeDrawer"
-            />
+        <Teleport to="body">
+            <div class="drawer-container">
+                <!-- 遮罩层 -->
+                <div
+                    v-if="showMask && isOpen"
+                    class="drawer-mask"
+                    @click="closeDrawer"
+                />
 
-            <!-- 抽屉内容 -->
-            <div
-                class="drawer-content"
-                :class="{ open: isOpen }"
-                :style="{ width }"
-            >
-                <!-- 抽屉标题 -->
-                <div class="drawer-header">
-                    <div class="header-content">
-                        <div class="header-icon">
-                            <svg viewBox="0 0 24 24" width="24" height="24">
-                                <path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9-4.03-9-9-9zm0 16c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z" fill="currentColor" />
-                                <path d="M13 7h-2v5.41l4.29 4.29 1.41-1.41-3.7-3.7V7z" fill="currentColor" />
+                <!-- 抽屉内容 -->
+                <div
+                    class="drawer-content"
+                    :class="{ open: isOpen }"
+                    :style="{ width }"
+                >
+                    <!-- 抽屉标题 -->
+                    <div class="drawer-header">
+                        <div class="header-content">
+                            <div class="header-icon">
+                                <svg viewBox="0 0 24 24" width="24" height="24">
+                                    <path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9-4.03-9-9-9zm0 16c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z" fill="currentColor" />
+                                    <path d="M13 7h-2v5.41l4.29 4.29 1.41-1.41-3.7-3.7V7z" fill="currentColor" />
+                                </svg>
+                            </div>
+                            <div class="header-text">
+                                <h3>房间控制</h3>
+                                <span class="header-subtitle">调整您的个性化设置</span>
+                            </div>
+                        </div>
+                        <button class="close-button" @click="closeDrawer">
+                            <svg viewBox="0 0 24 24" width="18" height="18">
+                                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" fill="currentColor" />
                             </svg>
-                        </div>
-                        <div class="header-text">
-                            <h3>房间控制</h3>
-                            <span class="header-subtitle">调整您的个性化设置</span>
-                        </div>
+                        </button>
                     </div>
-                    <button class="close-button" @click="closeDrawer">
-                        <svg viewBox="0 0 24 24" width="18" height="18">
-                            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" fill="currentColor" />
-                        </svg>
-                    </button>
-                </div>
 
-                <!-- 控制卡片容器 -->
-                <div class="control-cards-container">
-                    <CurtainControlCard />
-                    <TelevisionControlCard />
-                    <WeatherControlCard />
+                    <!-- 控制卡片容器 -->
+                    <div class="control-cards-container">
+                        <CurtainControlCard />
+                        <TelevisionControlCard />
+                        <WeatherControlCard />
+                    </div>
                 </div>
             </div>
-        </div>
+        </Teleport>
     </div>
 </template>
 
 <style scoped>
-/* 控制按钮样式 */
-.control-button {
-  position: fixed;
-  right: 24px;
-  top: 24px;
-  border: none;
-  background: none;
-  padding: 0;
-  cursor: pointer;
-  z-index: 1050;
-}
-
 .btn-content {
   display: flex;
   align-items: center;
@@ -162,7 +152,7 @@ onUnmounted(() => {
   bottom: 0;
   left: 0;
   pointer-events: none;
-  z-index: 1100;
+  z-index: 10000;
 }
 
 .drawer-mask {

@@ -169,22 +169,6 @@ onMounted(() => {
 </template>
 
 <style scoped>
-/* 全局样式 */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-html,
-body {
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    background-color: #EFEFEF;
-    /* 浅色背景 */
-}
-
 .game-app {
     position: relative;
     width: 100%;
@@ -213,7 +197,7 @@ body {
     position: fixed;
     top: 20px;
     left: 20px;
-    width: 210px;
+    width: 200px;
     z-index: 1000;
     display: flex;
     flex-direction: column;
@@ -250,6 +234,8 @@ body {
     transition: all 0.3s;
     overflow: hidden;
     border-radius: 16px;
+    animation: float 6s ease-in-out infinite;
+    opacity: 0.85;
 }
 
 .btn-content {
@@ -266,6 +252,10 @@ body {
                 inset 0 1px 1px rgba(255, 255, 255, 0.4),
                 inset 0 -1px 1px rgba(0, 0, 0, 0.1);
     transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.public-area-btn:hover {
+    opacity: 1;
 }
 
 .public-area-btn:hover .btn-content {
@@ -339,42 +329,13 @@ body {
 }
 
 @keyframes ripple-effect {
-    0% {
-        transform: scale(0);
-        opacity: 0.6;
-    }
-    80% {
-        transform: scale(1.8);
-        opacity: 0;
-    }
-    100% {
-        transform: scale(2);
-        opacity: 0;
-    }
-}
-
-/* 给按钮添加漂浮动画 */
-.public-area-btn {
-    animation: float 6s ease-in-out infinite;
+    0% { transform: scale(0); opacity: 0.6; }
+    100% { transform: scale(2); opacity: 0; }
 }
 
 @keyframes float {
-    0%, 100% {
-        transform: translateY(0);
-    }
-    50% {
-        transform: translateY(-6px);
-    }
-}
-
-/* 使按钮在初始状态下半透明，悬停时完全不透明 */
-.public-area-btn {
-    opacity: 0.85;
-    transition: opacity 0.3s ease;
-}
-
-.public-area-btn:hover {
-    opacity: 1;
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
 }
 
 .xiao-ai {

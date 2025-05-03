@@ -148,7 +148,7 @@ onMounted(() => {
     </div>
 </template>
 
-<style>
+<style scoped>
 /* 全局样式 */
 * {
     margin: 0;
@@ -201,7 +201,7 @@ body {
     z-index: 5;
     display: flex;
     flex-direction: row;
-    gap: 15px;
+    gap: 6px;
     padding: 0;
     background: rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(5px);
@@ -212,7 +212,7 @@ body {
     height: 100%;
     position: relative;
     overflow: hidden;
-    border-radius: 8px;
+    border-radius: 8px 0 0 8px;
 }
 
 .chat-wrapper {
@@ -221,21 +221,9 @@ body {
     padding: 0;
     display: flex;
     flex-direction: column;
-    border-radius: 8px;
     overflow: hidden;
     backdrop-filter: blur(10px);
     background: rgba(255, 255, 255, 0.15);
-}
-
-/* 左侧边栏样式 */
-.left-sidebar {
-    position: fixed;
-    left: 20px;
-    top: 100px;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    z-index: 900;
 }
 
 /* 控制按钮样式 */
@@ -266,34 +254,6 @@ body {
 .control-button:active {
     transform: translateY(1px);
     box-shadow: 0 2px 5px rgba(99, 102, 241, 0.3);
-}
-
-.icon-container {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 10px;
-    position: relative;
-    overflow: hidden;
-}
-
-.icon-container::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(45deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0));
-    border-radius: inherit;
-}
-
-.control-icon {
-    position: relative;
-    z-index: 2;
 }
 
 .xiao-ai {
