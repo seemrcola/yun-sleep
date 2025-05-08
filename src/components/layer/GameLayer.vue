@@ -265,17 +265,12 @@ function updateCharacterPosition(deltaTime?: number) {
 
     character.isMoving = dx !== 0 || dy !== 0
 
-    // 带边界检查的位置更新
+    // 无需边界检查
     const newX = character.x + dx
     const newY = character.y + dy
 
-    if (newX >= 0 && newX + character.width <= containerWidth.value) {
-        character.x = newX
-    }
-
-    if (newY >= 0 && newY + character.height <= containerHeight.value) {
-        character.y = newY
-    }
+    character.x = newX
+    character.y = newY
 }
 
 // 检查角色与床之间的碰撞

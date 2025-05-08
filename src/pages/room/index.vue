@@ -85,7 +85,7 @@ function handleEnterRoom() {
         console.log('进入休息区:', currentRoom.value.id)
         // 这里可以添加导航到休息区内部页面的代码
         // 例如: router.push(`/room/${currentRoom.value.id}/chat`)
-        router.push('/public')
+        router.push(`/inn/${currentRoom.value.id}`)
     }
 }
 

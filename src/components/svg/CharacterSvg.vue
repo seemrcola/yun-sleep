@@ -86,13 +86,15 @@ onMounted(() => {
     const savedHairColor = localStorage.getItem('characterHairColor')
     const savedShirtColor = localStorage.getItem('characterShirtColor')
     const savedPantsColor = localStorage.getItem('characterPantsColor')
-    
+
     if (savedHairstyleType !== null && savedHairColor !== null) {
         // 使用保存的值
         hairstyleType.value = Number.parseInt(savedHairstyleType)
         hairColor.value = savedHairColor
-        if (savedShirtColor) shirtColor.value = savedShirtColor
-        if (savedPantsColor) pantsColor.value = savedPantsColor
+        if (savedShirtColor)
+            shirtColor.value = savedShirtColor
+        if (savedPantsColor)
+            pantsColor.value = savedPantsColor
     }
     else {
         // 生成新的随机值
@@ -132,43 +134,43 @@ defineExpose({
         <g class="pixelated-character">
             <!-- 阴影 - 像素化 -->
             <rect x="16" y="40" width="14" height="3" fill="rgba(0,0,0,0.25)" />
-            
+
             <!-- 头部像素 - 正面 -->
             <g v-if="isFacingDown">
                 <!-- 裤子 -->
                 <rect x="16" y="25" width="6" height="10" :fill="pantsColor" />
                 <rect x="24" y="25" width="6" height="10" :fill="pantsColor" />
-                
+
                 <!-- 鞋子 -->
                 <rect x="16" y="35" width="6" height="4" :fill="shoesColor" />
                 <rect x="24" y="35" width="6" height="4" :fill="shoesColor" />
-                
+
                 <!-- 上身躯干 - 衬衫 -->
                 <rect x="18" y="11" width="10" height="14" :fill="shirtColor" />
-                
+
                 <!-- 手臂 -->
                 <rect x="14" y="11" width="4" height="10" :fill="skinColor" />
                 <rect x="28" y="11" width="4" height="10" :fill="skinColor" />
-                
+
                 <!-- 胸口/领口 -->
                 <rect x="21" y="11" width="4" height="2" :fill="skinColor" />
-                
+
                 <!-- 头部 -->
                 <rect x="15" y="-5" width="16" height="16" :fill="skinColor" class="head-bounce" />
-                
+
                 <!-- 耳朵 -->
                 <rect x="15" y="-1" width="2" height="4" :fill="skinColor" />
                 <rect x="29" y="-1" width="2" height="4" :fill="skinColor" />
-                
+
                 <!-- 眼睛 -->
                 <rect x="18" y="-1" width="3" height="3" fill="#000000" />
                 <rect x="25" y="-1" width="3" height="3" fill="#000000" />
                 <rect x="19" y="0" width="1" height="1" fill="#FFFFFF" />
                 <rect x="26" y="0" width="1" height="1" fill="#FFFFFF" />
-                
+
                 <!-- 嘴巴 -->
                 <rect x="21" y="5" width="4" height="1" fill="#000000" />
-                
+
                 <!-- 发型 - 根据类型 -->
                 <g v-if="hairstyleType === 0">
                     <!-- 短发 -->
@@ -201,31 +203,31 @@ defineExpose({
                     <rect x="19" y="-15" width="8" height="10" :fill="hairColor" />
                 </g>
             </g>
-            
+
             <!-- 头部像素 - 背面 -->
             <g v-if="isFacingUp">
                 <!-- 裤子 -->
                 <rect x="16" y="25" width="6" height="10" :fill="pantsColor" />
                 <rect x="24" y="25" width="6" height="10" :fill="pantsColor" />
-                
+
                 <!-- 鞋子 -->
                 <rect x="16" y="35" width="6" height="4" :fill="shoesColor" />
                 <rect x="24" y="35" width="6" height="4" :fill="shoesColor" />
-                
+
                 <!-- 上身躯干 - 衬衫 -->
                 <rect x="18" y="11" width="10" height="14" :fill="shirtColor" />
-                
+
                 <!-- 手臂 -->
                 <rect x="14" y="11" width="4" height="10" :fill="skinColor" />
                 <rect x="28" y="11" width="4" height="10" :fill="skinColor" />
-                
+
                 <!-- 头部 - 背面 -->
                 <rect x="15" y="-5" width="16" height="16" :fill="skinColor" class="head-bounce" />
-                
+
                 <!-- 耳朵 -->
                 <rect x="15" y="-1" width="2" height="4" :fill="skinColor" />
                 <rect x="29" y="-1" width="2" height="4" :fill="skinColor" />
-                
+
                 <!-- 发型 - 后视图，根据类型显示 -->
                 <g v-if="hairstyleType === 0">
                     <!-- 短发后视图 -->
@@ -251,44 +253,44 @@ defineExpose({
                     <rect x="19" y="-15" width="8" height="10" :fill="hairColor" />
                 </g>
             </g>
-            
+
             <!-- 头部像素 - 右侧面 -->
             <g v-if="isFacingRight">
                 <!-- 裤子 -->
                 <rect x="20" y="25" width="6" height="10" :fill="pantsColor" />
-                
+
                 <!-- 鞋子 -->
                 <rect x="20" y="35" width="6" height="4" :fill="shoesColor" />
-                
+
                 <!-- 上身躯干 - 衬衫 -->
                 <rect x="18" y="11" width="10" height="14" :fill="shirtColor" />
-                
+
                 <!-- 手臂 - 前臂 -->
                 <rect v-if="!isMoving" x="28" y="11" width="4" height="10" :fill="skinColor" />
-                
+
                 <!-- 手臂 - 后臂 - 在身体后面 -->
                 <rect v-if="!isMoving" x="14" y="13" width="4" height="10" :fill="skinColor" />
-                
+
                 <!-- 手臂 - 移动状态 -->
                 <g v-if="isMoving">
                     <!-- 挥动的手臂 -->
                     <rect x="28" y="9" width="5" height="8" :fill="skinColor" />
                     <rect x="14" y="15" width="4" height="10" :fill="skinColor" />
                 </g>
-                
+
                 <!-- 头部 - 侧面 -->
                 <rect x="15" y="-5" width="14" height="16" :fill="skinColor" class="head-bounce" />
-                
+
                 <!-- 耳朵 -->
                 <rect x="29" y="-1" width="2" height="4" :fill="skinColor" />
-                
+
                 <!-- 眼睛 - 侧面 -->
                 <rect x="26" y="-1" width="3" height="3" fill="#000000" />
                 <rect x="27" y="0" width="1" height="1" fill="#FFFFFF" />
-                
+
                 <!-- 嘴巴 - 侧面 -->
                 <rect x="25" y="5" width="3" height="1" fill="#000000" />
-                
+
                 <!-- 发型 - 侧面视图 -->
                 <g v-if="hairstyleType === 0">
                     <!-- 短发侧面 -->
@@ -315,44 +317,44 @@ defineExpose({
                     <rect x="19" y="-15" width="6" height="10" :fill="hairColor" />
                 </g>
             </g>
-            
+
             <!-- 头部像素 - 左侧面 -->
             <g v-if="isFacingLeft">
                 <!-- 裤子 -->
                 <rect x="20" y="25" width="6" height="10" :fill="pantsColor" />
-                
+
                 <!-- 鞋子 -->
                 <rect x="20" y="35" width="6" height="4" :fill="shoesColor" />
-                
+
                 <!-- 上身躯干 - 衬衫 -->
                 <rect x="18" y="11" width="10" height="14" :fill="shirtColor" />
-                
+
                 <!-- 手臂 - 前臂 -->
                 <rect v-if="!isMoving" x="14" y="11" width="4" height="10" :fill="skinColor" />
-                
+
                 <!-- 手臂 - 后臂 - 在身体后面 -->
                 <rect v-if="!isMoving" x="28" y="13" width="4" height="10" :fill="skinColor" />
-                
+
                 <!-- 手臂 - 移动状态 -->
                 <g v-if="isMoving">
                     <!-- 挥动的手臂 -->
                     <rect x="13" y="9" width="5" height="8" :fill="skinColor" />
                     <rect x="28" y="15" width="4" height="10" :fill="skinColor" />
                 </g>
-                
+
                 <!-- 头部 - 侧面 -->
                 <rect x="17" y="-5" width="14" height="16" :fill="skinColor" class="head-bounce" />
-                
+
                 <!-- 耳朵 -->
                 <rect x="15" y="-1" width="2" height="4" :fill="skinColor" />
-                
+
                 <!-- 眼睛 - 侧面 -->
                 <rect x="17" y="-1" width="3" height="3" fill="#000000" />
                 <rect x="18" y="0" width="1" height="1" fill="#FFFFFF" />
-                
+
                 <!-- 嘴巴 - 侧面 -->
                 <rect x="18" y="5" width="3" height="1" fill="#000000" />
-                
+
                 <!-- 发型 - 侧面视图 -->
                 <g v-if="hairstyleType === 0">
                     <!-- 短发侧面 -->
@@ -379,7 +381,7 @@ defineExpose({
                     <rect x="21" y="-15" width="6" height="10" :fill="hairColor" />
                 </g>
             </g>
-            
+
             <!-- 腿部动画 - 移动状态 -->
             <g v-if="isMoving">
                 <g v-if="isFacingDown || isFacingUp">
@@ -390,7 +392,7 @@ defineExpose({
                     <rect x="16" y="35" width="6" height="4" :fill="shoesColor" class="leg-left" />
                     <rect x="24" y="35" width="6" height="4" :fill="shoesColor" class="leg-right" />
                 </g>
-                
+
                 <g v-if="isFacingLeft || isFacingRight">
                     <!-- 移动时的腿部 - 侧面 -->
                     <rect x="18" y="25" width="5" height="14" :fill="pantsColor" class="leg-forward" />
@@ -400,7 +402,7 @@ defineExpose({
                     <rect x="23" y="35" width="5" height="4" :fill="shoesColor" class="leg-back" />
                 </g>
             </g>
-            
+
             <!-- 移动指示器 - 像素风格 -->
             <g v-if="isMoving" class="movement-indicator">
                 <rect v-if="isFacingDown" x="21" y="39" width="4" height="4" fill="#FFFFFF" />

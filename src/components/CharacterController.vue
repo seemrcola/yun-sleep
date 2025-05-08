@@ -1,8 +1,17 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
+import type { Person } from '../service/createSocekt'
 
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
+import { socketService } from '../service/createSocekt'
 import SpeechBubble from './SpeechBubble.vue'
 import CharacterSvg from './svg/CharacterSvg.vue'
+// Props for the component
+const props = defineProps({
+    roomId: {
+        type: Number,
+        required: true,
+    },
+})
 // If @vueuse/core is not available, we'll create our own window size tracking
 // 使用原生方式获取窗口大小
 const windowWidth = ref(window.innerWidth)
@@ -46,6 +55,18 @@ const isFacingRight = ref(true)
 const isMoving = ref(false)
 const inAir = ref(false)
 const direction = ref<'up' | 'down' | 'left' | 'right'>('right')
+const isSleeping = ref(false)
+const currentBed = ref(-1)
+const username = ref('')
+const userId = ref(0)
+
+// 其他人
+const people = ref<Person[]>([])
+
+// 过滤掉当前用户，只显示其他人
+const otherPeople = computed(() => {
+    return people.value.filter(p => p.id !== userId.value)
+})
 
 // 初始定位
 onMounted(() => {
@@ -263,6 +284,71 @@ function processMessageQueue() {
 // 导出供外部使用的显示消息方法
 defineExpose({
     showMessage,
+})
+
+// 加入房间并初始化
+async function initSocketConnection() {
+    try {
+    // 使用awaitConnect确保已连接
+        await socketService.awaitConnect()
+
+        // 加入房间
+        const response = await socketService.joinRoom(props.roomId)
+
+        // 设置其他用户列表
+        people.value = response.people.filter(p => p.id !== socketService.getUserId())
+
+        console.log('Socket连接成功，已加入房间:', props.roomId)
+    }
+    catch (error) {
+        console.error('Socket初始化失败:', error)
+    }
+}
+
+// 监听事件
+onMounted(() => {
+    // 初始化Socket连接
+    initSocketConnection()
+
+    // 处理其他人加入
+    socketService.on('personJoined', (person: Person) => {
+        people.value.push(person)
+    })
+
+    // 处理其他人离开
+    socketService.on('personLeft', (userId: number) => {
+        const index = people.value.findIndex(p => p.id === userId)
+        if (index !== -1) {
+            people.value.splice(index, 1)
+        }
+    })
+
+    // 处理位置更新
+    socketService.on('positionUpdated', (data: { userId: number, x: number, y: number }) => {
+        const person = people.value.find(p => p.id === data.userId)
+        if (person) {
+            person.x = data.x
+            person.y = data.y
+        }
+    })
+
+    // 处理睡眠状态更新
+    socketService.on('sleepStateUpdated', (data: { userId: number, isSleeping: boolean, bed: number }) => {
+        const person = people.value.find(p => p.id === data.userId)
+        if (person) {
+            person.isSleeping = data.isSleeping
+            person.bed = data.bed
+        }
+    })
+})
+
+// 销毁时离开房间并清理事件
+onUnmounted(() => {
+    socketService.leaveRoom()
+    socketService.off('personJoined', () => {})
+    socketService.off('personLeft', () => {})
+    socketService.off('positionUpdated', () => {})
+    socketService.off('sleepStateUpdated', () => {})
 })
 </script>
 

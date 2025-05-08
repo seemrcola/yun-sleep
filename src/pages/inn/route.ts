@@ -2,10 +2,10 @@ import type { RouteRecordRaw } from 'vue-router'
 
 const routes: RouteRecordRaw[] = [
     {
-        path: '/public',
+        path: '/inn/:id',
         component: () => import('./index.vue'),
         meta: {
-            title: '公共休息区',
+            title: '云睡觉客栈',
         },
     },
 ]
