@@ -1,24 +1,22 @@
 <script setup lang="ts">
+import { computed, onMounted, onUnmounted, ref } from 'vue'
+
 import AirConditioner from '@/components/AirConditioner.vue'
 import ChatBox from '@/components/ChatBox.vue'
 import CurtainLayer from '@/components/layer/CurtainLayer.vue'
-import GameLayerSvg from '@/components/layer/GameLayer.vue'
 import WeatherLayer from '@/components/layer/WeatherLayer.vue'
+import GameLayerSvg from '@/components/layer/GameLayer.vue'
 import MessageInput from '@/components/MessageInput.vue'
 import OperationBar from '@/components/OperationBar.vue'
 import SleepTimeCard from '@/components/SleepTime.vue'
 import Television from '@/components/Television.vue'
 import XiaomiAi from '@/components/XiaoAi.vue'
-import { socketService } from '@/service/createSocekt'
-import { computed, onMounted, ref } from 'vue'
-import { useRoute } from 'vue-router'
 import ControlDrawer from './components/ControlDrawer.vue'
+import { socketService, SocketListenerEvent } from '@/service/createSocekt'
+import { useRoute } from 'vue-router'
 
 const route = useRoute()
 const innId = route.params.id
-
-// 连接socket客栈
-socketService.connect(innId as string)
 
 // 应用尺寸
 const windowWidth = ref(window.innerWidth)
@@ -82,11 +80,27 @@ function handleChatSend(message: string) {
 }
 
 // 处理窗口大小调整
-onMounted(() => {
-    window.addEventListener('resize', () => {
-        windowWidth.value = window.innerWidth
-        windowHeight.value = window.innerHeight
+function handleWindowResize() {
+    windowWidth.value = window.innerWidth
+    windowHeight.value = window.innerHeight
+}
+
+// 链接进入socket客栈
+function joinSocketInn() {
+    // 链接socket客栈
+    socketService.joinRoom(Number(innId))
+    socketService.on(SocketListenerEvent.PERSON_JOINED, (person) => {
+        console.log('有人加入客栈', person)
     })
+}
+
+onMounted(() => {
+    window.addEventListener('resize', handleWindowResize)
+    joinSocketInn()
+})
+
+onUnmounted(() => {
+    window.removeEventListener('resize', handleWindowResize)
 })
 </script>
 

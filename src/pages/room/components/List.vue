@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { Room } from '../type'
-import dayjs from 'dayjs'
 import { computed, ref } from 'vue'
+import { format } from 'date-fns/fp'
 
 const props = defineProps<{
     rooms: Room[]
@@ -74,7 +74,13 @@ const filteredRooms = computed(() => {
                         </div>
                     </div>
                     <div class="room-footer">
-                        <span class="room-time">{{ dayjs(room.createdAt).format('YY-MM-DD HH:mm:ss') }}</span>
+                        <span class="room-time">
+                          {{ 
+                            room?.createdAt 
+                              ? format('yyyy-MM-dd HH:mm:ss')(new Date(room.createdAt)) 
+                              : '' 
+                          }}
+                        </span>
                         <button
                             class="join-btn"
                             :disabled="room.current >= room.capacity || (currentRoom !== null && currentRoom.id === room.id)"

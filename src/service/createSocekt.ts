@@ -4,21 +4,40 @@ import { io } from 'socket.io-client'
 import useToken from '../utils/token'
 
 interface Person {
-    name: string
-    id: number
-    x: number
-    y: number
-    room: number
-    isSleeping: boolean
-    bed: number
+    name: string // 用户名
+    id: number // 用户ID
+    x: number // 用户位置X坐标
+    y: number // 用户位置Y坐标
+    room: number // 房间ID
+    isSleeping: boolean // 是否睡觉
+    bed: number // 床位ID
 }
 
 interface Message {
-    type: 'bot' | 'user' | 'system'
-    userId?: number
-    username?: string
-    data: string
-    timestamp: number
+    type: 'bot' | 'user' | 'system' // 消息类型
+    userId?: number // 用户ID
+    username?: string // 用户名
+    data: string // 消息内容
+    timestamp: number // 消息时间戳
+}
+
+enum SocketListenerEvent {
+    ERROR = 'error',
+    PERSON_JOINED = 'personJoined',
+    PERSON_LEFT = 'personLeft',
+    POSITION_UPDATED = 'positionUpdated',
+    SLEEP_STATE_UPDATED = 'sleepStateUpdated',
+    NEW_MESSAGE = 'newMessage',
+    DISCONNECT = 'disconnect',
+    JOIN_ROOM_SUCCESS = 'joinRoomSuccess',
+}
+
+enum SocketEmitEvent {
+    JOIN_ROOM = 'joinRoom',
+    LEAVE_ROOM = 'leaveRoom',
+    UPDATE_POSITION = 'updatePosition',
+    UPDATE_SLEEP_STATE = 'updateSleepState',
+    SEND_MESSAGE = 'sendMessage',
 }
 
 class SocketService {
@@ -33,13 +52,15 @@ class SocketService {
     private eventListeners: {
         [key: string]: Array<(...args: any[]) => void>
     } = {
-            personJoined: [],
-            personLeft: [],
-            positionUpdated: [],
-            sleepStateUpdated: [],
-            newMessage: [],
-            error: [],
-        }
+        [SocketListenerEvent.PERSON_JOINED]: [],
+        [SocketListenerEvent.PERSON_LEFT]: [],
+        [SocketListenerEvent.POSITION_UPDATED]: [],
+        [SocketListenerEvent.SLEEP_STATE_UPDATED]: [],
+        [SocketListenerEvent.NEW_MESSAGE]: [],
+        [SocketListenerEvent.DISCONNECT]: [],
+        [SocketListenerEvent.JOIN_ROOM_SUCCESS]: [],
+        [SocketListenerEvent.ERROR]: [],
+    }
 
     // 获取单例实例
     private static instance: SocketService | null = null
@@ -67,7 +88,7 @@ class SocketService {
     }
 
     // 初始化连接
-    connect(baseURL: string): Promise<void> {
+    private connect(baseURL: string): Promise<void> {
         // 如果已经在连接中，返回现有的Promise
         if (this.isConnecting && this.connectPromise) {
             return this.connectPromise
@@ -99,7 +120,7 @@ class SocketService {
                     transports: ['websocket'],
                     reconnection: true,
                     reconnectionAttempts: 5,
-                    reconnectionDelay: 1000,
+                    reconnectionDelay: 3 * 1_000,
                 })
 
                 // 监听连接成功
@@ -129,27 +150,6 @@ class SocketService {
         return this.connectPromise
     }
 
-    // 等待连接完成
-    async awaitConnect(): Promise<void> {
-    // 如果已经连接，直接返回
-        if (this.socket?.connected) {
-            return Promise.resolve()
-        }
-
-        // 如果正在连接，等待连接完成
-        if (this.isConnecting && this.connectPromise) {
-            return this.connectPromise
-        }
-
-        // 如果未开始连接，尝试自动连接
-        const socketUrl = import.meta.env.VITE_SOCKET_URL
-        if (socketUrl) {
-            return this.connect(socketUrl)
-        }
-
-        return Promise.reject(new Error('无法连接Socket: 未指定服务器地址'))
-    }
-
     // 断开连接
     disconnect(): void {
         if (this.socket) {
@@ -169,40 +169,40 @@ class SocketService {
             return
 
         // 错误处理
-        this.socket.on('error', (data) => {
+        this.socket.on(SocketListenerEvent.ERROR, (data) => {
             console.error('Socket.IO 错误:', data.message)
-            this.triggerEvent('error', data)
+            this.triggerEvent(SocketListenerEvent.ERROR, data)
         })
 
         // 处理新用户加入
-        this.socket.on('personJoined', (data) => {
+        this.socket.on(SocketListenerEvent.PERSON_JOINED, (data) => {
             console.log('新用户加入:', data.person.name)
-            this.triggerEvent('personJoined', data.person)
+            this.triggerEvent(SocketListenerEvent.PERSON_JOINED, data.person)
         })
 
         // 处理用户离开
-        this.socket.on('personLeft', (data) => {
+        this.socket.on(SocketListenerEvent.PERSON_LEFT, (data) => {
             console.log('用户离开:', data.userId)
-            this.triggerEvent('personLeft', data.userId)
+            this.triggerEvent(SocketListenerEvent.PERSON_LEFT, data.userId)
         })
 
         // 处理位置更新
-        this.socket.on('positionUpdated', (data) => {
-            this.triggerEvent('positionUpdated', data)
+        this.socket.on(SocketListenerEvent.POSITION_UPDATED, (data) => {
+            this.triggerEvent(SocketListenerEvent.POSITION_UPDATED, data)
         })
 
         // 处理睡眠状态更新
-        this.socket.on('sleepStateUpdated', (data) => {
-            this.triggerEvent('sleepStateUpdated', data)
+        this.socket.on(SocketListenerEvent.SLEEP_STATE_UPDATED, (data) => {
+            this.triggerEvent(SocketListenerEvent.SLEEP_STATE_UPDATED, data)
         })
 
         // 处理新消息
-        this.socket.on('newMessage', (data) => {
-            this.triggerEvent('newMessage', data)
+        this.socket.on(SocketListenerEvent.NEW_MESSAGE, (data) => {
+            this.triggerEvent(SocketListenerEvent.NEW_MESSAGE, data)
         })
 
         // 监听断开连接
-        this.socket.on('disconnect', (reason) => {
+        this.socket.on(SocketListenerEvent.DISCONNECT, (reason) => {
             console.log('Socket.IO 连接断开:', reason)
         })
     }
@@ -213,19 +213,16 @@ class SocketService {
         people: Person[]
         messages: Message[]
     }> {
-    // 确保已连接
-        await this.awaitConnect()
-
         return new Promise((resolve, reject) => {
             if (!this.socket) {
                 reject(new Error('Socket 未连接'))
                 return
             }
 
-            this.socket.emit('joinRoom', { roomId })
+            this.socket.emit(SocketEmitEvent.JOIN_ROOM, { roomId })
 
             // 监听加入房间成功的事件
-            this.socket.once('joinRoomSuccess', (response) => {
+            this.socket.once(SocketListenerEvent.JOIN_ROOM_SUCCESS, (response) => {
                 this.roomId = response.roomId
                 this.userId = response.person.id
                 this.username = response.person.name
@@ -238,16 +235,13 @@ class SocketService {
 
     // 离开房间
     async leaveRoom(): Promise<void> {
-    // 确保已连接
-        await this.awaitConnect()
-
         return new Promise((resolve) => {
             if (!this.socket || !this.roomId) {
                 resolve()
                 return
             }
 
-            this.socket.emit('leaveRoom')
+            this.socket.emit(SocketEmitEvent.LEAVE_ROOM)
             this.roomId = null
             resolve()
         })
@@ -255,41 +249,32 @@ class SocketService {
 
     // 更新位置
     async updatePosition(x: number, y: number): Promise<void> {
-    // 确保已连接
-        await this.awaitConnect()
-
         if (!this.socket || !this.roomId) {
             console.error('无法更新位置: 未连接或未加入房间')
             return
         }
 
-        this.socket.emit('updatePosition', { x, y })
+        this.socket.emit(SocketEmitEvent.UPDATE_POSITION, { x, y })
     }
 
     // 更新睡眠状态
     async updateSleepState(isSleeping: boolean, bed?: number): Promise<void> {
-    // 确保已连接
-        await this.awaitConnect()
-
         if (!this.socket || !this.roomId) {
             console.error('无法更新睡眠状态: 未连接或未加入房间')
             return
         }
 
-        this.socket.emit('updateSleepState', { isSleeping, bed })
+        this.socket.emit(SocketEmitEvent.UPDATE_SLEEP_STATE, { isSleeping, bed })
     }
 
     // 发送消息
     async sendMessage(message: string): Promise<void> {
-    // 确保已连接
-        await this.awaitConnect()
-
         if (!this.socket || !this.roomId) {
             console.error('无法发送消息: 未连接或未加入房间')
             return
         }
 
-        this.socket.emit('sendMessage', { message })
+        this.socket.emit(SocketEmitEvent.SEND_MESSAGE, { message })
     }
 
     // 注册事件监听器
@@ -312,7 +297,7 @@ class SocketService {
     }
 
     // 触发事件
-    private triggerEvent(event: string, ...args: any[]): void {
+    private triggerEvent(event: SocketListenerEvent, ...args: any[]): void {
         if (!this.eventListeners[event])
             return
 
@@ -352,3 +337,4 @@ export const socketService = SocketService.getInstance()
 
 // 导出类型定义
 export type { Message, Person }
+export { SocketListenerEvent, SocketEmitEvent }

@@ -6,7 +6,6 @@ import { useRouter } from 'vue-router'
 import {
     createRoomAction,
     getRoomByIdAction,
-    getUserInfoAction,
     leaveRoomAction,
     listRoomsAction,
 } from './api'
@@ -89,13 +88,7 @@ function handleEnterRoom() {
     }
 }
 
-async function getUserInfo() {
-    const userInfo = await getUserInfoAction()
-    userStore.setUser(userInfo)
-}
-
-onMounted(async () => {
-    await getUserInfo()
+onMounted(() => {
     getCurrentRoom()
     searchRooms()
 })

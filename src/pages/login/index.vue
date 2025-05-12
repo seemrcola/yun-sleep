@@ -3,7 +3,7 @@ import { useUserStore } from '@/store/user'
 import useToken from '@/utils/token'
 import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { loginAction, registerAction } from './api'
+import { loginAction, registerAction, getUserInfoAction } from './api'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -75,13 +75,14 @@ async function handleLogin() {
             username: formData.username,
             password: formData.password,
         })
-        console.log(user, 'user')
         const token = user.token
         useToken.setToken(token)
 
-        // 删除token 并设置用户
-        Reflect.deleteProperty(user, 'token')
-        userStore.setUser(user)
+        // 获取用户信息
+        const userInfo = await getUserInfoAction()
+        console.log(userInfo, 'userInfo')
+
+        userStore.setUser(userInfo)
 
         // 跳转至房间页面
         router.push('/room')

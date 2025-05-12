@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import type { Room } from '../type'
-import dayjs from 'dayjs'
+import { format } from 'date-fns/fp'
 
 defineProps<{
-    room: Room | null
+    room: Room
     onEnterRoom: () => void
     onLeaveRoom: () => void
 }>()
@@ -59,7 +59,7 @@ defineProps<{
                                 人数
                             </div>
                             <div class="info-value">
-                                {{ room?.current }}/{{ room?.capacity }}
+                                {{ room.current }}/{{ room.capacity }}
                             </div>
                         </div>
                     </div>
@@ -77,10 +77,10 @@ defineProps<{
                                 创建时间
                             </div>
                             <div class="info-value">
-                                {{ dayjs(room?.createdAt).format('YY-MM-DD') }}
+                                {{ room?.createdAt ? format('yyyy-MM-dd')(new Date(room.createdAt)) : '' }}
                             </div>
                             <div class="info-value">
-                                {{ dayjs(room?.createdAt).format('HH:mm:ss') }}
+                                {{ room?.createdAt ? format('HH:mm:ss')(new Date(room.createdAt)) : '' }}
                             </div>
                         </div>
                     </div>
@@ -123,7 +123,7 @@ defineProps<{
 <style scoped>
 .current-room-card {
   width: 100%;
-  max-width: 520px;
+  max-width: 36rem;
   background: rgba(255, 255, 255, 0.9);
   border-radius: 24px;
   padding: 32px;
