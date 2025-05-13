@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { Room } from '../type'
-import { computed, ref } from 'vue'
 import { format } from 'date-fns/fp'
+import { computed, ref } from 'vue'
 
 const props = defineProps<{
     rooms: Room[]
@@ -75,11 +75,11 @@ const filteredRooms = computed(() => {
                     </div>
                     <div class="room-footer">
                         <span class="room-time">
-                          {{ 
-                            room?.createdAt 
-                              ? format('yyyy-MM-dd HH:mm:ss')(new Date(room.createdAt)) 
-                              : '' 
-                          }}
+                            {{
+                                room?.createdAt
+                                    ? format('yyyy-MM-dd HH:mm:ss')(new Date(room.createdAt))
+                                    : ''
+                            }}
                         </span>
                         <button
                             class="join-btn"

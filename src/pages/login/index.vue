@@ -3,7 +3,7 @@ import { useUserStore } from '@/store/user'
 import useToken from '@/utils/token'
 import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { loginAction, registerAction, getUserInfoAction } from './api'
+import { getUserInfoAction, loginAction, registerAction } from './api'
 
 const router = useRouter()
 const userStore = useUserStore()

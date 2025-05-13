@@ -14,10 +14,10 @@ interface Person {
 }
 
 interface Message {
-    type: 'bot' | 'user' | 'system' // 消息类型
+    sender: 'bot' | 'user' | 'system' // 消息类型
     userId?: number // 用户ID
     username?: string // 用户名
-    data: string // 消息内容
+    content: string // 消息内容
     timestamp: number // 消息时间戳
 }
 
@@ -52,15 +52,15 @@ class SocketService {
     private eventListeners: {
         [key: string]: Array<(...args: any[]) => void>
     } = {
-        [SocketListenerEvent.PERSON_JOINED]: [],
-        [SocketListenerEvent.PERSON_LEFT]: [],
-        [SocketListenerEvent.POSITION_UPDATED]: [],
-        [SocketListenerEvent.SLEEP_STATE_UPDATED]: [],
-        [SocketListenerEvent.NEW_MESSAGE]: [],
-        [SocketListenerEvent.DISCONNECT]: [],
-        [SocketListenerEvent.JOIN_ROOM_SUCCESS]: [],
-        [SocketListenerEvent.ERROR]: [],
-    }
+            [SocketListenerEvent.PERSON_JOINED]: [],
+            [SocketListenerEvent.PERSON_LEFT]: [],
+            [SocketListenerEvent.POSITION_UPDATED]: [],
+            [SocketListenerEvent.SLEEP_STATE_UPDATED]: [],
+            [SocketListenerEvent.NEW_MESSAGE]: [],
+            [SocketListenerEvent.DISCONNECT]: [],
+            [SocketListenerEvent.JOIN_ROOM_SUCCESS]: [],
+            [SocketListenerEvent.ERROR]: [],
+        }
 
     // 获取单例实例
     private static instance: SocketService | null = null
@@ -268,13 +268,13 @@ class SocketService {
     }
 
     // 发送消息
-    async sendMessage(message: string): Promise<void> {
+    async sendMessage(message: { content: string }): Promise<void> {
         if (!this.socket || !this.roomId) {
             console.error('无法发送消息: 未连接或未加入房间')
             return
         }
 
-        this.socket.emit(SocketEmitEvent.SEND_MESSAGE, { message })
+        this.socket.emit(SocketEmitEvent.SEND_MESSAGE, message)
     }
 
     // 注册事件监听器
@@ -337,4 +337,4 @@ export const socketService = SocketService.getInstance()
 
 // 导出类型定义
 export type { Message, Person }
-export { SocketListenerEvent, SocketEmitEvent }
+export { SocketEmitEvent, SocketListenerEvent }

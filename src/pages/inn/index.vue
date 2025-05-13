@@ -1,19 +1,19 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref } from 'vue'
-
 import AirConditioner from '@/components/AirConditioner.vue'
-import ChatBox from '@/components/ChatBox.vue'
+
 import CurtainLayer from '@/components/layer/CurtainLayer.vue'
-import WeatherLayer from '@/components/layer/WeatherLayer.vue'
 import GameLayerSvg from '@/components/layer/GameLayer.vue'
+import WeatherLayer from '@/components/layer/WeatherLayer.vue'
 import MessageInput from '@/components/MessageInput.vue'
 import OperationBar from '@/components/OperationBar.vue'
 import SleepTimeCard from '@/components/SleepTime.vue'
 import Television from '@/components/Television.vue'
 import XiaomiAi from '@/components/XiaoAi.vue'
-import ControlDrawer from './components/ControlDrawer.vue'
-import { socketService, SocketListenerEvent } from '@/service/createSocekt'
+import { SocketListenerEvent, socketService } from '@/service/createSocekt'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
+import ChatBox from './components/ChatBox.vue'
+import ControlDrawer from './components/ControlDrawer.vue'
 
 const route = useRoute()
 const innId = route.params.id
@@ -44,6 +44,8 @@ function handleMessageInput(text: string) {
     if (gameLayerRef.value) {
         // 触发游戏层中的setBubbleMessage方法
         gameLayerRef.value.setBubbleMessage(text)
+        // socket发送消息
+        socketService.sendMessage({ content: text })
     }
 }
 

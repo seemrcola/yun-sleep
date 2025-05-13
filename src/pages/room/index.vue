@@ -60,9 +60,7 @@ async function handleCreateRoom(
 async function handleJoinRoom(room: Room) {
     // 设置当前房间
     currentRoom.value = room
-    // TODO: 调用加入房间接口
-    console.log('加入房间:', room)
-    router.push('/public')
+    router.push(`/inn/${room.id}`)
 }
 
 async function handleLeaveRoom() {
@@ -79,11 +77,7 @@ async function handleLeaveRoom() {
 }
 
 function handleEnterRoom() {
-    // TODO: 实现进入休息区的逻辑，例如跳转到聊天页面
     if (currentRoom.value) {
-        console.log('进入休息区:', currentRoom.value.id)
-        // 这里可以添加导航到休息区内部页面的代码
-        // 例如: router.push(`/room/${currentRoom.value.id}/chat`)
         router.push(`/inn/${currentRoom.value.id}`)
     }
 }
