@@ -2,10 +2,10 @@
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import NightstandModal from '../NightstandModal.vue'
 import SpeechBubble from '../SpeechBubble.vue'
-import BedSvg from '../svg/BedSvg.vue'
-import CharacterSvg from '../svg/CharacterSvg.vue'
 import NightstandItems from '../svg/NightstandItems.vue'
 import NightstandSvg from '../svg/NightstandSvg.vue'
+import BedLayer from './BedLayer.vue'
+import PlayerLayer from './PlayerLayer.vue'
 
 // 定义属性
 const props = defineProps<{
@@ -53,9 +53,6 @@ const keys = reactive({
     ArrowRight: false,
 })
 
-// 床位拖动功能控制
-const bedsAreDraggable = ref(false)
-
 // 灯光控制
 const isLightOn = ref(true)
 
@@ -84,9 +81,6 @@ interface Character {
     isMoving: boolean
     bubbleMessage: string | null
 }
-
-// 角色引用，用于获取精确位置
-const characterRef = ref<InstanceType<typeof CharacterSvg> | null>(null)
 
 // 计算角色中心位置（用于气泡定位）
 const characterPosition = computed(() => {
@@ -119,8 +113,98 @@ const nightstandPosition = computed(() => {
     }
 })
 
-// 放大的zZZ
-const largeZZZ = computed(() => nightstandItems.melatonin && character.isSleeping)
+// 组件引用
+const bedLayerRef = ref<InstanceType<typeof BedLayer> | null>(null)
+const playerLayerRef = ref<InstanceType<typeof PlayerLayer> | null>(null)
+
+// 处理床位更新
+function handleBedsUpdate(updatedBeds: Bed[]) {
+    beds.length = 0
+    beds.push(...updatedBeds)
+}
+
+// 处理床位点击
+function handleBedClicked(bedId: number) {
+    playerLayerRef.value?.handleBedClick(bedId)
+}
+
+// 处理角色睡觉
+function handleCharacterSleep(bedIndex: number) {
+    // 更新床占用状态
+    if (bedLayerRef.value) {
+        bedLayerRef.value.updateBedOccupation(bedIndex, true)
+    }
+    
+    // 更新角色状态
+    character.isSleeping = true
+    character.currentBedIndex = bedIndex
+    
+    // 显示床头柜
+    nightstandVisible.value = true
+    
+    // 保存床头柜状态
+    saveNightstandItems()
+}
+
+// 处理角色醒来
+function handleCharacterWake() {
+    // 更新床占用状态
+    if (character.currentBedIndex >= 0) {
+        bedLayerRef.value?.updateBedOccupation(character.currentBedIndex, false)
+    }
+    
+    // 更新角色状态
+    character.isSleeping = false
+    character.currentBedIndex = -1
+    
+    // 隐藏床头柜
+    nightstandVisible.value = false
+    
+    // 清除床头柜可见性状态
+    localStorage.removeItem('nightstandVisible')
+}
+
+// 更新角色信息
+function handleCharacterUpdate(updatedCharacter: Character) {
+    Object.assign(character, updatedCharacter)
+}
+
+// 床头柜点击处理
+function handleNightstandClicked() {
+    nightstandModalVisible.value = true
+}
+
+// 处理床头柜选项选择
+function handleItemSelection(item: 'eyeMask' | 'lamp' | 'melatonin' | 'musicPlayer') {
+    nightstandItems[item] = !nightstandItems[item]
+    saveNightstandItems()
+}
+
+// 保存床头柜选项到localStorage
+function saveNightstandItems() {
+    localStorage.setItem('nightstandItems', JSON.stringify(nightstandItems))
+    // 保存床头柜可见性状态
+    localStorage.setItem('nightstandVisible', String(nightstandVisible.value))
+}
+
+// 从localStorage加载床头柜选项
+function loadNightstandItems() {
+    const savedItems = localStorage.getItem('nightstandItems')
+    if (savedItems) {
+        const items = JSON.parse(savedItems)
+        Object.assign(nightstandItems, items)
+    }
+
+    // 恢复床头柜可见性状态
+    const savedVisibility = localStorage.getItem('nightstandVisible')
+    if (savedVisibility !== null) {
+        nightstandVisible.value = savedVisibility === 'true'
+    }
+    else {
+        // 如果没有保存过，则在睡眠状态下默认显示床头柜
+        nightstandVisible.value = character.isSleeping
+    }
+}
 
 // 初始化游戏
 onMounted(() => {
@@ -161,6 +245,9 @@ onMounted(() => {
             }
         }
     }
+
+    // 加载床头柜状态
+    loadNightstandItems()
 })
 
 // 监听容器尺寸变化
@@ -327,177 +414,10 @@ function handleKeyUp(e: KeyboardEvent) {
     }
 }
 
-// 床事件处理
-function handleBedClicked(bedId: number) {
-    if (character.isSleeping) {
-    // 如果已经在睡觉，醒来
-        if (character.currentBedIndex === bedId) {
-            wakeUpCharacter()
-        }
-        return
-    }
-
-    const bed = beds[bedId]
-    if (!bed)
-        return
-
-    // 检查角色是否足够靠近床以便睡觉
-    const characterCenterX = character.x + character.width / 2
-    const characterCenterY = character.y + character.height / 2
-    const bedCenterX = bed.x + bed.width / 2
-    const bedCenterY = bed.y + bed.height / 2
-
-    const distance = Math.sqrt(
-        (characterCenterX - bedCenterX) ** 2
-        + (characterCenterY - bedCenterY) ** 2,
-    )
-
-    // 如果足够近（60px以内），角色可以睡觉
-    if (distance < 60) {
-        character.isSleeping = true
-        character.currentBedIndex = bedId
-        bed.isOccupied = true
-
-        // 将角色适当地放在床上 - 调整为更靠下的位置
-        character.x = bed.x + (bed.width - character.width) / 2
-        character.y = bed.y + 35 // 根据火柴人大小调整位置
-
-        // 保存当前睡眠的床位索引
-        localStorage.setItem('currentBedIndex', bedId.toString())
-        localStorage.setItem('isSleeping', 'true')
-
-        // 触发睡眠开始事件
-        window.dispatchEvent(new CustomEvent('character-sleep-start'))
-
-        // 睡觉后显示床头柜
-        nightstandVisible.value = true
-
-        // 保存床头柜状态
-        saveNightstandItems()
-    }
-}
-
-function wakeUpCharacter() {
-    if (!character.isSleeping)
-        return
-
-    const bedIndex = character.currentBedIndex
-    if (bedIndex >= 0 && bedIndex < beds.length) {
-        beds[bedIndex].isOccupied = false
-    }
-
-    character.isSleeping = false
-    character.currentBedIndex = -1
-
-    // 清除睡眠床位索引
-    localStorage.removeItem('currentBedIndex')
-    localStorage.removeItem('isSleeping')
-
-    // 清除床头柜可见性状态
-    localStorage.removeItem('nightstandVisible')
-
-    // 触发睡眠结束事件
-    window.dispatchEvent(new CustomEvent('character-sleep-end'))
-
-    // 隐藏床头柜
-    nightstandVisible.value = false
-}
-
-function handleBedDragStart(bedId: number) {
-    console.log('handleBedDragStart', bedId)
-    // 在这个组件中拖动开始时没有特定的事情要做
-    // BedSvg组件处理自己的拖动状态
-}
-
-function handleBedDragMove(bedId: number, dx: number, dy: number) {
-    const bed = beds[bedId]
-    if (!bed)
-        return
-
-    // 更新床位置
-    bed.x += dx
-    bed.y += dy
-
-    // 将床保持在容器边界内
-    bed.x = Math.max(0, Math.min(containerWidth.value - bed.width, bed.x))
-    bed.y = Math.max(0, Math.min(containerHeight.value - bed.height, bed.y))
-
-    // 如果角色正在这张床上睡觉，同时移动角色
-    if (character.isSleeping && character.currentBedIndex === bedId) {
-        character.x = bed.x + (bed.width - character.width) / 2
-        character.y = bed.y + 35 // 更新为相同的位置
-    }
-}
-
-function handleBedDragEnd(bedId: number) {
-    console.log('handleBedDragEnd', bedId)
-    // 在这个组件中拖动结束时没有特定的事情要做
-}
-
-// 角色可见性的计算属性
-const isCharacterVisible = computed(() => !character.isSleeping)
-
-// 设置角色气泡消息
-let bubbleMessageTimer: number | null = null
+// 设置气泡消息
 function setBubbleMessage(message: string) {
-    // 设置消息
-    character.bubbleMessage = message
-
-    // 清除之前的计时器（如果有）
-    if (bubbleMessageTimer) {
-        clearTimeout(bubbleMessageTimer)
-    }
-
-    // 设置20秒后消失的计时器
-    bubbleMessageTimer = window.setTimeout(() => {
-        character.bubbleMessage = null
-    }, 20000)
+    playerLayerRef.value?.setBubbleMessage(message)
 }
-
-// 床头柜点击处理
-function handleNightstandClicked() {
-    nightstandModalVisible.value = true
-}
-
-// 处理床头柜选项选择
-function handleItemSelection(item: 'eyeMask' | 'lamp' | 'melatonin' | 'musicPlayer') {
-    nightstandItems[item] = !nightstandItems[item]
-    saveNightstandItems()
-}
-
-// 保存床头柜选项到localStorage
-function saveNightstandItems() {
-    localStorage.setItem('nightstandItems', JSON.stringify(nightstandItems))
-    // 保存床头柜可见性状态
-    localStorage.setItem('nightstandVisible', String(nightstandVisible.value))
-}
-
-// 从localStorage加载床头柜选项
-function loadNightstandItems() {
-    const savedItems = localStorage.getItem('nightstandItems')
-    if (savedItems) {
-        const items = JSON.parse(savedItems)
-        Object.assign(nightstandItems, items)
-    }
-
-    // 恢复床头柜可见性状态
-    const savedVisibility = localStorage.getItem('nightstandVisible')
-    if (savedVisibility !== null) {
-        nightstandVisible.value = savedVisibility === 'true'
-    }
-    else {
-        // 如果没有保存过，则在睡眠状态下默认显示床头柜
-        nightstandVisible.value = character.isSleeping
-    }
-}
-
-// 暴露方法给父组件使用
-defineExpose({
-    setBubbleMessage,
-    toggleLight,
-    toggleBedDraggable,
-    resetBedPositions,
-})
 
 // 处理容器点击，避免点击床头柜时唤醒角色
 function handleContainerClick(event: MouseEvent) {
@@ -515,38 +435,31 @@ function handleContainerClick(event: MouseEvent) {
     }
 
     // 否则，唤醒角色
-    wakeUpCharacter()
+    playerLayerRef.value?.wakeUpCharacter()
 }
 
 // 复原床位位置
 function resetBedPositions() {
-    if (originalBedPositions.value.length === 0)
-        return
-
-    for (const position of originalBedPositions.value) {
-        const bed = beds.find(b => b.id === position.id)
-        if (bed) {
-            bed.x = position.x
-            bed.y = position.y
-
-            // 如果角色正在这张床上睡觉，同时移动角色
-            if (character.isSleeping && character.currentBedIndex === position.id) {
-                character.x = position.x + (bed.width - character.width) / 2
-                character.y = position.y + 35 // 更新为相同的位置
-            }
-        }
-    }
+    bedLayerRef.value?.resetBedPositions()
 }
 
 // 切换床位拖动功能
 function toggleBedDraggable() {
-    bedsAreDraggable.value = !bedsAreDraggable.value
+    bedLayerRef.value?.toggleBedDraggable()
 }
 
 // 切换灯光
 function toggleLight() {
     isLightOn.value = !isLightOn.value
 }
+
+// 暴露方法给父组件使用
+defineExpose({
+    setBubbleMessage,
+    toggleLight,
+    toggleBedDraggable,
+    resetBedPositions,
+})
 </script>
 
 <template>
@@ -556,40 +469,35 @@ function toggleLight() {
         :class="{ 'lights-off': !isLightOn }"
         @click="handleContainerClick"
     >
+        <!-- 床位层 -->
+        <BedLayer
+            ref="bedLayerRef"
+            :width="containerWidth"
+            :height="containerHeight"
+            :bed-count="bedCount"
+            :is-light-on="isLightOn"
+            @bed-clicked="handleBedClicked"
+            @update-beds="handleBedsUpdate"
+        />
+        
+        <!-- 玩家层 -->
+        <PlayerLayer
+            ref="playerLayerRef"
+            :width="containerWidth"
+            :height="containerHeight"
+            :beds="beds"
+            :is-light-on="isLightOn"
+            @character-sleep="handleCharacterSleep"
+            @character-wake="handleCharacterWake"
+            @update-character="handleCharacterUpdate"
+        />
+        
+        <!-- 床头柜相关 -->
         <svg
             :width="containerWidth"
             :height="containerHeight"
-            class="game-svg"
+            class="furniture-svg"
         >
-            <!-- 床位 -->
-            <BedSvg
-                v-for="bed in beds"
-                :id="bed.id"
-                :key="bed.id"
-                :x="bed.x"
-                :y="bed.y"
-                :width="bed.width"
-                :height="bed.height"
-                :is-occupied="bed.id === character.currentBedIndex && character.isSleeping"
-                :is-draggable="bedsAreDraggable"
-                @bed-clicked="handleBedClicked"
-                @drag-start="handleBedDragStart"
-                @drag-move="handleBedDragMove"
-                @drag-end="handleBedDragEnd"
-            />
-
-            <!-- 角色（仅在不睡觉时显示） -->
-            <CharacterSvg
-                v-if="isCharacterVisible"
-                ref="characterRef"
-                :x="character.x"
-                :y="character.y"
-                :width="character.width"
-                :height="character.height"
-                :direction="character.direction"
-                :is-moving="character.isMoving"
-            />
-
             <!-- 床头柜 -->
             <NightstandSvg
                 v-if="character.isSleeping && character.currentBedIndex >= 0"
@@ -653,15 +561,16 @@ function toggleLight() {
   filter: brightness(0.7);
 }
 
-.game-svg {
+.furniture-svg {
   display: block;
   position: absolute;
   top: 0;
   left: 0;
+  z-index: 3;
   pointer-events: none;
 }
 
-.game-svg * {
+.furniture-svg * {
   pointer-events: auto;
 }
 </style>
