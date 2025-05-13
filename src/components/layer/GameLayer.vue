@@ -590,31 +590,6 @@ function toggleLight() {
                 :is-moving="character.isMoving"
             />
 
-            <!-- 睡觉 zZZ 效果 -->
-            <g v-if="character.isSleeping && character.currentBedIndex >= 0">
-                <text
-                    :x="beds[character.currentBedIndex].x + beds[character.currentBedIndex].width * 0.7"
-                    :y="beds[character.currentBedIndex].y + 15"
-                    :font-size="largeZZZ ? '24' : '16'"
-                    fill="#5C6BC0"
-                    opacity="0.8"
-                >
-                    zZZ
-                    <animate
-                        attributeName="opacity"
-                        values="0.8;0.3;0.8"
-                        dur="3s"
-                        repeatCount="indefinite"
-                    />
-                    <animate
-                        attributeName="y"
-                        :values="`${beds[character.currentBedIndex].y + 15};${beds[character.currentBedIndex].y + 5};${beds[character.currentBedIndex].y + 15}`"
-                        dur="3s"
-                        repeatCount="indefinite"
-                    />
-                </text>
-            </g>
-
             <!-- 床头柜 -->
             <NightstandSvg
                 v-if="character.isSleeping && character.currentBedIndex >= 0"
