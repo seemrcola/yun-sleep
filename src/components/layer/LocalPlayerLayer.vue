@@ -17,7 +17,7 @@ const props = defineProps<{
 const emit = defineEmits<{
     'character-sleep': [bedIndex: number]
     'character-wake': []
-    'update-character': [character: Character]
+    'update-character': [character: Partial<Character>]
 }>()
 
 // 移动控制
@@ -95,7 +95,7 @@ function updateCharacterPosition(deltaTime?: number) {
 
     // 通知父组件角色位置更新
     if (props.character.isMoving) {
-        emit('update-character', { ...props.character })
+        emit('update-character', { x: newX, y: newY })
     }
 }
 
@@ -138,7 +138,7 @@ function checkCollisions() {
                 props.character.y = expandedBed.y + expandedBed.height
 
             // 通知父组件角色位置更新
-            emit('update-character', { ...props.character })
+            emit('update-character', { x: props.character.x, y: props.character.y })
         }
     }
 }
@@ -199,7 +199,7 @@ function handleBedClick(bedId: number) {
 
         // 通知父组件
         emit('character-sleep', bedId)
-        emit('update-character', { ...props.character })
+        emit('update-character', { isSleeping: true })
     }
 }
 
@@ -219,7 +219,7 @@ function wakeUpCharacter() {
 
     // 通知父组件
     emit('character-wake')
-    emit('update-character', { ...props.character })
+    emit('update-character', { isSleeping: false })
 }
 
 // 设置角色气泡消息

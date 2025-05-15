@@ -4,16 +4,6 @@ import { io } from 'socket.io-client'
 import useToken from '../utils/token'
 import type { Character } from '@/types'
 
-interface Person {
-    name: string // 用户名
-    id: number // 用户ID
-    x: number // 用户位置X坐标
-    y: number // 用户位置Y坐标
-    room: number // 房间ID
-    isSleeping: boolean // 是否睡觉
-    bed: number // 床位ID
-}
-
 interface Message {
     sender: 'bot' | 'user' | 'system' // 消息类型
     userId?: number // 用户ID
@@ -175,8 +165,8 @@ class SocketService {
         // 处理新用户加入
         this.socket.on(
             SocketListenerEvent.PERSON_JOINED,
-            (data: { person: Person, people: Person[], messages: Message[] }) => {
-                console.log('新用户加入:', data.person.name)
+            (data: { character: Character, characters: Character[], messages: Message[] }) => {
+                console.log('新用户加入:', data.character.username)
                 this.triggerEvent(SocketListenerEvent.PERSON_JOINED, data)
             },
         )
@@ -205,8 +195,8 @@ class SocketService {
 
     // 加入房间
     async joinRoom(roomId: number): Promise<{
-        person: Person
-        people: Person[]
+        character: Character
+        characters: Character[]
         messages: Message[]
     }> {
         return new Promise((resolve, reject) => {
@@ -216,8 +206,6 @@ class SocketService {
             }
 
             this.socket.emit(SocketEmitEvent.JOIN_ROOM, { roomId })
-
-            console.log('加入房间 --- 1', roomId)
 
             // 监听加入房间成功的事件
             this.socket.once(SocketListenerEvent.JOIN_ROOM_SUCCESS, (response) => {
@@ -323,5 +311,5 @@ class SocketService {
 export const socketService = SocketService.getInstance()
 
 // 导出类型定义
-export type { Message, Person }
+export type { Message }
 export { SocketEmitEvent, SocketListenerEvent }

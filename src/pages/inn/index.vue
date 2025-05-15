@@ -94,16 +94,16 @@ function handleWindowResize() {
 // 链接进入socket客栈
 function listenSocketRoomEvent() {
     // 链接socket客栈
-    socketService.on(
+    socketService.on(   
         SocketListenerEvent.PERSON_JOINED,
-        ({ people }) => {
+        ({ characters: people }) => {
             characters.value = people
         },
     )
     // 处理角色更新
     socketService.on(
         SocketListenerEvent.CHARACTER_UPDATED,
-        ({ people }) => {
+        ({ characters: people }) => {
             characters.value = people
         }
     )

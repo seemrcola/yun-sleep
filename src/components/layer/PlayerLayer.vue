@@ -21,7 +21,7 @@ const props = defineProps<{
 const emit = defineEmits<{
     'character-sleep': [bedIndex: number]
     'character-wake': []
-    'update-character': [character: Character]
+    'update-character': [character: Partial<Character>]
 }>()
 
 // 本地角色状态
@@ -72,7 +72,7 @@ function setBubbleMessage(message: string) {
 function setCharacterPosition(x: number, y: number) {
     character.x = x
     character.y = y
-    emit('update-character', { ...character })
+    emit('update-character', { x, y })
 }
 
 // 处理床点击

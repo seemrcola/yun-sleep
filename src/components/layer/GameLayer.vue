@@ -23,6 +23,7 @@ const props = defineProps<{
     height?: number
     bedCount: number
     characters: Character[]
+    roomId: number
 }>()
 
 // 定义emit
@@ -141,7 +142,7 @@ function handleCharacterWake() {
 }
 
 // 更新角色信息
-function handleCharacterUpdate(updatedCharacter: Character) {
+function handleCharacterUpdate(updatedCharacter: Partial<Character>) {
     Object.assign(character, updatedCharacter)
     emit('update-character', character)
 }
@@ -276,6 +277,7 @@ defineExpose({
             :width="containerWidth"
             :height="containerHeight"
             :beds="beds"
+            :room-id="roomId"
             :is-light-on="isLightOn"
             :characters="characters"
             @character-sleep="handleCharacterSleep"
