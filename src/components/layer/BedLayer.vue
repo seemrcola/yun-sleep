@@ -163,12 +163,19 @@ function getAllBeds() {
     return [...beds]
 }
 
+// 为GameLayer的游戏循环提供一个update方法
+function updateFrame(deltaTime: number) {
+    // 床位层的更新逻辑，如果有动画或状态变化可以在这里处理
+    // 目前床位是静态的，所以这里可以是一个空方法
+}
+
 // 暴露方法给父组件
 defineExpose({
     resetBedPositions,
     toggleBedDraggable,
     updateBedOccupation,
-    getAllBeds
+    getAllBeds,
+    updateFrame
 })
 </script>
 
