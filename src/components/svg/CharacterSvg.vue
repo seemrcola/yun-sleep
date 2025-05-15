@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 
 const props = defineProps<{
     x: number
@@ -75,10 +75,10 @@ defineExpose({
         <g class="stick-figure" :stroke="characterColor" stroke-width="2" fill="none" stroke-linecap="round">
             <!-- 头部：圆圈 -->
             <circle cx="12" cy="6" r="5" />
-            
+
             <!-- 身体：线条 -->
             <line x1="12" y1="11" x2="12" y2="22" />
-            
+
             <!-- 手臂 - 正面/背面视图 -->
             <g v-if="isFacingUp || isFacingDown">
                 <!-- 标准状态下的手臂 -->
@@ -86,14 +86,14 @@ defineExpose({
                     <line x1="12" y1="14" x2="6" y2="18" />
                     <line x1="12" y1="14" x2="18" y2="18" />
                 </g>
-                
+
                 <!-- 走路状态下的手臂 - 相反摆动 -->
                 <g v-if="isMoving">
                     <line class="arm-swing-back" x1="12" y1="14" x2="6" y2="18" />
                     <line class="arm-swing-forward" x1="12" y1="14" x2="18" y2="18" />
                 </g>
             </g>
-            
+
             <!-- 侧面手臂 -->
             <g v-if="isFacingLeft || isFacingRight">
                 <!-- 标准状态下的手臂 -->
@@ -101,14 +101,14 @@ defineExpose({
                     <line x1="12" y1="14" x2="8" y2="18" />
                     <line x1="12" y1="14" x2="16" y2="18" />
                 </g>
-                
+
                 <!-- 走路状态下的手臂 - 相反摆动 -->
                 <g v-if="isMoving">
                     <line class="arm-swing-opposite" x1="12" y1="14" x2="8" y2="18" />
                     <line class="arm-swing" x1="12" y1="14" x2="16" y2="18" />
                 </g>
             </g>
-            
+
             <!-- 腿部 - 正面/背面视图 -->
             <g v-if="isFacingUp || isFacingDown">
                 <!-- 标准状态下的腿部 -->
@@ -116,14 +116,14 @@ defineExpose({
                     <line x1="12" y1="22" x2="8" y2="32" />
                     <line x1="12" y1="22" x2="16" y2="32" />
                 </g>
-                
+
                 <!-- 走路状态下的腿部 - 相反摆动 -->
                 <g v-if="isMoving">
                     <line class="leg-swing-forward" x1="12" y1="22" x2="8" y2="32" />
                     <line class="leg-swing-back" x1="12" y1="22" x2="16" y2="32" />
                 </g>
             </g>
-            
+
             <!-- 侧面腿部 -->
             <g v-if="isFacingLeft || isFacingRight">
                 <!-- 标准状态下的腿部 -->
@@ -131,7 +131,7 @@ defineExpose({
                     <line x1="12" y1="22" x2="8" y2="32" />
                     <line x1="12" y1="22" x2="16" y2="32" />
                 </g>
-                
+
                 <!-- 走路状态下的腿部 - 模拟行走效果 -->
                 <g v-if="isMoving">
                     <line class="leg-swing" x1="12" y1="22" x2="8" y2="32" />

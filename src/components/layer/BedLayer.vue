@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { Bed } from '@/types.d'
 import { computed, reactive, ref, watch } from 'vue'
 import BedSvg from '../svg/BedSvg.vue'
 
@@ -29,16 +30,6 @@ const bedsAreDraggable = ref(false)
 
 // 原始床位位置存储，用于复原
 const originalBedPositions = ref<{ id: number, x: number, y: number }[]>([])
-
-// 类型定义
-interface Bed {
-    id: number
-    x: number
-    y: number
-    width: number
-    height: number
-    isOccupied: boolean
-}
 
 // 监听容器尺寸变化
 watch([containerWidth, containerHeight], () => {
@@ -90,7 +81,7 @@ function initializeBeds() {
             y,
         })
     }
-    
+
     // 通知父组件床位已更新
     emit('update-beds', [...beds])
 }
@@ -119,7 +110,7 @@ function handleBedDragMove(bedId: number, dx: number, dy: number) {
     // 将床保持在容器边界内
     bed.x = Math.max(0, Math.min(containerWidth.value - bed.width, bed.x))
     bed.y = Math.max(0, Math.min(containerHeight.value - bed.height, bed.y))
-    
+
     // 通知父组件床位已更新
     emit('update-beds', [...beds])
 }
@@ -141,7 +132,7 @@ function resetBedPositions() {
             bed.y = position.y
         }
     }
-    
+
     // 通知父组件床位已更新
     emit('update-beds', [...beds])
 }
@@ -175,7 +166,7 @@ defineExpose({
     toggleBedDraggable,
     updateBedOccupation,
     getAllBeds,
-    updateFrame
+    updateFrame,
 })
 </script>
 
@@ -222,4 +213,4 @@ defineExpose({
 .bed-layer.lights-off {
     filter: brightness(0.7);
 }
-</style> 
+</style>

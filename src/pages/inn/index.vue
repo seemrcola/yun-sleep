@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import AirConditioner from '@/components/AirConditioner.vue'
+import type { Character } from '@/types.d'
 
+import AirConditioner from '@/components/AirConditioner.vue'
 import CurtainLayer from '@/components/layer/CurtainLayer.vue'
 import GameLayerSvg from '@/components/layer/GameLayer.vue'
 import WeatherLayer from '@/components/layer/WeatherLayer.vue'
@@ -38,6 +39,9 @@ const chatBoxRef = ref<InstanceType<typeof ChatBox> | null>(null)
 // 灯光和拖动控制
 const isLightOn = ref(true)
 const bedsAreDraggable = ref(false)
+
+// 游戏玩家
+const characters = ref<Character[]>([])
 
 // 处理消息输入
 function handleMessageInput(text: string) {
@@ -88,17 +92,35 @@ function handleWindowResize() {
 }
 
 // 链接进入socket客栈
-function joinSocketInn() {
+function listenSocketRoomEvent() {
     // 链接socket客栈
-    socketService.joinRoom(Number(innId))
-    socketService.on(SocketListenerEvent.PERSON_JOINED, (person) => {
-        console.log('有人加入客栈', person)
-    })
+    socketService.on(
+        SocketListenerEvent.PERSON_JOINED,
+        ({ people }) => {
+            characters.value = people
+        },
+    )
+    // 处理角色更新
+    socketService.on(
+        SocketListenerEvent.CHARACTER_UPDATED,
+        ({ people }) => {
+            characters.value = people
+        }
+    )
+}
+
+// 处理角色更新
+function handleUpdateCharacter(character: Character) {
+    console.log('处理角色更新', character)
+    // 通知服务端更新角色
+    socketService.updateCharacter(character)
 }
 
 onMounted(() => {
     window.addEventListener('resize', handleWindowResize)
-    joinSocketInn()
+    listenSocketRoomEvent()
+
+    socketService.joinRoom(Number(innId))
 })
 
 onUnmounted(() => {
@@ -154,7 +176,14 @@ onUnmounted(() => {
         >
             <!-- 游戏层（床和角色） -->
             <div class="game-layer-wrapper">
-                <GameLayerSvg ref="gameLayerRef" :width="gameWidth * 0.75" :height="gameHeight" :bed-count="24" />
+                <GameLayerSvg
+                    ref="gameLayerRef"
+                    :width="gameWidth * 0.75"
+                    :height="gameHeight"
+                    :bed-count="24"
+                    :characters="characters"
+                    @update-character="handleUpdateCharacter"
+                />
 
                 <!-- 幕布层（位于其他所有层之上） -->
                 <CurtainLayer :width="gameWidth * 0.75" :height="gameHeight" />

@@ -1,15 +1,19 @@
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref, onUnmounted } from 'vue'
-import CharacterSvg from '../svg/CharacterSvg.vue'
-import SpeechBubble from '../SpeechBubble.vue'
-import { socketService, SocketListenerEvent } from '@/service/createSocekt';
+import type { Character } from '@/types.d'
+import { onMounted, reactive, ref } from 'vue'
+import LocalPlayerLayer from './LocalPlayerLayer.vue'
+import RemotePlayerLayer from './RemotePlayerLayer.vue'
+import { useUserStore } from '@/store/user'
+
+const userStore = useUserStore()
 
 // 定义接收的属性
-const props = defineProps<{
+defineProps<{
     width?: number
     height?: number
     beds: any[] // 床位数据
     isLightOn: boolean
+    characters: Character[] // 远程角色数据
 }>()
 
 // 定义发出的事件
@@ -19,16 +23,16 @@ const emit = defineEmits<{
     'update-character': [character: Character]
 }>()
 
-// 角色状态
+// 本地角色状态
 const character = reactive<Character>({
-    id: -1,
-    username: '',
+    id: userStore.user.id,
+    username: userStore.user.username,
     room: -1,
     x: 100,
     y: 100,
-    width: 30, // 小一点的角色宽度
-    height: 30, // 小一点的角色高度
-    speed: 3,
+    width: 30,
+    height: 30,
+    speed: 1,
     isSleeping: false,
     currentBedIndex: -1,
     direction: 'down',
@@ -36,352 +40,64 @@ const character = reactive<Character>({
     bubbleMessage: null,
 })
 
-// 移动控制
-const keys = reactive({
-    ArrowUp: false,
-    ArrowDown: false,
-    ArrowLeft: false,
-    ArrowRight: false,
-})
+// 组件引用
+const localPlayerLayerRef = ref<InstanceType<typeof LocalPlayerLayer> | null>(null)
+const remotePlayerLayerRef = ref<InstanceType<typeof RemotePlayerLayer> | null>(null)
 
-// 类型定义
-interface Character {
-    id: number
-    username: string
-    room: number
-    x: number
-    y: number
-    width: number
-    height: number
-    speed: number
-    isSleeping: boolean
-    currentBedIndex: number
-    direction: 'up' | 'down' | 'left' | 'right'
-    isMoving: boolean
-    bubbleMessage: string | null
+// 处理本地角色睡觉事件
+function handleLocalCharacterSleep(bedIndex: number) {
+    emit('character-sleep', bedIndex)
 }
 
-// 角色引用，用于获取精确位置
-const characterRef = ref<InstanceType<typeof CharacterSvg> | null>(null)
-
-// 计算角色中心位置（用于气泡定位）
-const characterPosition = computed(() => {
-    return {
-        x: character.x,
-        y: character.y,
-        width: character.width,
-        height: character.height,
-    }
-})
-
-// 角色可见性的计算属性
-const isCharacterVisible = computed(() => !character.isSleeping)
-
-// 角色移动的游戏循环
-let lastTime = 0
-function gameLoop(time = 0) {
-    const deltaTime = time - lastTime
-    lastTime = time
-
-    updateCharacterPosition(deltaTime)
-    checkCollisions()
-
-    requestAnimationFrame(gameLoop)
-}
-
-// 根据键盘输入更新角色位置
-function updateCharacterPosition(deltaTime?: number) {
-    if (deltaTime)
-        void 0 // 如果deltaTime存在，则表示是游戏循环
-
-    if (character.isSleeping)
-        return
-
-    const moveUp = keys.ArrowUp
-    const moveDown = keys.ArrowDown
-    const moveLeft = keys.ArrowLeft
-    const moveRight = keys.ArrowRight
-
-    let dx = 0
-    let dy = 0
-
-    if (moveUp) {
-        dy -= character.speed
-        character.direction = 'up'
-    }
-    if (moveDown) {
-        dy += character.speed
-        character.direction = 'down'
-    }
-    if (moveLeft) {
-        dx -= character.speed
-        character.direction = 'left'
-    }
-    if (moveRight) {
-        dx += character.speed
-        character.direction = 'right'
-    }
-
-    // 标准化对角线移动
-    if (dx !== 0 && dy !== 0) {
-        const factor = 1 / Math.sqrt(2)
-        dx *= factor
-        dy *= factor
-    }
-
-    character.isMoving = dx !== 0 || dy !== 0
-
-    // 无需边界检查
-    const newX = character.x + dx
-    const newY = character.y + dy
-
-    character.x = newX
-    character.y = newY
-    
-    // 通知父组件角色位置更新
-    if (character.isMoving) {
-        emit('update-character', { ...character })
-    }
-}
-
-// 检查角色与床之间的碰撞
-function checkCollisions() {
-    if (character.isSleeping)
-        return
-
-    for (const bed of props.beds) {
-        // 为了更好的游戏体验，扩大碰撞盒
-        const expandedBed = {
-            x: bed.x - 5,
-            y: bed.y - 5,
-            width: bed.width + 10,
-            height: bed.height + 10,
-        }
-
-        if (
-            character.x < expandedBed.x + expandedBed.width
-            && character.x + character.width > expandedBed.x
-            && character.y < expandedBed.y + expandedBed.height
-            && character.y + character.height > expandedBed.y
-        ) {
-            // 处理碰撞 - 将角色推开
-            const overlapLeft = character.x + character.width - expandedBed.x
-            const overlapRight = expandedBed.x + expandedBed.width - character.x
-            const overlapTop = character.y + character.height - expandedBed.y
-            const overlapBottom = expandedBed.y + expandedBed.height - character.y
-
-            // 找到最小重叠并相应调整位置
-            const minOverlap = Math.min(overlapLeft, overlapRight, overlapTop, overlapBottom)
-
-            if (minOverlap === overlapLeft)
-                character.x = expandedBed.x - character.width
-            else if (minOverlap === overlapRight)
-                character.x = expandedBed.x + expandedBed.width
-            else if (minOverlap === overlapTop)
-                character.y = expandedBed.y - character.height
-            else if (minOverlap === overlapBottom)
-                character.y = expandedBed.y + expandedBed.height
-            
-            // 通知父组件角色位置更新
-            emit('update-character', { ...character })
-        }
-    }
-}
-
-// 输入处理器
-function handleKeyDown(e: KeyboardEvent) {
-    if (e.key in keys) {
-        keys[e.key as keyof typeof keys] = true
-    }
-}
-
-function handleKeyUp(e: KeyboardEvent) {
-    if (e.key in keys) {
-        keys[e.key as keyof typeof keys] = false
-    }
-}
-
-// 处理床点击
-function handleBedClick(bedId: number) {
-    if (character.isSleeping) {
-        // 如果已经在睡觉，醒来
-        if (character.currentBedIndex === bedId) {
-            wakeUpCharacter()
-        }
-        return
-    }
-
-    const bed = props.beds[bedId]
-    if (!bed)
-        return
-
-    // 检查角色是否足够靠近床以便睡觉
-    const characterCenterX = character.x + character.width / 2
-    const characterCenterY = character.y + character.height / 2
-    const bedCenterX = bed.x + bed.width / 2
-    const bedCenterY = bed.y + bed.height / 2
-
-    const distance = Math.sqrt(
-        (characterCenterX - bedCenterX) ** 2
-        + (characterCenterY - bedCenterY) ** 2,
-    )
-
-    // 如果足够近（60px以内），角色可以睡觉
-    if (distance < 60) {
-        character.isSleeping = true
-        character.currentBedIndex = bedId
-
-        // 将角色适当地放在床上 - 调整为更靠下的位置
-        character.x = bed.x + (bed.width - character.width) / 2
-        character.y = bed.y + 35 // 根据火柴人大小调整位置
-
-        // 保存当前睡眠的床位索引
-        localStorage.setItem('currentBedIndex', bedId.toString())
-        localStorage.setItem('isSleeping', 'true')
-
-        // 触发睡眠开始事件
-        window.dispatchEvent(new CustomEvent('character-sleep-start'))
-        
-        // 通知父组件
-        emit('character-sleep', bedId)
-        emit('update-character', { ...character })
-    }
-}
-
-function wakeUpCharacter() {
-    if (!character.isSleeping)
-        return
-
-    character.isSleeping = false
-    character.currentBedIndex = -1
-
-    // 清除睡眠床位索引
-    localStorage.removeItem('currentBedIndex')
-    localStorage.removeItem('isSleeping')
-
-    // 触发睡眠结束事件
-    window.dispatchEvent(new CustomEvent('character-sleep-end'))
-    
-    // 通知父组件
+// 处理本地角色醒来事件
+function handleLocalCharacterWake() {
     emit('character-wake')
+}
+
+// 处理本地角色更新事件
+function handleLocalCharacterUpdate(updatedCharacter: Character) {
+    // 更新本地角色状态
+    Object.assign(character, updatedCharacter)
+    // 传递给父组件
     emit('update-character', { ...character })
 }
 
-// 设置角色气泡消息
-let bubbleMessageTimer: number | null = null
+// 设置气泡消息
 function setBubbleMessage(message: string) {
-    // 设置消息
     character.bubbleMessage = message
-
-    // 清除之前的计时器（如果有）
-    if (bubbleMessageTimer) {
-        clearTimeout(bubbleMessageTimer)
-    }
-
-    // 设置20秒后消失的计时器
-    bubbleMessageTimer = window.setTimeout(() => {
-        character.bubbleMessage = null
-    }, 20000)
 }
 
-// 设置角色坐标 (用于外部调用)
+// 设置角色坐标
 function setCharacterPosition(x: number, y: number) {
     character.x = x
     character.y = y
     emit('update-character', { ...character })
 }
 
-// 监听socket事件
-function listenSocketEvents() {
-    // 监听用户加入事件
-    socketService.on(
-        SocketListenerEvent.PERSON_JOINED,
-        data => {
-            console.log('PERSON_JOINED', data)
-        }
-    )
-    // 监听用户离开
-    socketService.on(
-        SocketListenerEvent.PERSON_LEFT,
-        data => {
-            console.log('PERSON_LEFT', data)
-        }
-    )
-    // 监听用户移动
-    socketService.on(
-        SocketListenerEvent.POSITION_UPDATED,
-        data => {
-            console.log('PERSON_MOVED', data)
-        }
-    )
-    // 监听用户睡眠状态更新
-    socketService.on(
-        SocketListenerEvent.SLEEP_STATE_UPDATED,
-        data => {
-            console.log('SLEEP_STATE_UPDATED', data)
-        }
-    )
+// 处理床点击
+function handleBedClick(bedId: number) {
+    // 转发给本地玩家层
+    localPlayerLayerRef.value?.handleBedClick(bedId)
+}
+
+// 唤醒角色
+function wakeUpCharacter() {
+    // 转发给本地玩家层
+    localPlayerLayerRef.value?.wakeUpCharacter()
+}
+
+// 为GameLayer的游戏循环提供一个update方法
+function updateFrame(deltaTime: number) {
+    // 更新本地角色
+    localPlayerLayerRef.value?.updateFrame(deltaTime)
+    // 更新远程角色
+    remotePlayerLayerRef.value?.updateFrame(deltaTime)
 }
 
 // 初始化游戏
 onMounted(() => {
-    // 设置键盘控制
-    window.addEventListener('keydown', handleKeyDown)
-    window.addEventListener('keyup', handleKeyUp)
-
-    // 启动游戏循环
-    lastTime = 0
-    gameLoop()
-
-    // 监听socket事件
-    listenSocketEvents()
-
-    // 检查是否应该恢复睡眠状态
-    const isSleeping = localStorage.getItem('isSleeping') === 'true'
-    if (isSleeping) {
-        const bedIndex = localStorage.getItem('currentBedIndex')
-        if (bedIndex !== null) {
-            const index = Number.parseInt(bedIndex)
-            if (index >= 0 && index < props.beds.length) {
-                // 延迟一下以确保床位已初始化
-                setTimeout(() => {
-                    character.isSleeping = true
-                    character.currentBedIndex = index
-                    
-                    // 更新角色位置到床上
-                    const bed = props.beds[index]
-                    character.x = bed.x + (bed.width - character.width) / 2
-                    character.y = bed.y + 35 // 根据火柴人大小调整位置
-
-                    // 触发睡眠开始事件
-                    window.dispatchEvent(new CustomEvent('character-sleep-start'))
-
-                    // 通知父组件
-                    emit('character-sleep', index)
-                    emit('update-character', { ...character })
-                }, 100)
-            }
-        }
-    }
+    // 不需要额外初始化，所有初始化逻辑都转移到LocalPlayerLayer
 })
-
-// 组件卸载时清理
-onUnmounted(() => {
-    // 移除键盘事件监听
-    window.removeEventListener('keydown', handleKeyDown)
-    window.removeEventListener('keyup', handleKeyUp)
-    
-    // 清除消息气泡计时器
-    if (bubbleMessageTimer) {
-        clearTimeout(bubbleMessageTimer)
-    }
-})
-
-// 为GameLayer的游戏循环提供一个update方法
-function updateFrame(deltaTime: number) {
-    updateCharacterPosition(deltaTime);
-    checkCollisions();
-}
 
 // 暴露方法给父组件使用
 defineExpose({
@@ -389,38 +105,34 @@ defineExpose({
     setCharacterPosition,
     wakeUpCharacter,
     handleBedClick,
-    updateFrame
+    updateFrame,
 })
 </script>
 
 <template>
     <div class="player-layer">
-        <svg
+        <!-- 本地玩家层 -->
+        <LocalPlayerLayer
+            ref="localPlayerLayerRef"
             :width="width"
             :height="height"
-            class="character-svg"
-            :class="{ 'lights-off': !isLightOn }"
-        >
-            <!-- 角色（仅在不睡觉时显示） -->
-            <CharacterSvg
-                v-if="isCharacterVisible"
-                ref="characterRef"
-                :x="character.x"
-                :y="character.y"
-                :width="character.width"
-                :height="character.height"
-                :direction="character.direction"
-                :is-moving="character.isMoving"
-            />
-        </svg>
+            :beds="beds"
+            :is-light-on="isLightOn"
+            :character="character"
+            @character-sleep="handleLocalCharacterSleep"
+            @character-wake="handleLocalCharacterWake"
+            @update-character="handleLocalCharacterUpdate"
+        />
 
-        <!-- 使用DOM方式的气泡框 -->
-        <SpeechBubble
-            :message="character.bubbleMessage"
-            :character-x="characterPosition.x"
-            :character-y="characterPosition.y"
-            :character-width="characterPosition.width"
-            :character-height="characterPosition.height"
+        <!-- 远程玩家层 -->
+        <RemotePlayerLayer
+            ref="remotePlayerLayerRef"
+            :width="width"
+            :height="height"
+            :beds="beds"
+            :is-light-on="isLightOn"
+            :characters="characters"
+            :local-character-id="character.id"
         />
     </div>
 </template>
@@ -435,21 +147,4 @@ defineExpose({
     height: 100%;
     pointer-events: none;
 }
-
-.character-svg {
-    display: block;
-    position: absolute;
-    top: 0;
-    left: 0;
-    pointer-events: none;
-}
-
-.character-svg * {
-    pointer-events: auto;
-}
-
-/* 灯光关闭时的效果 */
-.character-svg.lights-off {
-    filter: brightness(0.7);
-}
-</style> 
+</style>

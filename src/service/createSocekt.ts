@@ -2,6 +2,7 @@
 import type { Socket } from 'socket.io-client'
 import { io } from 'socket.io-client'
 import useToken from '../utils/token'
+import type { Character } from '@/types'
 
 interface Person {
     name: string // 用户名
@@ -25,8 +26,7 @@ enum SocketListenerEvent {
     ERROR = 'error',
     PERSON_JOINED = 'personJoined',
     PERSON_LEFT = 'personLeft',
-    POSITION_UPDATED = 'positionUpdated',
-    SLEEP_STATE_UPDATED = 'sleepStateUpdated',
+    CHARACTER_UPDATED = 'characterUpdated',
     NEW_MESSAGE = 'newMessage',
     DISCONNECT = 'disconnect',
     JOIN_ROOM_SUCCESS = 'joinRoomSuccess',
@@ -35,8 +35,7 @@ enum SocketListenerEvent {
 enum SocketEmitEvent {
     JOIN_ROOM = 'joinRoom',
     LEAVE_ROOM = 'leaveRoom',
-    UPDATE_POSITION = 'updatePosition',
-    UPDATE_SLEEP_STATE = 'updateSleepState',
+    CHARACTER_UPDATE = 'characterUpdate',   
     SEND_MESSAGE = 'sendMessage',
 }
 
@@ -54,8 +53,7 @@ class SocketService {
     } = {
             [SocketListenerEvent.PERSON_JOINED]: [],
             [SocketListenerEvent.PERSON_LEFT]: [],
-            [SocketListenerEvent.POSITION_UPDATED]: [],
-            [SocketListenerEvent.SLEEP_STATE_UPDATED]: [],
+            [SocketListenerEvent.CHARACTER_UPDATED]: [],
             [SocketListenerEvent.NEW_MESSAGE]: [],
             [SocketListenerEvent.DISCONNECT]: [],
             [SocketListenerEvent.JOIN_ROOM_SUCCESS]: [],
@@ -175,10 +173,13 @@ class SocketService {
         })
 
         // 处理新用户加入
-        this.socket.on(SocketListenerEvent.PERSON_JOINED, (data) => {
-            console.log('新用户加入:', data.person.name)
-            this.triggerEvent(SocketListenerEvent.PERSON_JOINED, data.person)
-        })
+        this.socket.on(
+            SocketListenerEvent.PERSON_JOINED,
+            (data: { person: Person, people: Person[], messages: Message[] }) => {
+                console.log('新用户加入:', data.person.name)
+                this.triggerEvent(SocketListenerEvent.PERSON_JOINED, data)
+            },
+        )
 
         // 处理用户离开
         this.socket.on(SocketListenerEvent.PERSON_LEFT, (data) => {
@@ -186,14 +187,9 @@ class SocketService {
             this.triggerEvent(SocketListenerEvent.PERSON_LEFT, data.userId)
         })
 
-        // 处理位置更新
-        this.socket.on(SocketListenerEvent.POSITION_UPDATED, (data) => {
-            this.triggerEvent(SocketListenerEvent.POSITION_UPDATED, data)
-        })
-
-        // 处理睡眠状态更新
-        this.socket.on(SocketListenerEvent.SLEEP_STATE_UPDATED, (data) => {
-            this.triggerEvent(SocketListenerEvent.SLEEP_STATE_UPDATED, data)
+        // 处理角色更新 （位置、睡眠状态）
+        this.socket.on(SocketListenerEvent.CHARACTER_UPDATED, (data) => {
+            this.triggerEvent(SocketListenerEvent.CHARACTER_UPDATED, data)
         })
 
         // 处理新消息
@@ -221,13 +217,14 @@ class SocketService {
 
             this.socket.emit(SocketEmitEvent.JOIN_ROOM, { roomId })
 
+            console.log('加入房间 --- 1', roomId)
+
             // 监听加入房间成功的事件
             this.socket.once(SocketListenerEvent.JOIN_ROOM_SUCCESS, (response) => {
                 this.roomId = response.roomId
                 this.userId = response.person.id
                 this.username = response.person.name
 
-                console.log(`成功加入房间 ${roomId}`)
                 resolve(response)
             })
         })
@@ -247,24 +244,14 @@ class SocketService {
         })
     }
 
-    // 更新位置
-    async updatePosition(x: number, y: number): Promise<void> {
+    // 更新角色
+    async updateCharacter(character: Character): Promise<void> {
         if (!this.socket || !this.roomId) {
-            console.error('无法更新位置: 未连接或未加入房间')
+            console.error('无法更新角色: 未连接或未加入房间')
             return
         }
 
-        this.socket.emit(SocketEmitEvent.UPDATE_POSITION, { x, y })
-    }
-
-    // 更新睡眠状态
-    async updateSleepState(isSleeping: boolean, bed?: number): Promise<void> {
-        if (!this.socket || !this.roomId) {
-            console.error('无法更新睡眠状态: 未连接或未加入房间')
-            return
-        }
-
-        this.socket.emit(SocketEmitEvent.UPDATE_SLEEP_STATE, { isSleeping, bed })
+        this.socket.emit(SocketEmitEvent.CHARACTER_UPDATE, character)
     }
 
     // 发送消息

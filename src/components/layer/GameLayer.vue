@@ -6,9 +6,10 @@
  * 床位层：
  *  - 床位层负责渲染床位
  * 玩家层：
- *  - 玩家层负责渲染玩家 以及玩家对话产生的气泡
+ *  - 玩家层分为本地玩家和远端玩家 本地玩家会负责渲染本地玩家 远端玩家会负责渲染远端玩家
  */
 
+import type { Bed, Character } from '@/types.d'
 import { computed, onMounted, reactive, ref } from 'vue'
 import NightstandModal from '../NightstandModal.vue'
 import NightstandItems from '../svg/NightstandItems.vue'
@@ -16,34 +17,17 @@ import NightstandSvg from '../svg/NightstandSvg.vue'
 import BedLayer from './BedLayer.vue'
 import PlayerLayer from './PlayerLayer.vue'
 
-// 类型定义
-interface Bed {
-    id: number
-    x: number
-    y: number
-    width: number
-    height: number
-    isOccupied: boolean
-}
-
-interface Character {
-    x: number
-    y: number
-    width: number
-    height: number
-    speed: number
-    isSleeping: boolean
-    currentBedIndex: number
-    direction: 'up' | 'down' | 'left' | 'right'
-    isMoving: boolean
-    bubbleMessage: string | null
-}
-
 // 定义属性
 const props = defineProps<{
     width?: number
     height?: number
     bedCount: number
+    characters: Character[]
+}>()
+
+// 定义emit
+const emit = defineEmits<{
+    (e: 'update-character', character: Character): void
 }>()
 
 // 游戏尺寸
@@ -51,14 +35,15 @@ const containerRef = ref<HTMLDivElement | null>(null)
 const containerWidth = computed(() => props.width || window.innerWidth)
 const containerHeight = computed(() => props.height || window.innerHeight)
 
-// 游戏状态
+// 床的集合
 const beds = reactive<Bed[]>([])
+// 本地玩家状态
 const character = reactive<Character>({
     x: 100,
     y: 100,
     width: 30,
     height: 30,
-    speed: 3,
+    speed: 1,
     isSleeping: false,
     currentBedIndex: -1,
     direction: 'down',
@@ -100,9 +85,6 @@ const nightstandPosition = computed(() => {
     }
 })
 
-// 放大的zZZ
-const largeZZZ = computed(() => nightstandItems.melatonin && character.isSleeping)
-
 // 组件引用
 const bedLayerRef = ref<InstanceType<typeof BedLayer> | null>(null)
 const playerLayerRef = ref<InstanceType<typeof PlayerLayer> | null>(null)
@@ -124,16 +106,18 @@ function handleCharacterSleep(bedIndex: number) {
     if (bedLayerRef.value) {
         bedLayerRef.value.updateBedOccupation(bedIndex, true)
     }
-    
+
     // 更新角色状态
     character.isSleeping = true
     character.currentBedIndex = bedIndex
-    
+
     // 显示床头柜
     nightstandVisible.value = true
-    
+
     // 保存床头柜状态
     saveNightstandItems()
+
+    emit('update-character', character)
 }
 
 // 处理角色醒来
@@ -142,21 +126,24 @@ function handleCharacterWake() {
     if (character.currentBedIndex >= 0) {
         bedLayerRef.value?.updateBedOccupation(character.currentBedIndex, false)
     }
-    
+
     // 更新角色状态
     character.isSleeping = false
     character.currentBedIndex = -1
-    
+
     // 隐藏床头柜
     nightstandVisible.value = false
-    
+
     // 清除床头柜可见性状态
     localStorage.removeItem('nightstandVisible')
+
+    emit('update-character', character)
 }
 
 // 更新角色信息
 function handleCharacterUpdate(updatedCharacter: Character) {
     Object.assign(character, updatedCharacter)
+    emit('update-character', character)
 }
 
 // 床头柜点击处理
@@ -196,31 +183,15 @@ function loadNightstandItems() {
     }
 }
 
-// 初始化游戏
-onMounted(() => {
-    // 加载床头柜状态
-    loadNightstandItems()
-    
-    // 启动游戏循环
-    lastTime = 0
-    gameLoop()
-})
-
 // 角色移动的游戏循环
 let lastTime = 0
 function gameLoop(time = 0) {
     const deltaTime = time - lastTime
     lastTime = time
-
-    // 调用子组件暴露的更新方法
-    if (playerLayerRef.value) {
-        playerLayerRef.value.updateFrame(deltaTime)
-    }
-    
-    if (bedLayerRef.value) {
-        bedLayerRef.value.updateFrame(deltaTime)
-    }
-
+    // 玩家组件frame更新
+    playerLayerRef.value!.updateFrame(deltaTime)
+    // 床位组件frame更新
+    bedLayerRef.value!.updateFrame(deltaTime)
     // 触发下一帧
     requestAnimationFrame(gameLoop)
 }
@@ -264,6 +235,14 @@ function setBubbleMessage(message: string) {
     playerLayerRef.value?.setBubbleMessage(message)
 }
 
+// 初始化游戏
+onMounted(() => {
+    // 加载床头柜状态
+    loadNightstandItems()
+    // 启动游戏循环
+    gameLoop()
+})
+
 // 暴露方法给父组件使用
 defineExpose({
     setBubbleMessage,
@@ -290,7 +269,7 @@ defineExpose({
             @bed-clicked="handleBedClicked"
             @update-beds="handleBedsUpdate"
         />
-        
+
         <!-- 玩家层 -->
         <PlayerLayer
             ref="playerLayerRef"
@@ -298,11 +277,12 @@ defineExpose({
             :height="containerHeight"
             :beds="beds"
             :is-light-on="isLightOn"
+            :characters="characters"
             @character-sleep="handleCharacterSleep"
             @character-wake="handleCharacterWake"
             @update-character="handleCharacterUpdate"
         />
-        
+
         <!-- 床头柜相关 -->
         <svg
             :width="containerWidth"
@@ -331,30 +311,6 @@ defineExpose({
                 :show-lamp="nightstandItems.lamp"
                 :show-music-notes="nightstandItems.musicPlayer"
             />
-            
-            <!-- 睡觉 zZZ 效果 -->
-            <text
-                v-if="character.isSleeping && character.currentBedIndex >= 0"
-                :x="beds[character.currentBedIndex].x + beds[character.currentBedIndex].width * 0.7"
-                :y="beds[character.currentBedIndex].y + 15"
-                :font-size="largeZZZ ? '24' : '16'"
-                fill="#5C6BC0"
-                opacity="0.8"
-            >
-                zZZ
-                <animate
-                    attributeName="opacity"
-                    values="0.8;0.3;0.8"
-                    dur="3s"
-                    repeatCount="indefinite"
-                />
-                <animate
-                    attributeName="y"
-                    :values="`${beds[character.currentBedIndex].y + 15};${beds[character.currentBedIndex].y + 5};${beds[character.currentBedIndex].y + 15}`"
-                    dur="3s"
-                    repeatCount="indefinite"
-                />
-            </text>
         </svg>
 
         <!-- 床头柜弹窗 -->
