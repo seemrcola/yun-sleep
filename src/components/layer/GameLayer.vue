@@ -190,9 +190,13 @@ function gameLoop(time = 0) {
     const deltaTime = time - lastTime
     lastTime = time
     // 玩家组件frame更新
-    playerLayerRef.value!.updateFrame(deltaTime)
+    if (playerLayerRef.value) {
+        playerLayerRef.value.updateFrame(deltaTime)
+    }
     // 床位组件frame更新
-    bedLayerRef.value!.updateFrame(deltaTime)
+    if (bedLayerRef.value) {
+        bedLayerRef.value.updateFrame(deltaTime)
+    }
     // 触发下一帧
     requestAnimationFrame(gameLoop)
 }

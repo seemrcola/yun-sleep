@@ -166,31 +166,42 @@ class SocketService {
         this.socket.on(
             SocketListenerEvent.PERSON_JOINED,
             (data: { character: Character, characters: Character[], messages: Message[] }) => {
-                console.log('新用户加入:', data.character.username)
                 this.triggerEvent(SocketListenerEvent.PERSON_JOINED, data)
             },
         )
 
         // 处理用户离开
-        this.socket.on(SocketListenerEvent.PERSON_LEFT, (data) => {
-            console.log('用户离开:', data.userId)
-            this.triggerEvent(SocketListenerEvent.PERSON_LEFT, data.userId)
-        })
+        this.socket.on(
+            SocketListenerEvent.PERSON_LEFT,
+            (data: { userId: number }) => {
+                console.log('用户离开:', data.userId)
+                this.triggerEvent(SocketListenerEvent.PERSON_LEFT, data.userId)
+            },
+        )
 
         // 处理角色更新 （位置、睡眠状态）
-        this.socket.on(SocketListenerEvent.CHARACTER_UPDATED, (data) => {
-            this.triggerEvent(SocketListenerEvent.CHARACTER_UPDATED, data)
-        })
+        this.socket.on(
+            SocketListenerEvent.CHARACTER_UPDATED,
+            (data: { characters: Character[] }) => {
+                this.triggerEvent(SocketListenerEvent.CHARACTER_UPDATED, data)
+            },
+        )       
 
         // 处理新消息
-        this.socket.on(SocketListenerEvent.NEW_MESSAGE, (data) => {
-            this.triggerEvent(SocketListenerEvent.NEW_MESSAGE, data)
-        })
+        this.socket.on(
+            SocketListenerEvent.NEW_MESSAGE,
+            (data: { message: Message, sender: string, timestamp: Date }) => {
+                this.triggerEvent(SocketListenerEvent.NEW_MESSAGE, data)
+            },
+        )
 
         // 监听断开连接
-        this.socket.on(SocketListenerEvent.DISCONNECT, (reason) => {
-            console.log('Socket.IO 连接断开:', reason)
-        })
+        this.socket.on(
+            SocketListenerEvent.DISCONNECT,
+            (reason: string) => {
+                console.log('Socket.IO 连接断开:', reason)
+            },
+        )
     }
 
     // 加入房间
@@ -208,12 +219,23 @@ class SocketService {
             this.socket.emit(SocketEmitEvent.JOIN_ROOM, { roomId })
 
             // 监听加入房间成功的事件
-            this.socket.once(SocketListenerEvent.JOIN_ROOM_SUCCESS, (response) => {
-                this.roomId = response.roomId
-                this.userId = response.person.id
-                this.username = response.person.name
+            this.socket.once(
+                SocketListenerEvent.JOIN_ROOM_SUCCESS,
+                ({ roomId, character, characters, messages }: {
+                    roomId: number
+                    character: Character
+                    characters: Character[]
+                    messages: Message[]
+                }) => {
+                    this.roomId = roomId
+                    this.userId = character.id as number
+                    this.username = character.username as string
 
-                resolve(response)
+                    resolve({
+                        character,
+                        characters,
+                        messages,
+                    })
             })
         })
     }

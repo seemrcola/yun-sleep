@@ -8,6 +8,7 @@ export interface Bed {
     isOccupied: boolean
 }
 
+// 角色
 export interface Character {
     id?: number
     username?: string

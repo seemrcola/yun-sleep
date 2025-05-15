@@ -49,9 +49,13 @@ function addMessage(msg: Partial<Message>) {
 
 // 监听消息
 function setupSocketListener() {
-    socketService.on(SocketListenerEvent.NEW_MESSAGE, (message) => {
-        addMessage(message)
-    })
+    socketService.on(
+        SocketListenerEvent.NEW_MESSAGE,
+        (msg: Partial<Message>) => {
+            console.log(msg, '1-1-1-1-1-')
+            addMessage(msg)
+        },
+    )
 }
 
 // 暴露方法给父组件
