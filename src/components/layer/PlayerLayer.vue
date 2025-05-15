@@ -8,11 +8,12 @@ import { useUserStore } from '@/store/user'
 const userStore = useUserStore()
 
 // 定义接收的属性
-defineProps<{
+const props = defineProps<{
     width?: number
     height?: number
     beds: any[] // 床位数据
     isLightOn: boolean
+    roomId: number
     characters: Character[] // 远程角色数据
 }>()
 
@@ -27,7 +28,7 @@ const emit = defineEmits<{
 const character = reactive<Character>({
     id: userStore.user.id,
     username: userStore.user.username,
-    room: -1,
+    room: props.roomId || -1,
     x: 100,
     y: 100,
     width: 30,

@@ -181,6 +181,7 @@ onUnmounted(() => {
                     :width="gameWidth * 0.75"
                     :height="gameHeight"
                     :bed-count="24"
+                    :room-id="Number(innId)"
                     :characters="characters"
                     @update-character="handleUpdateCharacter"
                 />
