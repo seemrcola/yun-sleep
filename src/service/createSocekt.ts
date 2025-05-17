@@ -1,8 +1,8 @@
+import type { Character } from '@/types'
 // Socket.io 客户端实现
 import type { Socket } from 'socket.io-client'
 import { io } from 'socket.io-client'
 import useToken from '../utils/token'
-import type { Character } from '@/types'
 
 interface Message {
     sender: 'bot' | 'user' | 'system' // 消息类型
@@ -25,7 +25,7 @@ enum SocketListenerEvent {
 enum SocketEmitEvent {
     JOIN_ROOM = 'joinRoom',
     LEAVE_ROOM = 'leaveRoom',
-    CHARACTER_UPDATE = 'characterUpdate',   
+    CHARACTER_UPDATE = 'characterUpdate',
     SEND_MESSAGE = 'sendMessage',
 }
 
@@ -185,7 +185,7 @@ class SocketService {
             (data: { characters: Character[] }) => {
                 this.triggerEvent(SocketListenerEvent.CHARACTER_UPDATED, data)
             },
-        )       
+        )
 
         // 处理新消息
         this.socket.on(
@@ -236,7 +236,8 @@ class SocketService {
                         characters,
                         messages,
                     })
-            })
+                },
+            )
         })
     }
 
@@ -265,7 +266,7 @@ class SocketService {
     }
 
     // 发送消息
-    async sendMessage(message: { content: string }): Promise<void> {
+    async sendMessage(message: { content: string | null }): Promise<void> {
         if (!this.socket || !this.roomId) {
             console.error('无法发送消息: 未连接或未加入房间')
             return

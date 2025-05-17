@@ -324,6 +324,7 @@ defineExpose({
 
         <!-- 本地用户的气泡框 -->
         <SpeechBubble
+            v-if="character.bubbleMessage"
             :message="character.bubbleMessage"
             :character-x="characterPosition.x"
             :character-y="characterPosition.y"

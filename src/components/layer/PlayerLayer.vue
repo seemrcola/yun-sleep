@@ -1,11 +1,9 @@
 <script setup lang="ts">
 import type { Character } from '@/types.d'
+import { useUserStore } from '@/store/user'
 import { onMounted, reactive, ref } from 'vue'
 import LocalPlayerLayer from './LocalPlayerLayer.vue'
 import RemotePlayerLayer from './RemotePlayerLayer.vue'
-import { useUserStore } from '@/store/user'
-
-const userStore = useUserStore()
 
 // 定义接收的属性
 const props = defineProps<{
@@ -23,6 +21,8 @@ const emit = defineEmits<{
     'character-wake': []
     'update-character': [character: Partial<Character>]
 }>()
+
+const userStore = useUserStore()
 
 // 本地角色状态
 const character = reactive<Character>({

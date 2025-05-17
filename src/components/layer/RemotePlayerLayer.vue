@@ -69,6 +69,7 @@ defineExpose({
 
         <!-- 远程用户的气泡框 -->
         <template v-for="remoteChar in characters" :key="`bubble-${remoteChar.id}`">
+            {{ remoteChar.bubbleMessage }}
             <SpeechBubble
                 v-if="isRemoteUser(remoteChar) && remoteChar.bubbleMessage"
                 :message="remoteChar.bubbleMessage"

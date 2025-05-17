@@ -50,6 +50,12 @@ function handleMessageInput(text: string) {
         gameLayerRef.value.setBubbleMessage(text)
         // socket发送消息
         socketService.sendMessage({ content: text })
+        // 十秒钟后将气泡消息清空
+        // 这里的清空逻辑就是 将气泡消息设置为空并通知socket 这样socket下一次就会推送无气泡消息的用户信息
+        setTimeout(() => {
+            gameLayerRef.value!.setBubbleMessage('')
+            socketService.sendMessage({ content: null })
+        }, 10 * 1_000)
     }
 }
 
@@ -94,7 +100,7 @@ function handleWindowResize() {
 // 链接进入socket客栈
 function listenSocketRoomEvent() {
     // 链接socket客栈
-    socketService.on(   
+    socketService.on(
         SocketListenerEvent.PERSON_JOINED,
         ({ characters: people }) => {
             characters.value = people
@@ -105,7 +111,7 @@ function listenSocketRoomEvent() {
         SocketListenerEvent.CHARACTER_UPDATED,
         ({ characters: people }) => {
             characters.value = people
-        }
+        },
     )
 }
 

@@ -52,7 +52,6 @@ function setupSocketListener() {
     socketService.on(
         SocketListenerEvent.NEW_MESSAGE,
         (msg: Partial<Message>) => {
-            console.log(msg, '1-1-1-1-1-')
             addMessage(msg)
         },
     )
@@ -84,48 +83,48 @@ onMounted(() => {
 
         <!-- 消息容器 -->
         <div ref="chatContainer" class="messages-container">
-            <div
+            <template
                 v-for="message in messages"
                 :key="message.id"
-                class="message"
-                :class="message.sender"
             >
-                <!-- 所有消息的头像都在左侧显示 -->
-                <div class="message-avatar">
-                    <!-- Bot头像 -->
-                    <div v-if="message.sender === 'bot'" class="avatar bot-avatar">
-                        <svg viewBox="0 0 24 24" width="20" height="20">
-                            <rect x="7" y="4" width="10" height="16" rx="2" fill="currentColor" />
-                            <rect x="9" y="8" width="2" height="2" rx="1" fill="white" />
-                            <rect x="13" y="8" width="2" height="2" rx="1" fill="white" />
-                            <rect x="9" y="13" width="6" height="2" rx="1" fill="white" />
-                            <path d="M5 10V14H3V10H5Z" fill="currentColor" />
-                            <path d="M21 10V14H19V10H21Z" fill="currentColor" />
-                        </svg>
+                <div v-if="message.content" class="message" :class="message.sender">
+                    <!-- 所有消息的头像都在左侧显示 -->
+                    <div class="message-avatar">
+                        <!-- Bot头像 -->
+                        <div v-if="message.sender === 'bot'" class="avatar bot-avatar">
+                            <svg viewBox="0 0 24 24" width="20" height="20">
+                                <rect x="7" y="4" width="10" height="16" rx="2" fill="currentColor" />
+                                <rect x="9" y="8" width="2" height="2" rx="1" fill="white" />
+                                <rect x="13" y="8" width="2" height="2" rx="1" fill="white" />
+                                <rect x="9" y="13" width="6" height="2" rx="1" fill="white" />
+                                <path d="M5 10V14H3V10H5Z" fill="currentColor" />
+                                <path d="M21 10V14H19V10H21Z" fill="currentColor" />
+                            </svg>
+                        </div>
+                        <!-- 用户头像 -->
+                        <div v-else class="avatar user-avatar">
+                            <svg viewBox="0 0 24 24" width="20" height="20">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 4c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm0 14c-2.03 0-4.43-.82-6.14-2.88C7.55 15.8 9.68 15 12 15s4.45.8 6.14 2.12C16.43 19.18 14.03 20 12 20z" fill="currentColor" />
+                            </svg>
+                        </div>
                     </div>
-                    <!-- 用户头像 -->
-                    <div v-else class="avatar user-avatar">
-                        <svg viewBox="0 0 24 24" width="20" height="20">
-                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 4c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm0 14c-2.03 0-4.43-.82-6.14-2.88C7.55 15.8 9.68 15 12 15s4.45.8 6.14 2.12C16.43 19.18 14.03 20 12 20z" fill="currentColor" />
-                        </svg>
-                    </div>
-                </div>
 
-                <div class="message-content-wrapper">
-                    <!-- 发送者名称 -->
-                    <div class="sender-name">
-                        {{ message.sender === 'bot' ? 'BOT' : message.username }}
-                    </div>
-                    <div class="message-bubble">
-                        <div class="message-content">
-                            {{ message.content }}
+                    <div class="message-content-wrapper">
+                        <!-- 发送者名称 -->
+                        <div class="sender-name">
+                            {{ message.sender === 'bot' ? 'BOT' : message.username }}
                         </div>
-                        <div class="message-time">
-                            {{ message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}
+                        <div class="message-bubble">
+                            <div class="message-content">
+                                {{ message.content }}
+                            </div>
+                            <div class="message-time">
+                                {{ message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            </template>
         </div>
     </div>
 </template>
