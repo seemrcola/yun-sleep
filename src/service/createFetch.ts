@@ -41,6 +41,11 @@ export function createFetch(defaultConfig: RequestConfig = {}) {
             return data.data
         }
         else {
+            if (data.message === '无效的token') {
+                useToken.removeToken()
+                // 处理无效token导航到登录页的逻辑，不直接使用router
+                window.location.href = '/login'
+            }
             Message.error(data.message || '请求失败')
             throw new Error(data.message || '请求失败')
         }
