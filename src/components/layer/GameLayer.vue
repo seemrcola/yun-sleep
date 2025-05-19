@@ -36,8 +36,6 @@ const containerRef = ref<HTMLDivElement | null>(null)
 const containerWidth = computed(() => props.width || window.innerWidth)
 const containerHeight = computed(() => props.height || window.innerHeight)
 
-console.log(props, '---')
-
 // 床的集合
 const beds = reactive<Bed[]>([])
 // 本地玩家状态

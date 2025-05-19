@@ -10,11 +10,12 @@ import OperationBar from '@/components/OperationBar.vue'
 import SleepTimeCard from '@/components/SleepTime.vue'
 import Television from '@/components/Television.vue'
 import XiaomiAi from '@/components/XiaoAi.vue'
+import ChatBox from './components/ChatBox.vue'
+import ControlDrawer from './components/ControlDrawer.vue'
+
 import { SocketListenerEvent, socketService } from '@/service/createSocekt'
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import ChatBox from './components/ChatBox.vue'
-import ControlDrawer from './components/ControlDrawer.vue'
 
 const route = useRoute()
 const router = useRouter()
