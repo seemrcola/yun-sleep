@@ -14,13 +14,15 @@ import ChatBox from './components/ChatBox.vue'
 import ControlDrawer from './components/ControlDrawer.vue'
 
 import { SocketListenerEvent, socketService } from '@/service/createSocekt'
+import { getRoomByIdAction } from './api'
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 const route = useRoute()
 const router = useRouter()
 const innId = route.params.id
-const roomName = ref(`云睡觉客栈 #${innId}`)
+const roomName = computed(() => `[云睡觉客栈] #${roomInfo.value?.name}`)
+const roomInfo = ref<any>(null)
 
 // 应用尺寸
 const windowWidth = ref(window.innerWidth)
@@ -32,6 +34,11 @@ const gameWidth = ref(1200) // 固定总宽度1200px (游戏区域900px + 聊天
 const gameHeight = ref(750) // 固定高度750px
 const layerWidth = computed(() => gameWidth.value * 0.75) // 900px
 const chatWidth = computed(() => gameWidth.value * 0.25) // 300px
+
+async function getRoomInfo() {
+    const roomInfoRes = await getRoomByIdAction({ roomId: innId as string })
+    roomInfo.value = roomInfoRes
+}
 
 // 我们这个宽高是根据 1920*1080 来设计的
 // 我们要根据屏幕的实际宽高来进行中心缩放
@@ -147,6 +154,7 @@ function exitRoom() {
 
 onMounted(() => {
     window.addEventListener('resize', handleWindowResize)
+    getRoomInfo()
     handleScale()
     listenSocketRoomEvent()
     socketService.joinRoom(Number(innId))
@@ -220,10 +228,11 @@ onUnmounted(() => {
             >
                 <!-- 游戏层 -->
                 <GameLayerSvg
+                    v-if="roomInfo"
                     ref="gameLayerRef"
                     :width="layerWidth"
                     :height="gameHeight"
-                    :bed-count="24"
+                    :bed-count="roomInfo?.capacity"
                     :room-id="Number(innId)"
                     :characters="characters"
                     @update-character="handleUpdateCharacter"
