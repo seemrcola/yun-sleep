@@ -36,6 +36,8 @@ const containerRef = ref<HTMLDivElement | null>(null)
 const containerWidth = computed(() => props.width || window.innerWidth)
 const containerHeight = computed(() => props.height || window.innerHeight)
 
+console.log(props, '---')
+
 // 床的集合
 const beds = reactive<Bed[]>([])
 // 本地玩家状态
@@ -260,7 +262,7 @@ defineExpose({
 <template>
     <div
         ref="containerRef"
-        class="game-container"
+        class="game-layer-svg-container"
         :class="{ 'lights-off': !isLightOn }"
         @click="handleContainerClick"
     >
@@ -330,7 +332,7 @@ defineExpose({
 </template>
 
 <style scoped>
-.game-container {
+.game-layer-svg-container {
   position: relative;
   width: 100%;
   height: 100%;
@@ -344,7 +346,7 @@ defineExpose({
 }
 
 /* 灯光关闭时的效果 */
-.game-container.lights-off {
+.game-layer-svg-container.lights-off {
   background-color: #1a2939; /* 深蓝色夜间背景 */
   filter: brightness(0.7);
 }

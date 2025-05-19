@@ -23,13 +23,26 @@ const innId = route.params.id
 const windowWidth = ref(window.innerWidth)
 const windowHeight = ref(window.innerHeight)
 
-// 游戏尺寸（屏幕的70%）
-const gameWidth = computed(() => Math.round(windowWidth.value * 0.7))
-const gameHeight = computed(() => Math.round(windowHeight.value * 0.7))
+// 游戏尺寸（固定尺寸）
+const gameContainerRef = ref<HTMLDivElement | null>(null)
+const gameWidth = ref(1200) // 固定总宽度1200px (游戏区域900px + 聊天区域300px)
+const gameHeight = ref(750) // 固定高度750px
+const layerWidth = computed(() => gameWidth.value * 0.75) // 900px
+const chatWidth = computed(() => gameWidth.value * 0.25) // 300px
 
-// 游戏的位置 - 略微靠右
-const gameLeft = computed(() => Math.round(windowWidth.value * 0.15))
-const gameTop = computed(() => Math.round((windowHeight.value - gameHeight.value) / 2))
+// 我们这个宽高是根据 1920*1080 来设计的
+// 我们要根据屏幕的实际宽高来进行中心缩放
+function handleScale() {
+    const scaleX = windowWidth.value / 1920
+    const scaleY = windowHeight.value / 1080
+    const scale = Math.min(scaleX, scaleY)
+
+    // 对游戏区域进行缩放
+    if (gameContainerRef.value) {
+        gameContainerRef.value.style.transform = `translate(-50%, -50%) scale(${scale})`
+        gameContainerRef.value.style.transformOrigin = 'center'
+    }
+}
 
 // 游戏层引用
 const gameLayerRef = ref<InstanceType<typeof GameLayerSvg> | null>(null)
@@ -124,8 +137,8 @@ function handleUpdateCharacter(character: Character) {
 
 onMounted(() => {
     window.addEventListener('resize', handleWindowResize)
+    handleScale()
     listenSocketRoomEvent()
-
     socketService.joinRoom(Number(innId))
 })
 
@@ -170,21 +183,21 @@ onUnmounted(() => {
         <AirConditioner />
 
         <!-- 电视机组件 - 从顶部降下 -->
-        <Television :width="gameWidth * 0.8" :height="gameHeight * 0.5" />
+        <Television :width="gameWidth * 0.8" :height="gameHeight * 0.7" />
 
         <div
-            class="game-container" :style="{
-                width: `${gameWidth}px`,
-                height: `${gameHeight}px`,
-                left: `${gameLeft}px`,
-                top: `${gameTop}px`,
-            }"
+            ref="gameContainerRef"
+            class="game-container"
+            :style="{ width: `${gameWidth}px`, height: `${gameHeight}px` }"
         >
-            <!-- 游戏层（床和角色） -->
-            <div class="game-layer-wrapper">
+            <div
+                class="game-layer-wrapper"
+                :style="{ width: `${layerWidth}px`, height: `${gameHeight}px` }"
+            >
+                <!-- 游戏层 -->
                 <GameLayerSvg
                     ref="gameLayerRef"
-                    :width="gameWidth * 0.75"
+                    :width="layerWidth"
                     :height="gameHeight"
                     :bed-count="24"
                     :room-id="Number(innId)"
@@ -192,12 +205,15 @@ onUnmounted(() => {
                     @update-character="handleUpdateCharacter"
                 />
 
-                <!-- 幕布层（位于其他所有层之上） -->
-                <CurtainLayer :width="gameWidth * 0.75" :height="gameHeight" />
+                <!-- 幕布（窗帘）层 -->
+                <CurtainLayer :width="layerWidth" :height="gameHeight" />
             </div>
 
             <!-- 聊天框 -->
-            <div class="chat-wrapper">
+            <div
+                class="chat-wrapper"
+                :style="{ width: `${chatWidth}px`, height: `${gameHeight}px` }"
+            >
                 <ChatBox ref="chatBoxRef" title="聊天交流" @send="handleChatSend" />
             </div>
         </div>
@@ -257,33 +273,24 @@ body {
 
 .game-container {
     position: absolute;
-    overflow: hidden;
+    left: 50%; /* 水平居中 */
+    top: 50%; /* 垂直居中 */
+    transform: translate(-50%, -50%); /* 精确居中定位 */
     border-radius: 10px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
     z-index: 5;
     display: flex;
-    flex-direction: row;
-    gap: 6px;
-    padding: 0;
     background: rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(5px);
-}
-
-.game-layer-wrapper {
-    width: 75%;
-    height: 100%;
-    position: relative;
+    border-radius: 8px;
     overflow: hidden;
-    border-radius: 8px 0 0 8px;
 }
 
 .chat-wrapper {
-    width: 25%;
-    height: 100%;
     padding: 0;
     display: flex;
     flex-direction: column;
-    overflow: hidden;
+    overflow: auto;
     backdrop-filter: blur(10px);
     background: rgba(255, 255, 255, 0.15);
 }
