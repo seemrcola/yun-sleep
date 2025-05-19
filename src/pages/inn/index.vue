@@ -12,12 +12,14 @@ import Television from '@/components/Television.vue'
 import XiaomiAi from '@/components/XiaoAi.vue'
 import { SocketListenerEvent, socketService } from '@/service/createSocekt'
 import { computed, onMounted, onUnmounted, ref } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import ChatBox from './components/ChatBox.vue'
 import ControlDrawer from './components/ControlDrawer.vue'
 
 const route = useRoute()
+const router = useRouter()
 const innId = route.params.id
+const roomName = ref(`云睡觉客栈 #${innId}`)
 
 // 应用尺寸
 const windowWidth = ref(window.innerWidth)
@@ -135,6 +137,12 @@ function handleUpdateCharacter(character: Character) {
     socketService.updateCharacter(character)
 }
 
+// 退出房间
+function exitRoom() {
+    socketService.leaveRoom()
+    router.push('/room')
+}
+
 onMounted(() => {
     window.addEventListener('resize', handleWindowResize)
     handleScale()
@@ -144,6 +152,7 @@ onMounted(() => {
 
 onUnmounted(() => {
     window.removeEventListener('resize', handleWindowResize)
+    socketService.leaveRoom()
 })
 </script>
 
@@ -177,6 +186,19 @@ onUnmounted(() => {
                     </button>
                 </template>
             </ControlDrawer>
+        </div>
+
+        <!-- 房间信息和退出按钮 - 右上角 -->
+        <div class="room-info-container">
+            <div class="room-info-panel">
+                <div class="room-name">{{ roomName }}</div>
+                <button class="exit-button" @click="exitRoom">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M17 16L21 12M21 12L17 8M21 12H9M13 16V17C13 18.6569 11.6569 20 10 20H6C4.34315 20 3 18.6569 3 17V7C3 5.34315 4.34315 4 6 4H10C11.6569 4 13 5.34315 13 7V8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <span>退出</span>
+                </button>
+            </div>
         </div>
 
         <!-- 空调组件 - 固定在页面顶部中央 -->
@@ -269,6 +291,57 @@ body {
     display: flex;
     flex-direction: column;
     gap: 16px;
+}
+
+/* 房间信息容器 - 右上角 */
+.room-info-container {
+    position: fixed;
+    right: 20px;
+    top: 20px;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.room-info-panel {
+    display: flex;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 8px;
+    backdrop-filter: blur(4px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+}
+
+.room-name {
+    padding: 10px 16px;
+    color: white;
+    font-weight: 600;
+    font-size: 14px;
+    border-right: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.exit-button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background: transparent;
+    color: #ff6b6b;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    font-size: 14px;
+}
+
+.exit-button:hover {
+    background: rgba(239, 68, 68, 0.2);
+}
+
+.exit-button:active {
+    background: rgba(239, 68, 68, 0.3);
 }
 
 .game-container {
