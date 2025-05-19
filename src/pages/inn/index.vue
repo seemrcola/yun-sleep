@@ -111,6 +111,7 @@ function handleChatSend(message: string) {
 function handleWindowResize() {
     windowWidth.value = window.innerWidth
     windowHeight.value = window.innerHeight
+    handleScale()
 }
 
 // 链接进入socket客栈
