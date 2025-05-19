@@ -223,20 +223,9 @@ function wakeUpCharacter() {
 }
 
 // 设置角色气泡消息
-let bubbleMessageTimer: number | null = null
 function setBubbleMessage(message: string) {
     // 设置消息
     props.character.bubbleMessage = message
-
-    // 清除之前的计时器（如果有）
-    if (bubbleMessageTimer) {
-        clearTimeout(bubbleMessageTimer)
-    }
-
-    // 设置10秒后消失的计时器
-    bubbleMessageTimer = window.setTimeout(() => {
-        props.character.bubbleMessage = null
-    }, 10 * 1000)
 }
 
 // 初始化游戏
@@ -279,11 +268,6 @@ onUnmounted(() => {
     // 移除键盘事件监听
     window.removeEventListener('keydown', handleKeyDown)
     window.removeEventListener('keyup', handleKeyUp)
-
-    // 清除消息气泡计时器
-    if (bubbleMessageTimer) {
-        clearTimeout(bubbleMessageTimer)
-    }
 })
 
 // 为父组件的游戏循环提供一个update方法
