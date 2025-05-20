@@ -175,31 +175,10 @@ function handleTouchEnd(event: TouchEvent) {
             fill="url(#mattress-gradient)"
             opacity="0.5"
         />
-
-        <!-- 床垫缝线 -->
-        <path
-            d="M3,45 H57 M3,65 H57"
-            stroke="#D7CCC8"
-            stroke-width="0.7"
-            stroke-dasharray="1,1"
-        />
-
-        <!-- 床垫绗缝线 -->
-        <path
-            d="M20,3 V87 M40,3 V87"
-            stroke="#D7CCC8"
-            stroke-width="0.5"
-            stroke-dasharray="1,1"
-        />
-
-        <!-- 绗缝床垫图案 -->
-        <g opacity="0.2">
-            <path d="M10,15 L13,12 M10,25 L13,22 M10,35 L13,32 M10,55 L13,52 M10,75 L13,72" stroke="#D7CCC8" stroke-width="0.5" />
-            <path d="M30,15 L33,12 M30,25 L33,22 M30,35 L33,32 M30,55 L33,52 M30,75 L33,72" stroke="#D7CCC8" stroke-width="0.5" />
-            <path d="M50,15 L53,12 M50,25 L53,22 M50,35 L53,32 M50,55 L53,52 M50,75 L53,72" stroke="#D7CCC8" stroke-width="0.5" />
-        </g>
-
-        <!-- 枕头 - 俯视图带增强3D效果 -->
+        
+        <!-- 移除床垫虚线 -->
+        
+        <!-- 添加浅蓝色枕头 -->
         <rect
             x="10"
             y="10"
@@ -207,8 +186,8 @@ function handleTouchEnd(event: TouchEvent) {
             height="20"
             rx="3"
             ry="3"
-            fill="url(#pillow-gradient)"
-            stroke="#E0E0E0"
+            fill="url(#light-blue-pillow-gradient)"
+            stroke="#A8D8F0"
             stroke-width="0.7"
         />
 
@@ -227,7 +206,7 @@ function handleTouchEnd(event: TouchEvent) {
         <!-- 枕头凹痕/折痕 -->
         <path
             d="M30,10 V30"
-            stroke="#E0E0E0"
+            stroke="#A8D8F0"
             stroke-width="0.5"
             stroke-dasharray="1,1"
         />
@@ -235,124 +214,121 @@ function handleTouchEnd(event: TouchEvent) {
         <!-- 枕头边角阴影增加3D效果 -->
         <path
             d="M10,15 Q12,12 15,10 M50,15 Q48,12 45,10 M10,25 Q12,28 15,30 M50,25 Q48,28 45,30"
-            stroke="#D0D0D0"
+            stroke="#87CEEB"
             stroke-width="0.3"
             fill="none"
         />
-
-        <!-- 被子带折线 - 俯视图 -->
-        <rect
-            x="10"
-            y="40"
-            width="40"
-            height="40"
-            fill="url(#blanket-gradient)"
-            stroke="#3F51B5"
-            stroke-width="0.5"
-        />
-
-        <!-- 被子折线/折痕 - 更多细节 -->
-        <path
-            d="M10,50 H50 M10,55 H50 M10,60 H50 M10,65 H50 M10,70 H50 M10,75 H50"
-            stroke="#3F51B5"
-            stroke-width="0.4"
-            stroke-opacity="0.3"
-        />
-
-        <!-- 被子上的压痕纹理 -->
-        <path
-            d="M13,40 C15,45 15,50 13,55 C15,60 15,65 13,70 C15,75 15,80 13,80"
-            stroke="#3F51B5"
-            stroke-width="0.3"
-            stroke-opacity="0.4"
-            fill="none"
-        />
-        <path
-            d="M23,40 C25,45 25,50 23,55 C25,60 25,65 23,70 C25,75 25,80 23,80"
-            stroke="#3F51B5"
-            stroke-width="0.3"
-            stroke-opacity="0.4"
-            fill="none"
-        />
-        <path
-            d="M37,40 C35,45 35,50 37,55 C35,60 35,65 37,70 C35,75 35,80 37,80"
-            stroke="#3F51B5"
-            stroke-width="0.3"
-            stroke-opacity="0.4"
-            fill="none"
-        />
-        <path
-            d="M47,40 C45,45 45,50 47,55 C45,60 45,65 47,70 C45,75 45,80 47,80"
-            stroke="#3F51B5"
-            stroke-width="0.3"
-            stroke-opacity="0.4"
-            fill="none"
-        />
-
-        <!-- 被子边缘高光 -->
-        <path
-            d="M10,40 H50"
-            stroke="#FFFFFF"
-            stroke-width="1"
-            stroke-opacity="0.5"
-        />
-
-        <!-- 被子折角 - 更丰富 -->
-        <path
-            d="M10,40 L15,45 M50,40 L45,45"
-            stroke="#3F51B5"
-            stroke-width="0.5"
-            stroke-opacity="0.7"
-        />
-        <path
-            d="M10,80 L15,75 M50,80 L45,75"
-            stroke="#3F51B5"
-            stroke-width="0.5"
-            stroke-opacity="0.7"
-        />
-
-        <!-- 被子顶部翻折 -->
-        <path
-            d="M10,40 Q30,35 50,40"
-            fill="url(#blanket-fold-gradient)"
-            stroke="#3F51B5"
-            stroke-width="0.4"
-        />
-
-        <!-- 被子纹理图案 -->
-        <rect
-            x="10"
-            y="40"
-            width="40"
-            height="40"
-            fill="url(#blanket-pattern)"
-            opacity="0.4"
-        />
-
-        <!-- 床上有人时显示 -->
-        <g v-if="isOccupied" class="sleeping-person">
-            <!-- 被子下身体形状带3D效果 -->
-            <ellipse
-                cx="30"
-                cy="60"
-                rx="20"
-                ry="25"
-                fill="url(#body-gradient)"
-                filter="url(#bump)"
-                opacity="0.9"
+        
+        <!-- 无人睡觉时显示叠好的淡黄色被子在左下角 -->
+        <g v-if="!isOccupied" class="folded-blanket">
+            <!-- 叠好的被子 - 正方形，更大尺寸放在床中间 -->
+            <rect
+                x="10"
+                y="40"
+                width="40"
+                height="40"
+                rx="3"
+                ry="3"
+                fill="url(#yellow-blanket-gradient)"
+                stroke="#D4B957"
+                stroke-width="0.5"
             />
 
-            <!-- 被子围绕身体的褶皱 - 增强版 -->
+            <!-- 被子上的对折线 -->
             <path
-                d="M15,45 Q30,53 45,45 M12,55 Q30,68 48,55 M15,75 Q30,67 45,75"
-                stroke="#3F51B5"
+                d="M10,50 H50 M10,60 H50 M10,70 H50"
+                stroke="#D4B957"
+                stroke-width="0.5"
+                opacity="0.7"
+            />
+
+            <!-- 被子厚度表现 - 叠层效果 -->
+            <rect
+                x="12"
+                y="40"
+                width="36"
+                height="8"
+                rx="2"
+                ry="2"
+                fill="url(#yellow-blanket-fold)"
+                stroke="#D4B957"
+                stroke-width="0.3"
+            />
+            <rect
+                x="12"
+                y="48"
+                width="36"
+                height="8"
+                rx="2"
+                ry="2"
+                fill="url(#yellow-blanket-fold)"
+                stroke="#D4B957"
+                stroke-width="0.3"
+            />
+            <rect
+                x="12"
+                y="56"
+                width="36"
+                height="8"
+                rx="2"
+                ry="2"
+                fill="url(#yellow-blanket-fold)"
+                stroke="#D4B957"
+                stroke-width="0.3"
+            />
+
+            <!-- 被子立体感 -->
+            <path
+                d="M10,40 Q30,38 50,40 M10,48 Q30,46 50,48 M10,56 Q30,54 50,56"
+                stroke="#FFFFFF"
+                stroke-width="0.4"
+                opacity="0.6"
+                fill="none"
+            />
+
+            <!-- 被子边缘阴影 -->
+            <path
+                d="M10,40 L10,80 M50,40 L50,80"
+                stroke="#D4B957"
+                stroke-width="0.6"
+                opacity="0.8"
+            />
+        </g>
+
+        <!-- 有人睡觉时显示 -->
+        <g v-if="isOccupied" class="sleeping-person">
+            <!-- 移除下半身形状 -->
+
+            <!-- 淡黄色被子 - 展开盖住身体，更大的尺寸 -->
+            <rect
+                x="5"
+                y="30"
+                width="50"
+                height="55"
+                fill="url(#yellow-blanket-gradient)"
+                stroke="#D4B957"
+                stroke-width="0.5"
+            />
+
+            <!-- 被子褶皱和纹理 -->
+            <path
+                d="M5,40 H55 M5,50 H55 M5,60 H55 M5,70 H55 M5,80 H55"
+                stroke="#D4B957"
+                stroke-width="0.4"
+                stroke-opacity="0.5"
+            />
+
+            <!-- 被子围绕身体的褶皱 -->
+            <path
+                d="M10,35 Q30,43 50,35 M8,55 Q30,68 52,55 M10,75 Q30,67 50,75"
+                stroke="#D4B957"
                 stroke-width="0.5"
                 fill="none"
                 opacity="0.7"
             />
             <path
-                d="M18,50 Q30,58 42,50 M18,65 Q30,72 42,65 M18,80 Q30,73 42,80"
-                stroke="#3F51B5"
+                d="M15,45 Q30,50 45,45 M15,65 Q30,72 45,65 M15,80 Q30,73 45,80"
+                stroke="#D4B957"
                 stroke-width="0.3"
                 fill="none"
                 opacity="0.5"
@@ -360,15 +336,15 @@ function handleTouchEnd(event: TouchEvent) {
 
             <!-- 被子边缘的拱起细节 -->
             <path
-                d="M10,42 Q20,39 30,41 Q40,39 50,42"
-                stroke="#3F51B5"
+                d="M5,32 Q15,29 30,31 Q45,29 55,32"
+                stroke="#D4B957"
                 stroke-width="0.4"
                 fill="none"
                 opacity="0.7"
             />
             <path
-                d="M10,78 Q20,81 30,79 Q40,81 50,78"
-                stroke="#3F51B5"
+                d="M5,83 Q15,85 30,84 Q45,85 55,83"
+                stroke="#D4B957"
                 stroke-width="0.4"
                 fill="none"
                 opacity="0.7"
@@ -376,15 +352,15 @@ function handleTouchEnd(event: TouchEvent) {
 
             <!-- 被子侧边的褶皱效果 -->
             <path
-                d="M10,50 Q8,55 10,60 Q8,65 10,70"
-                stroke="#3F51B5"
+                d="M5,50 Q3,55 5,60 Q3,65 5,70"
+                stroke="#D4B957"
                 stroke-width="0.4"
                 fill="none"
                 opacity="0.7"
             />
             <path
-                d="M50,50 Q52,55 50,60 Q52,65 50,70"
-                stroke="#3F51B5"
+                d="M55,50 Q57,55 55,60 Q57,65 55,70"
+                stroke="#D4B957"
                 stroke-width="0.4"
                 fill="none"
                 opacity="0.7"
@@ -461,22 +437,22 @@ function handleTouchEnd(event: TouchEvent) {
             <g class="blanket-details">
                 <!-- 几条更明显的被子褶皱 -->
                 <path
-                    d="M10,44 Q30,42 50,44"
-                    stroke="#3F51B5"
+                    d="M5,38 Q30,36 55,38"
+                    stroke="#D4B957"
                     stroke-width="0.4"
                     fill="none"
                     opacity="0.6"
                 />
                 <path
-                    d="M10,52 Q25,56 50,52"
-                    stroke="#3F51B5"
+                    d="M5,52 Q25,56 55,52"
+                    stroke="#D4B957"
                     stroke-width="0.4"
                     fill="none"
                     opacity="0.6"
                 />
                 <path
-                    d="M12,65 Q35,60 48,65"
-                    stroke="#3F51B5"
+                    d="M7,65 Q35,60 53,65"
+                    stroke="#D4B957"
                     stroke-width="0.4"
                     fill="none"
                     opacity="0.6"
@@ -509,14 +485,14 @@ function handleTouchEnd(event: TouchEvent) {
             <!-- 手臂露出被子 -->
             <g class="arm-out">
                 <path
-                    d="M47,57 Q50,53 48,48"
+                    d="M47,37 Q50,33 48,28"
                     fill="#FFE0BD"
                     stroke="#EECFBA"
                     stroke-width="0.3"
                 />
                 <ellipse
                     cx="48"
-                    cy="48"
+                    cy="28"
                     rx="2"
                     ry="1.5"
                     fill="#FFE0BD"
@@ -557,20 +533,6 @@ function handleTouchEnd(event: TouchEvent) {
             </g>
         </g>
 
-        <!-- 床腿（四角）带3D效果 -->
-        <g class="bed-legs">
-            <circle cx="6" cy="6" r="2.5" fill="url(#leg-gradient)" />
-            <circle cx="54" cy="6" r="2.5" fill="url(#leg-gradient)" />
-            <circle cx="6" cy="84" r="2.5" fill="url(#leg-gradient)" />
-            <circle cx="54" cy="84" r="2.5" fill="url(#leg-gradient)" />
-
-            <!-- 床腿阴影 -->
-            <ellipse cx="6" cy="87" rx="2" ry="0.7" fill="rgba(0,0,0,0.2)" />
-            <ellipse cx="54" cy="87" rx="2" ry="0.7" fill="rgba(0,0,0,0.2)" />
-            <ellipse cx="6" cy="9" rx="2" ry="0.7" fill="rgba(0,0,0,0.1)" transform="rotate(-180 6 9)" />
-            <ellipse cx="54" cy="9" rx="2" ry="0.7" fill="rgba(0,0,0,0.1)" transform="rotate(-180 54 9)" />
-        </g>
-
         <!-- 视觉效果的滤镜和图案 -->
         <defs>
             <!-- 床垫渐变 -->
@@ -580,71 +542,45 @@ function handleTouchEnd(event: TouchEvent) {
                 <stop offset="100%" stop-color="#F5F5DC" />
             </linearGradient>
 
-            <!-- 枕头渐变 -->
-            <linearGradient id="pillow-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stop-color="#FFFFFF" />
-                <stop offset="50%" stop-color="#F8F8F8" />
-                <stop offset="100%" stop-color="#F0F0F0" />
+            <!-- 浅蓝色枕头渐变 -->
+            <linearGradient id="light-blue-pillow-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#D6F5FF" />
+                <stop offset="50%" stop-color="#B0E2FF" />
+                <stop offset="100%" stop-color="#87CEEB" />
+            </linearGradient>
+            
+            <!-- 淡黄色被子渐变 -->
+            <linearGradient id="yellow-blanket-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#FFF9C4" />
+                <stop offset="40%" stop-color="#FFF176" />
+                <stop offset="100%" stop-color="#FFEE58" />
+            </linearGradient>
+            
+            <!-- 被子叠层渐变 -->
+            <linearGradient id="yellow-blanket-fold" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#FFF9C4" />
+                <stop offset="40%" stop-color="#FFF59D" />
+                <stop offset="100%" stop-color="#FFF176" />
             </linearGradient>
 
-            <!-- 被子渐变 - 改进版 -->
-            <linearGradient id="blanket-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stop-color="#6082E6" />
-                <stop offset="40%" stop-color="#4169E1" />
-                <stop offset="100%" stop-color="#385DC7" />
-            </linearGradient>
-
-            <!-- 被子翻折渐变 -->
-            <linearGradient id="blanket-fold-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stop-color="#7C9CF2" />
-                <stop offset="100%" stop-color="#6082E6" />
-            </linearGradient>
-
-            <!-- 身体渐变 - 改进版 -->
+            <!-- 身体渐变 - 改为淡黄色系统 -->
             <radialGradient id="body-gradient" cx="50%" cy="50%" r="50%" fx="40%" fy="40%">
-                <stop offset="0%" stop-color="#7090EB" />
-                <stop offset="70%" stop-color="#4169E1" />
-                <stop offset="100%" stop-color="#385DC7" />
-            </radialGradient>
-
-            <!-- 床腿渐变 -->
-            <radialGradient id="leg-gradient" cx="50%" cy="50%" r="50%" fx="30%" fy="30%">
-                <stop offset="0%" stop-color="#8B4513" />
-                <stop offset="100%" stop-color="#5D4037" />
+                <stop offset="0%" stop-color="#FFF9C4" />
+                <stop offset="70%" stop-color="#FFF176" />
+                <stop offset="100%" stop-color="#FFE57F" />
             </radialGradient>
 
             <!-- 睡觉人物的3D效果凸起滤镜 - 增强版 -->
             <filter id="bump" x="-20%" y="-20%" width="140%" height="140%">
                 <feGaussianBlur in="SourceAlpha" stdDeviation="1.5" result="blur" />
                 <feOffset in="blur" dx="0" dy="2" result="offsetBlur" />
-                <feFlood flood-color="#3F51B5" flood-opacity="0.4" result="color" />
+                <feFlood flood-color="#FFE082" flood-opacity="0.4" result="color" />
                 <feComposite in="color" in2="offsetBlur" operator="in" result="coloredBlur" />
                 <feMerge>
                     <feMergeNode in="coloredBlur" />
                     <feMergeNode in="SourceGraphic" />
                 </feMerge>
             </filter>
-
-            <!-- 被子图案 - 改进版 -->
-            <pattern id="blanket-pattern" patternUnits="userSpaceOnUse" width="10" height="10">
-                <path
-                    d="M0,5 L10,5 M5,0 L5,10"
-                    stroke="#3F51B5"
-                    stroke-width="0.2"
-                    stroke-opacity="0.3"
-                />
-                <path
-                    d="M2.5,2.5 L7.5,7.5 M7.5,2.5 L2.5,7.5"
-                    stroke="#3F51B5"
-                    stroke-width="0.1"
-                    stroke-opacity="0.2"
-                />
-                <!-- 小圆点图案 -->
-                <circle cx="2.5" cy="2.5" r="0.5" fill="#3F51B5" fill-opacity="0.2" />
-                <circle cx="7.5" cy="7.5" r="0.5" fill="#3F51B5" fill-opacity="0.2" />
-                <circle cx="2.5" cy="7.5" r="0.5" fill="#3F51B5" fill-opacity="0.2" />
-                <circle cx="7.5" cy="2.5" r="0.5" fill="#3F51B5" fill-opacity="0.2" />
-            </pattern>
         </defs>
     </svg>
 </template>
@@ -676,8 +612,8 @@ function handleTouchEnd(event: TouchEvent) {
     animation: breathe 4s infinite ease-in-out;
 }
 
-.bed-legs {
-    filter: drop-shadow(0px 1px 1px rgba(0, 0, 0, 0.3));
+.folded-blanket {
+    filter: drop-shadow(0px 2px 2px rgba(0, 0, 0, 0.1));
 }
 
 .z1 {
