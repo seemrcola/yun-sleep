@@ -139,7 +139,14 @@ onMounted(() => {
             }"
         >
             <!-- 游戏层（床和角色） -->
-            <GameLayerSvg ref="gameLayerRef" :width="gameWidth" :height="gameHeight" :bed-count="24" />
+            <GameLayerSvg
+                ref="gameLayerRef"
+                :width="gameWidth"
+                :height="gameHeight"
+                :bed-count="18"
+                :room-id="1"
+                :characters="[]"
+            />
 
             <!-- 幕布层（位于其他所有层之上） -->
             <CurtainLayer :width="gameWidth" :height="gameHeight" />

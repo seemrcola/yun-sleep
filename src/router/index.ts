@@ -6,7 +6,7 @@ import { loadRoutes } from './loader'
 const baseRoutes = [
     {
         path: '/',
-        redirect: '/single',
+        redirect: '/room',
     },
 ]
 

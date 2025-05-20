@@ -1,18 +1,18 @@
 import type { Router } from 'vue-router'
-import { useUserStore } from '@/store/user'
+import useToken from '@/utils/token'
 
 const WHITE_LIST = ['/login', '/single']
 
 function setupGuard(router: Router) {
     router
         .beforeEach((to, _, next) => {
+            console.log('beforeEach', to)
             const path = to.path
             if (WHITE_LIST.includes(path))
                 return next()
-            const userStore = useUserStore()
-            const user = userStore.user
-            if (!user.id)
-                return next({ path: '/' })
+            const token = useToken.getToken()
+            if (!token)
+                return next({ path: '/login' })
             next()
         })
 
