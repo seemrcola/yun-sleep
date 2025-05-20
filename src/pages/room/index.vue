@@ -53,8 +53,7 @@ async function handleCreateRoom(
     userStore.setUser({
         roomId: room.id,
     })
-    // await searchRooms()
-    router.push('/public')
+    router.push(`/inn/${room.id}`)
 }
 
 async function handleJoinRoom(room: Room) {
