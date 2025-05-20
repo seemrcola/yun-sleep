@@ -148,7 +148,7 @@ function handleUpdateCharacter(character: Character) {
 
 // 退出房间
 function exitRoom() {
-    socketService.leaveRoom()
+    // socketService.leaveRoom()
     router.push('/room')
 }
 
